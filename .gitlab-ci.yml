@@ -1,0 +1,18 @@
+image: 
+  name: "continuumio/miniconda3:latest"
+
+stages:
+  - build
+
+variables:
+  BASE_ENV: seq2ml
+
+building_dependencies:
+  stage: build
+  script:
+    - conda config --append envs_dirs ./vendor/conda
+    - conda env create -f conda.yml -p ./vendor/conda/$BASE_ENV
+    - source activate $BASE_ENV
+    - echo "build successful :-)"
+  only:
+    - merge_requests
