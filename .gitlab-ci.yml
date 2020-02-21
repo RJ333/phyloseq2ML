@@ -1,5 +1,5 @@
 image: 
-  name: "conda/miniconda3:latest"
+  name: "continuumio/miniconda3:latest"
 
 stages:
   - build
