@@ -11,6 +11,7 @@ Description: Builds a bridge between phyloseq and Machine learning packages rang
 License: What license it uses
 Encoding: UTF-8
 LazyData: true
+Depends: R (>= 3.3.0)
 Imports: 
     methods,
     phyloseq
