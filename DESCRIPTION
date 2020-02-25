@@ -8,7 +8,7 @@ Authors@R:
            email = "rene.janssen@io-warnemuende.de",
            comment = c(ORCID = "0000-0002-0605-6860"))
 Description: Builds a bridge between phyloseq and Machine learning packages ranger and the keras framework.
-License: What license it uses
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.3.0)
