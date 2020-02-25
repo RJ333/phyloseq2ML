@@ -14,7 +14,7 @@ test_that("Sample data correct for given threshold and number of samples", {
 })
 
 test_that("Sample data correct for zero threshold and number of samples", {
-  expect_error(phyloseq2ML::filter_subsets(TNT_communities, 1, 2))
+  expect_error(phyloseq2ML::filter_subsets(TNT_communities, 0, 2))
 })
 
 test_that("Sample data correct for zero number of samples", {
