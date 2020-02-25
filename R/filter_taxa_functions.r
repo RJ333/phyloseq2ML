@@ -4,14 +4,19 @@
 #'
 #' @param phyloseq_object the object to be filtered
 #' @param threshold this amount of reads have to appear for an ASV, than all ASV reads are kept
-#' @param frequency the number of times the threshold has to be met
+#' @param num_samples the number of times the threshold has to be met
 #'
 #' @return The subsetted phyloseq object
 #'
 #' @export
-filter_subsets <- function(phyloseq_object, threshold, frequency = 1) {
+filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
+  if (threshold <= 0)
+    stop("threshold is not larger 0, filter would have no effect, stopped function")
+  if (num_samples <= 0)
+    stop("number of samples is not larger 0, filter would have no effect, stopped function")
+  
   phyloseq_subset2 <- phyloseq::filter_taxa(phyloseq_object, function (x) {
-    sum(x > threshold) >= frequency }, prune = TRUE)
+    sum(x > threshold) >= num_samples }, prune = TRUE)
   return(phyloseq_subset2)
 }
 
