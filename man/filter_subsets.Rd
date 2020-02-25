@@ -4,14 +4,14 @@
 \alias{filter_subsets}
 \title{Remove ASVs from a phyloseq object.}
 \usage{
-filter_subsets(phyloseq_object, threshold, frequency = 1)
+filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
 }
 \arguments{
 \item{phyloseq_object}{the object to be filtered}
 
 \item{threshold}{this amount of reads have to appear for an ASV, than all ASV reads are kept}
 
-\item{frequency}{the number of times the threshold has to be met}
+\item{num_samples}{the number of times the threshold has to be met}
 }
 \value{
 The subsetted phyloseq object
