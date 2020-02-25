@@ -1,0 +1,5 @@
+^LICENSE\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
+^conda\.yml$
+^\./vendor.*$
