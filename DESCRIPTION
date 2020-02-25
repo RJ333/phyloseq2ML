@@ -1,0 +1,21 @@
+Package: phyloseq2ML
+Title: Connects Phyloseq To Ranger And Keras
+Version: 0.1
+Authors@R: 
+    person(given = "René",
+           family = "Janßen",
+           role = c("aut", "cre"),
+           email = "rene.janssen@io-warnemuende.de",
+           comment = c(ORCID = "0000-0002-0605-6860"))
+Description: Builds a bridge between phyloseq and Machine learning packages ranger and the keras framework.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.5.0)
+Imports: 
+    methods,
+    phyloseq
+RoxygenNote: 7.0.2
+Suggests: 
+    testthat (>= 2.1.0),
+    digest
