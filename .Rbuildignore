@@ -3,3 +3,4 @@
 ^\.Rproj\.user$
 ^conda\.yml$
 ^vendor$
+^\.gitlab-ci\.yml$
