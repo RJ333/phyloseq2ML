@@ -5,3 +5,4 @@
 ^vendor$
 ^\.gitlab-ci\.yml$
 ^\Important_devtools_functions\.r$
+^\analysis_script\.R$
