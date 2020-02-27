@@ -16,3 +16,6 @@ subset_list_df <- process_subsets(
   tax_levels = "blabla"
 )
 subset_list_df
+
+otu_table(TNT_communities)
+head(sample_data(TNT_communities))
