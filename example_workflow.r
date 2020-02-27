@@ -1,8 +1,8 @@
 library(phyloseq2ML)
+
 data(TNT_communities)
 ASV_thresholds <- c(1500)
-tax_levels <- setNames(c("To_genus", "To_family"), c("Genus", "Family"))
-tax_levels2 <- c("To_genus", "To_family")
+selected_taxa_1 <- setNames(c("To_genus", "To_family"), c("Genus", "Family"))
 
 # phyloseq objects as list
 subset_list <- list(
@@ -13,7 +13,7 @@ subset_list <- list(
 subset_list_df <- process_subsets(
   subset_list = subset_list, 
   ASV_thresholds = ASV_thresholds,
-  tax_levels = "blabla"
+  tax_levels = selected_taxa_1
 )
 subset_list_df
 

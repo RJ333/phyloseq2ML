@@ -24,22 +24,22 @@ filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
 #'
 #' This subsetting function allows to create multiple combinations of subsets from a
 #' list of phyloseq objects. The lowest taxonomic level (usually ASV or OTU) is always included,
-#' further taxonomic levels can be specified as described below, if they are available in the tax_table()
-#' the ASV level. The read counts of the new subsets are then turned into relative abundance
+#' further taxonomic levels can be specified as described below.
+#' The read counts of the new subsets are then turned into relative abundance
 #' and the count tables are finally stored as list of data.frames. NaNs are turned into 0.
 #'
 #' @param subset_list a list of phyloseq objects
 #' @param ASV_thresholds an integer vector specifying the input to `filter_taxa(sum(x > ASV_threshold) >= 1)``
 #' @param tax_levels specifying the tax levels to agglomerate in the form of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
 #'   Here, "To_genus" is the corresponding taxonomic level in tax_table() and "Genus" is appended to the name the agglomerated data.frame in the
-#'   results list for later distinction. Check taxa level using `colnames(tax_table(TNT_communities))``
+#'   results list for later distinction. Check taxa level using `colnames(tax_table(TNT_communities))`
 #' @param ... further argument passed on to filter_subsets()
 #'
 #' @return A list of subsetted data frames for each combination of phyloseq_subset, ASV_threshold and tax_levels (+ ASV/OTU)
 #'
 #' @export
-process_subsets <- function(subset_list, ASV_thresholds, tax_levels = NULL, ...) {
-  if (is.list(subset_list) == FALSE)
+create_counttable_subsets <- function(subset_list, ASV_thresholds, tax_levels = NULL, ...) {
+  if (!is.list(subset_list))
     stop("Input needs to be a list")
   if (length(ASV_thresholds) < 1)
     stop("No count thresholds provided for subsetting")
