@@ -12,12 +12,8 @@ subset_list <- list(
 )
 
 # tax levels parameter is NULL as default
-subset_list_df <- create_counttable_subsets(
+subset_list_tax <- create_counttable_subsets(
   subset_list = subset_list, 
   ASV_thresholds = ASV_thresholds,
-  tax_levels = selected_taxa_1
-)
-subset_list_df
-
-otu_table(TNT_communities)
-head(sample_data(TNT_communities))
+  tax_levels = selected_taxa_1)
+subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)

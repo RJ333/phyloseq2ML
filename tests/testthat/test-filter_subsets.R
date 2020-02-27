@@ -34,13 +34,13 @@ test_that("The returning object is a list also without tax levels specified", {
     ASV_thresholds = c(1500, 2000))))
 })
 
-test_that("Process subset fails if no count values are provided", {
+test_that("create_counttable_subsets fails if no count values are provided", {
   expect_error(phyloseq2ML::create_counttable_subsets(
     subset_list = list(TNT_communities),  
     ASV_thresholds = NULL))
 })
 
-test_that("Process subset fails if input is not a list", {
+test_that("create_counttable_subsets fails if input is not a list", {
   expect_error(phyloseq2ML::create_counttable_subsets(
     subset_list = TNT_communities,  
     ASV_thresholds = 500,

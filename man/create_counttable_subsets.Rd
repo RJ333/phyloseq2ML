@@ -9,21 +9,25 @@ create_counttable_subsets(subset_list, ASV_thresholds, tax_levels = NULL, ...)
 \arguments{
 \item{subset_list}{a list of phyloseq objects}
 
-\item{ASV_thresholds}{an integer vector specifying the input to `filter_taxa(sum(x > ASV_threshold) >= 1)``}
+\item{ASV_thresholds}{an integer vector specifying the input
+to `filter_taxa(sum(x > ASV_threshold) >= 1)`}
 
-\item{tax_levels}{specifying the tax levels to agglomerate in the form of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
-Here, "To_genus" is the corresponding taxonomic level in tax_table() and "Genus" is appended to the name the agglomerated data.frame in the
-results list for later distinction. Check taxa level using `colnames(tax_table(TNT_communities))`}
+\item{tax_levels}{specifying the tax levels to agglomerate in the form 
+of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
+Here, "To_genus" is the corresponding taxonomic level in tax_table() and 
+"Genus" is appended to the name the agglomerated data.frame in the
+results list for later distinction. Check taxa level using 
+`colnames(tax_table(TNT_communities))`}
 
 \item{...}{further argument passed on to filter_subsets()}
 }
 \value{
-A list of subsetted data frames for each combination of phyloseq_subset, ASV_threshold and tax_levels (+ ASV/OTU)
+A list of subsetted data frames for each combination of 
+  phyloseq_subset, ASV_threshold and tax_levels (+ ASV/OTU)
 }
 \description{
-This subsetting function allows to create multiple combinations of subsets from a
-list of phyloseq objects. The lowest taxonomic level (usually ASV or OTU) is always included,
-further taxonomic levels can be specified as described below.
-The read counts of the new subsets are then turned into relative abundance
-and the count tables are finally stored as list of data.frames. NaNs are turned into 0.
+This subsetting function allows to create multiple combinations of subsets 
+from a list of phyloseq objects. The lowest taxonomic level 
+(usually ASV or OTU) is always included, further taxonomic levels can be 
+specified as described below.
 }
