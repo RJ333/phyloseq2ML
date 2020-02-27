@@ -29,7 +29,7 @@ test_that("Agglomeration fails if tax levels are not among  tax ranks", {
 })
 
 test_that("The returning object is a list also without tax levels specified", {
-  expect_error(is.list(phyloseq2ML::create_counttable_subsets(
+  expect_true(is.list(phyloseq2ML::create_counttable_subsets(
     subset_list = list(TNT_communities),  
     ASV_thresholds = c(1500, 2000))))
 })
