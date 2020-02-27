@@ -10,6 +10,7 @@ devtools::
 usethis::use_package("methods") 
 # if they are only suggests, use:
 usethis::use_package("speedyseq", "Suggests")
+usethis::use_package("futile.logger", "Suggests")
 # this allows to install e.g. from bioconductor
 setRepositories()
 # if it complaines about missing documentation, you may not have run this command
