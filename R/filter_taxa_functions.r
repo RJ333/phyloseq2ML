@@ -51,18 +51,18 @@ create_counttable_subsets <- function(subset_list, ASV_thresholds, tax_levels = 
     for (current_threshold in ASV_thresholds) { 
       current_name <- paste(names(subset_list)[filter_counter], 
                             current_threshold, "filtered", sep = "_")
-      print(paste0("Generating subset: ", current_name))
+      futile.logger::flog.info("Generating subset: ", current_name)
       subset_list_filtered[[current_name]] <- filter_subsets(phyloseq_subset, 
                                                              threshold = current_threshold, ...)
       
     }
   }
   if (is.null(tax_levels)) {
-    print("No taxonomic levels for agglomeration specified")
+    futile.logger::flog.info("No taxonomic levels for agglomeration specified")
     names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".ASV")
     subset_list_comb <- subset_list_filtered
   } else {
-    print("Applying taxonomic agglomeration")
+    futile.logger::flog.info("Applying taxonomic agglomeration")
     subset_list_filtered_tax <- unlist(lapply(subset_list_filtered, function(xx) {
       lapply(tax_levels, function(yy) {
         phyloseq::tax_glom(xx, taxrank = yy)
@@ -73,13 +73,13 @@ create_counttable_subsets <- function(subset_list, ASV_thresholds, tax_levels = 
     names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".ASV")
     subset_list_comb <- c(subset_list_filtered, subset_list_filtered_tax)
   }
-  print("Transforming remaining absolute counts into relative abundances [%]")
+  futile.logger::flog.info("Transforming remaining absolute counts into relative abundances [%]")
   subset_list_rel <- lapply(subset_list_comb, phyloseq::transform_sample_counts, 
                             function(x) {(x / sum(x)) * 100})
   subset_list_matrix <- lapply(subset_list_rel, function (x) {methods::as(phyloseq::otu_table(x), "matrix")}) 
   subset_list_matrix2 <- rapply(subset_list_matrix, 
                                 f = function(x) ifelse(is.nan(x), 0, x), how = "replace")
   subset_list_df <- lapply(subset_list_matrix2, as.data.frame)
-  print("Returning list with subsetted data.frames")
+  futile.logger::flog.info("Returning list with subsetted data.frames")
   subset_list_df
 }

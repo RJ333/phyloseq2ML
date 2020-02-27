@@ -1,4 +1,6 @@
 library(phyloseq2ML)
+library(futile.logger)
+flog.threshold(TRACE)
 
 data(TNT_communities)
 ASV_thresholds <- c(1500)
@@ -10,7 +12,7 @@ subset_list <- list(
 )
 
 # tax levels parameter is NULL as default
-subset_list_df <- process_subsets(
+subset_list_df <- create_counttable_subsets(
   subset_list = subset_list, 
   ASV_thresholds = ASV_thresholds,
   tax_levels = selected_taxa_1

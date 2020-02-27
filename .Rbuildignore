@@ -4,6 +4,5 @@
 ^conda\.yml$
 ^vendor$
 ^\.gitlab-ci\.yml$
-^\Important_devtools_functions\.r$
-^\example_workflow\.r$
+^Important_devtools_functions\.r$
 ^example_workflow\.r$
