@@ -14,9 +14,9 @@ LazyData: true
 Depends: R (>= 3.5.0)
 Imports: 
     methods,
-    phyloseq
+    phyloseq,
+    futile.logger
 RoxygenNote: 7.0.2
 Suggests: 
     testthat (>= 2.1.0),
-    digest,
-    futile.logger
+    digest
