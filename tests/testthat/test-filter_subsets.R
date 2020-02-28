@@ -34,10 +34,11 @@ test_that("The returning object is a list also without tax levels specified", {
     ASV_thresholds = c(1500, 2000))))
 })
 
-test_that("create_counttable_subsets fails if no count values are provided", {
+test_that("create_counttable_subsets fails if count value vector is empty", {
+  empty_vector <- NULL
   expect_error(phyloseq2ML::create_counttable_subsets(
     subset_list = list(TNT_communities),  
-    ASV_thresholds = NULL))
+    ASV_thresholds = empty_vector))
 })
 
 test_that("create_counttable_subsets fails if input is not a list", {
