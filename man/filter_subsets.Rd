@@ -9,7 +9,8 @@ filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
 \arguments{
 \item{phyloseq_object}{the object to be filtered}
 
-\item{threshold}{this amount of reads have to appear for an ASV, than all ASV reads are kept}
+\item{threshold}{this amount of reads have to appear for an ASV, 
+than all ASV reads are kept}
 
 \item{num_samples}{the number of times the threshold has to be met}
 }
@@ -17,5 +18,6 @@ filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
 The subsetted phyloseq object
 }
 \description{
-This version of the filter_taxa function can be used with lists and lapply or for loops.
+This version of the filter_taxa function can be used with lists and 
+lapply or for loops.
 }

@@ -20,3 +20,30 @@ test_that("Sample data correct for zero threshold and number of samples", {
 test_that("Sample data correct for zero number of samples", {
   expect_error(phyloseq2ML::filter_subsets(TNT_communities, 2, 0))
 })
+
+test_that("Agglomeration fails if tax levels are not among  tax ranks", {
+  expect_error(phyloseq2ML::create_counttable_subsets(
+  subset_list = list(TNT_communities),  
+  ASV_thresholds = c(1500, 2000),
+  tax_levels = "Space Force"))
+})
+
+test_that("The returning object is a list also without tax levels specified", {
+  expect_true(is.list(phyloseq2ML::create_counttable_subsets(
+    subset_list = list(TNT_communities),  
+    ASV_thresholds = c(1500, 2000))))
+})
+
+test_that("create_counttable_subsets fails if count value vector is empty", {
+  empty_vector <- c()
+  expect_error(phyloseq2ML::create_counttable_subsets(
+    subset_list = list(TNT_communities),  
+    ASV_thresholds = empty_vector))
+})
+
+test_that("create_counttable_subsets fails if input is not a list", {
+  expect_error(phyloseq2ML::create_counttable_subsets(
+    subset_list = TNT_communities,  
+    ASV_thresholds = 500,
+    tax_levels = "Genus"))
+})
