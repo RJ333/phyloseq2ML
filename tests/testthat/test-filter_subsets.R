@@ -35,7 +35,7 @@ test_that("The returning object is a list also without tax levels specified", {
 })
 
 test_that("create_counttable_subsets fails if count value vector is empty", {
-  empty_vector <- NULL
+  empty_vector <- c()
   expect_error(phyloseq2ML::create_counttable_subsets(
     subset_list = list(TNT_communities),  
     ASV_thresholds = empty_vector))
