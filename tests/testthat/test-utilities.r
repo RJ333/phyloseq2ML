@@ -25,7 +25,7 @@ test_that("Integer check returns TRUE for number", {
 
 ## is.dummy
 test_that("Dummy check works for vectors", {
-  expect_false(phyloseq2ML::is.dummy(c(1, 0, 0, 1)))
+  expect_true(phyloseq2ML::is.dummy(c(1, 0, 0, 1)))
   expect_true(phyloseq2ML::is.dummy(c(0, 0)))
   expect_true(phyloseq2ML::is.dummy(c(1, 1)))
 })
