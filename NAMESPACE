@@ -2,4 +2,6 @@
 
 export(create_counttable_subsets)
 export(filter_subsets)
+export(is.dummy)
+export(is.wholenumber)
 export(to_relative_abundance)
