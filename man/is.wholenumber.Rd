@@ -10,7 +10,8 @@ is.wholenumber(x, tolerance = .Machine$double.eps^0.5)
 \item{x}{the vector to be tested, use `sapply(x, is.wholenumber)` for a data frame}
 
 \item{tolerance}{numerical specifying the tolerance for rounding a value.
-defaults to `.Machine$double.eps^0.5`}
+defaults to `.Machine$double.eps^0.5` with `.Machine$double.eps` being
+the smallest positive floating-point number x such that 1 + x != 1}
 }
 \value{
 A logical vector returning TRUE for column(s) that are completely integers

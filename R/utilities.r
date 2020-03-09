@@ -7,27 +7,28 @@
 #' 
 #' @param x the vector to be tested, use `sapply(x, is.wholenumber)` for a data frame
 #' @param tolerance numerical specifying the tolerance for rounding a value.
-#'   defaults to `.Machine$double.eps^0.5`
+#'   defaults to `.Machine$double.eps^0.5` with `.Machine$double.eps` being
+#'   the smallest positive floating-point number x such that 1 + x != 1
 #'
 #' @return A logical vector returning TRUE for column(s) that are completely integers 
 #'
-#' @export
+#' 
 is.wholenumber <- function(x, tolerance = .Machine$double.eps^0.5)  {
   all(abs(x - round(x)) < tolerance)
 }
 
 #' Tests if a vector is a dummy column
 #'
-#' This function identifies specifically dummy variables (only 0 and 1) 
+#' This function identifies specifically columns with dummy variables (only 0 and 1) 
 #' from all other column types. 1.0 as single value returns TRUE, which is a 
-#' matter of print formatting rather of type
+#' matter of print formatting rather of type.
 #' 
 #' @param x the vector to be tested, use `sapply(x, is.wholenumber)` for a data 
 #'   frame. Strict testing using 'vapply(x, FUN = is.dummy, FUN.VALUE = logical(1)`
 #'
 #' @return A logical vector returning TRUE for column(s) that only contain 0 and/or 1
 #'
-#' @export
+#' 
 is.dummy <- function(x) {
   all(sort(unique(x)) %in% c(0, 1)) == TRUE
 }

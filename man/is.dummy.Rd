@@ -14,7 +14,7 @@ frame. Strict testing using 'vapply(x, FUN = is.dummy, FUN.VALUE = logical(1)`}
 A logical vector returning TRUE for column(s) that only contain 0 and/or 1
 }
 \description{
-This function identifies specifically dummy variables (only 0 and 1) 
+This function identifies specifically columns with dummy variables (only 0 and 1) 
 from all other column types. 1.0 as single value returns TRUE, which is a 
-matter of print formatting rather of type
+matter of print formatting rather of type.
 }
