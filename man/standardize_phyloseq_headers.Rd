@@ -4,12 +4,12 @@
 \alias{standardize_phyloseq_headers}
 \title{Change naming style of the taxa in the phyloseq object.}
 \usage{
-standardize_phyloseq_headers(phyloseq_object, taxa_name, use_sequences)
+standardize_phyloseq_headers(phyloseq_object, taxa_prefix, use_sequences)
 }
 \arguments{
 \item{phyloseq_object}{The phyloseq object with the taxa_names() to be modified.}
 
-\item{taxa_name}{The leading name of your taxa, e.g. `ASV` or `OTU`}
+\item{taxa_prefix}{The leading name of your taxa, e.g. `ASV` or `OTU`}
 
 \item{use_sequences}{Logical indicating whether your current taxa_names()
 are sequences which you want to have moved to the refseq() slot of the 
