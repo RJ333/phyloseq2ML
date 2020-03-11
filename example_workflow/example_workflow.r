@@ -5,7 +5,7 @@ flog.threshold(TRACE)
 data(TNT_communities)
 
 # modify phyloseq object
-testps <- phyloseq2ML::standardize_phyloseq_headers(
+testps <- standardize_phyloseq_headers(
   phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
 
 # define subsetting parameters
