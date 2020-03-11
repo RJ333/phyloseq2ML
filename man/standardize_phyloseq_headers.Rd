@@ -7,7 +7,7 @@
 standardize_phyloseq_headers(phyloseq_object, taxa_prefix, use_sequences)
 }
 \arguments{
-\item{phyloseq_object}{The phyloseq object with the taxa_names() to be modified.}
+\item{phyloseq_object}{The phyloseq object with the taxa_names() to be modified}
 
 \item{taxa_prefix}{The leading name of your taxa, e.g. `ASV` or `OTU`}
 
@@ -16,7 +16,7 @@ are sequences which you want to have moved to the refseq() slot of the
 returning phyloseq object}
 }
 \value{
-The modified phyloseq object.
+The modified phyloseq object
 }
 \description{
 This function adapts the rows and the columns of the corresponding
@@ -24,5 +24,6 @@ phyloseq object to improve the reading. It adds 0s based
 on the total amount of ASVs to enable correct sorting in R. If you imported
 your data from dada2 and your current taxa names are the sequences (ASVs),
 you can specify `use_sequences = TRUE` to move the sequences to the phyloseq
-refseq() slot before renaming takes place
+refseq() slot before renaming takes place. Existing sequences in the refseq()
+slot will then be overwritten!
 }
