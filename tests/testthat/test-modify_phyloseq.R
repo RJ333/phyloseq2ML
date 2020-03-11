@@ -1,6 +1,6 @@
-#test_that("this fails", {
-#  expect_equal(1, 2)
-#}) 
+test_that("this fails", {
+  expect_equal(1, 2)
+}) 
 
 test_that("Breaks when no sequences are available and use_sequences = TRUE", {
   expect_error(phyloseq2ML::standardize_phyloseq_headers(TNT_communities, taxa_prefix = "ASV", use_sequences = TRUE))
