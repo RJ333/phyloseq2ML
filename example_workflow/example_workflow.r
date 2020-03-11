@@ -3,6 +3,12 @@ library(futile.logger)
 flog.threshold(TRACE)
 
 data(TNT_communities)
+
+# modify phyloseq object
+testps <- standardize_phyloseq_headers(
+  phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
+
+# define subsetting parameters
 ASV_thresholds <- c(1500)
 selected_taxa_1 <- setNames(c("To_genus", "To_family"), c("Genus", "Family"))
 
