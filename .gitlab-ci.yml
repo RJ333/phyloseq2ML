@@ -9,6 +9,7 @@ before_script:
 
 variables:
   BASE_ENV: seq2ml
+  DOCKER_DRIVER: overlay2
 
 stages:
   - build
