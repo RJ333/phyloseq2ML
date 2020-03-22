@@ -1,7 +1,12 @@
+# Access to R Studio Server
+ssh -i new_id ubuntu@ip-address -p some_number -L 8787:localhost:8787
+# in local browser
+localhost:8787
+
 # Important commands for package development
 devtools::
-  check() # errors, warnings, notes
   document() # when documentation was updated
+  check() # errors, warnings, notes
   test() # ALWAYS!!!!!
   build()
   install()
@@ -16,7 +21,10 @@ setRepositories()
 # if it complaines about missing documentation, you may not have run this command
 devtools::document() # before check
 # turn an R object into a data set as part of the package
+# also add description to R/data.R
 usethis::use_data(ps_no_control)
+usethis::use_data(testps)
+usethis::use_data(taxa_vector_list)
 
 # first command to setup the structure
 usethis::use_testthat()
