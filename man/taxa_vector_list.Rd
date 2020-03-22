@@ -3,21 +3,12 @@
 \docType{data}
 \name{taxa_vector_list}
 \alias{taxa_vector_list}
-\title{Prices of 50,000 round cut diamonds.}
-\format{A data frame with 53940 rows and 10 variables:
-\describe{
-  \item{price}{price, in US dollars}
-  \item{carat}{weight of the diamond, in carats}
-  ...
-}}
-\source{
-\url{http://www.diamondse.info/}
-}
+\title{Dictionary for taxonomic level conversion.}
+\format{A list with two vectors of taxonomic level Genus and Family}
 \usage{
 taxa_vector_list
 }
 \description{
-A dataset containing the prices and other attributes of almost 54,000
-diamonds.
+A list with vectors linking IDs (ASV/OTU/...) to their annotated taxonomic levels.
 }
 \keyword{datasets}

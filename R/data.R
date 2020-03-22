@@ -1,41 +1,24 @@
-#' Prices of 50,000 round cut diamonds.
+#' Microbial communities in ammunition contaminated sediments.
 #'
-#' A dataset containing the prices and other attributes of almost 54,000
-#' diamonds.
+#' A dataset in form of a phyloseq object containing an ASV count table, 
+#'   sample data and taxonomy data .
 #'
-#' @format A data frame with 53940 rows and 10 variables:
-#' \describe{
-#'   \item{price}{price, in US dollars}
-#'   \item{carat}{weight of the diamond, in carats}
-#'   ...
-#' }
-#' @source \url{http://www.diamondse.info/}
+#' @format A phyloseq object with 105 samples, 50 taxa and 93 sample variables
+#'
 "TNT_communities"
 
-#' Prices of 50,000 round cut diamonds.
+#' Renamed TNT communities.
 #'
-#' A dataset containing the prices and other attributes of almost 54,000
-#' diamonds.
+#' The phyloseq object `TNT_communities`with adjusted taxa names.
 #'
-#' @format A data frame with 53940 rows and 10 variables:
-#' \describe{
-#'   \item{price}{price, in US dollars}
-#'   \item{carat}{weight of the diamond, in carats}
-#'   ...
-#' }
-#' @source \url{http://www.diamondse.info/}
+#' @format A phyloseq object with 105 samples, 50 taxa and 93 sample variables
+#'
 "testps"
 
-#' Prices of 50,000 round cut diamonds.
+#' Dictionary for taxonomic level conversion.
 #'
-#' A dataset containing the prices and other attributes of almost 54,000
-#' diamonds.
+#' A list with vectors linking IDs (ASV/OTU/...) to their annotated taxonomic levels.
 #'
-#' @format A data frame with 53940 rows and 10 variables:
-#' \describe{
-#'   \item{price}{price, in US dollars}
-#'   \item{carat}{weight of the diamond, in carats}
-#'   ...
-#' }
-#' @source \url{http://www.diamondse.info/}
+#' @format A list with two vectors of taxonomic level Genus and Family
+#' 
 "taxa_vector_list"

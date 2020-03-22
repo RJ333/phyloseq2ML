@@ -4,12 +4,12 @@
 \alias{translate_ID}
 \title{Translate unique IDs such as ASV/OTUs to specified tax level}
 \usage{
-translate_ID(ID, translate_to, lookup_table, na.rm = TRUE)
+translate_ID(ID, tax_level, lookup_table, na.rm = TRUE)
 }
 \arguments{
 \item{ID}{a string with the ID name you want to translate}
 
-\item{translate_to}{a string with the desired taxonomic rank for translation}
+\item{tax_level}{a string with the desired taxonomic rank for translation}
 
 \item{lookup_table}{the list with all the lookup vectors created 
 by create_taxonomy_lookup().}
