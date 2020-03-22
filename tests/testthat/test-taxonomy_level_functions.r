@@ -12,8 +12,8 @@ test_that("Provided non existent taxonomic levels", {
 
 test_that("How many strings are translated with and withoutout NA", {
   expect_equal(length(phyloseq2ML::translate_ID(ID = c("ASV02", "ASV31"), 
-    translate_to = c("Genus"), lookup_table = taxa_vector_list)), 1)
+    tax_level = c("Genus"), lookup_table = taxa_vector_list)), 1)
   expect_equal(length(phyloseq2ML::translate_ID(ID = c("ASV02", "ASV31"), 
-    translate_to = c("Genus"), lookup_table = taxa_vector_list, na.rm = FALSE)), 2)
+    tax_level = c("Genus"), lookup_table = taxa_vector_list, na.rm = FALSE)), 2)
 })
 
