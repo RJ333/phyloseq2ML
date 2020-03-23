@@ -11,4 +11,4 @@ test_that("Number of columns should stay the same", {
 test_that("Break if columns are not available", {
   expect_error(phyloseq2ML::add_sample_data(add_sample_data = TRUE, phyloseq_object = testps, 
     count_tables = subset_list_df, sample_data_names = "not_existent"))
-})})
+})
