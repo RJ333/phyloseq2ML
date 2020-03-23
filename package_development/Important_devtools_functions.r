@@ -25,6 +25,7 @@ devtools::document() # before check
 usethis::use_data(ps_no_control)
 usethis::use_data(testps)
 usethis::use_data(taxa_vector_list)
+usethis::use_data(subset_list_df, internal = TRUE)
 
 # first command to setup the structure
 usethis::use_testthat()
