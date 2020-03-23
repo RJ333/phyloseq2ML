@@ -8,6 +8,11 @@ data(TNT_communities)
 testps <- standardize_phyloseq_headers(
   phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
 
+# translate ASVs to genus
+levels_tax_dictionary <- c("Family", "Genus")
+taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
+translate_ID(ID = c("ASV02", "ASV17"), translate_to = c("Genus"))
+
 # define subsetting parameters
 ASV_thresholds <- c(1500)
 selected_taxa_1 <- setNames(c("To_genus", "To_family"), c("Genus", "Family"))
