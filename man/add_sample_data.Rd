@@ -4,16 +4,9 @@
 \alias{add_sample_data}
 \title{Select sample data variables and add them to the count tables}
 \usage{
-add_sample_data(
-  merge_with_sample_data = FALSE,
-  sample_data_names = NULL,
-  phyloseq_object = NULL,
-  community_tables
-)
+add_sample_data(sample_data_names, phyloseq_object, community_tables)
 }
 \arguments{
-\item{merge_with_sample_data}{logical whether additional sample data should be used}
-
 \item{sample_data_names}{a vector of sample data variable names}
 
 \item{phyloseq_object}{the phyloseq object containing the sample data}
