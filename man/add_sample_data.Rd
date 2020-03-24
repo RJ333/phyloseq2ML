@@ -5,23 +5,23 @@
 \title{Select sample data variables and add them to the count tables}
 \usage{
 add_sample_data(
-  add_sample_data = FALSE,
+  merge_with_sample_data = FALSE,
   sample_data_names = NULL,
   phyloseq_object = NULL,
-  count_tables
+  community_tables
 )
 }
 \arguments{
-\item{add_sample_data}{logical whether additional sample data should be used}
+\item{merge_with_sample_data}{logical whether additional sample data should be used}
 
 \item{sample_data_names}{a vector of sample data variable names}
 
 \item{phyloseq_object}{the phyloseq object containing the sample data}
 
-\item{count_tables}{the list with relative abundance count tables}
+\item{community_tables}{the list with relative abundance community tables}
 }
 \value{
-A list of the merged count + sediment data frames
+A list of the merged community + sample data tables as data.frames
 }
 \description{
 This function selects specified columns from the sample data of a phyloseq object
