@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_taxa_functions.r
 \name{filter_subsets}
 \alias{filter_subsets}
-\title{Remove ASVs from a phyloseq object.}
+\title{Remove ASV/OTU/etc from a phyloseq object based on counts.}
 \usage{
 filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
 }
@@ -12,7 +12,7 @@ filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
 \item{threshold}{this amount of reads have to appear for an ASV, 
 than all ASV reads are kept}
 
-\item{num_samples}{the number of times the threshold has to be met}
+\item{num_samples}{the number of times (samples) the threshold has to be met}
 }
 \value{
 The subsetted phyloseq object

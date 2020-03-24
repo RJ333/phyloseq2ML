@@ -1,4 +1,4 @@
-#' Remove ASVs from a phyloseq object.
+#' Remove ASV/OTU/etc from a phyloseq object based on counts.
 #'
 #' This version of the filter_taxa function can be used with lists and 
 #' lapply or for loops.
@@ -6,7 +6,7 @@
 #' @param phyloseq_object the object to be filtered
 #' @param threshold this amount of reads have to appear for an ASV, 
 #'   than all ASV reads are kept
-#' @param num_samples the number of times the threshold has to be met
+#' @param num_samples the number of times (samples) the threshold has to be met
 #'
 #' @return The subsetted phyloseq object
 #'
@@ -32,8 +32,8 @@ filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
 #' specified as described below.
 #'
 #' @param subset_list a list of phyloseq objects
-#' @param ASV_thresholds an integer vector specifying the input
-#'   to `filter_taxa(sum(x > ASV_threshold) >= 1)`
+#' @param thresholds an integer vector specifying the input
+#'   to `filter_taxa(sum(x > threshold) >= 1)`
 #' @param tax_levels specifying the tax levels to agglomerate in the form 
 #'   of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
 #'   Here, "To_genus" is the corresponding taxonomic level in tax_table() and 
@@ -42,21 +42,21 @@ filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
 #'   `colnames(tax_table(TNT_communities))`
 #' @param ... further argument passed on to filter_subsets()
 #'
-#' @return A list of subsetted data frames for each combination of 
-#'   phyloseq_subset, ASV_threshold and tax_levels (+ ASV/OTU)
+#' @return A list of subsetted community tables for each combination of 
+#'   phyloseq_subset, thresholds and tax_levels (+ ASV/OTU)
 #' @export
-create_counttable_subsets <- function(subset_list, ASV_thresholds, 
+create_community_table_subsets <- function(subset_list, thresholds, 
   tax_levels = NULL, ...) {
   if (!is.list(subset_list))
     stop("Input needs to be a list")
-  if (length(ASV_thresholds) < 1)
+  if (length(thresholds) < 1)
     stop("No count thresholds provided for subsetting")
   
   subset_list_filtered <- list()
   filter_counter <- 0
   for (phyloseq_subset in subset_list) {
     filter_counter <- filter_counter + 1 
-    for (current_threshold in ASV_thresholds) { 
+    for (current_threshold in thresholds) { 
       current_name <- paste(names(subset_list)[filter_counter], 
         current_threshold, "filtered", sep = "_")
       futile.logger::flog.info("Generating subsets: ", current_name, capture = TRUE)
@@ -85,11 +85,12 @@ create_counttable_subsets <- function(subset_list, ASV_thresholds,
 #' Turn subsets of phyloseq objects into relative abundance data.frames.
 #'
 #' The provided list of phyloseq objects is turned to relative abundances 
-#' in percentage and converted to a list of data.frames. NaNs are turned into 0.
+#' in percentage. The community tables are converted to data.frames and stored
+#' in a list. NaNs are turned into 0.
 #'
 #' @param subset_list a list of phyloseq objects
 #'
-#' @return A list of subsetted counttable as data.frames 
+#' @return A list of subsetted community tables as data.frames 
 #'
 #' @export
 to_relative_abundance <- function(subset_list) {

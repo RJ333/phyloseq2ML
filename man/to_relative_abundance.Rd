@@ -10,9 +10,10 @@ to_relative_abundance(subset_list)
 \item{subset_list}{a list of phyloseq objects}
 }
 \value{
-A list of subsetted counttable as data.frames
+A list of subsetted community tables as data.frames
 }
 \description{
 The provided list of phyloseq objects is turned to relative abundances 
-in percentage and converted to a list of data.frames. NaNs are turned into 0.
+in percentage. The community tables are converted to data.frames and stored
+in a list. NaNs are turned into 0.
 }
