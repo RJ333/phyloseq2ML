@@ -22,10 +22,12 @@ setRepositories()
 devtools::document() # before check
 # turn an R object into a data set as part of the package
 # also add description to R/data.R
-usethis::use_data(ps_no_control)
-usethis::use_data(testps)
-usethis::use_data(taxa_vector_list)
-usethis::use_data(subset_list_df, internal = TRUE)
+usethis::use_data(TNT_communities)
+usethis::use_data(testps, 
+                  taxa_vector_list, 
+                  subset_list_df, 
+                  internal = TRUE, overwrite = TRUE)
+
 
 # first command to setup the structure
 usethis::use_testthat()

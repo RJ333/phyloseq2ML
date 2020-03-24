@@ -31,6 +31,5 @@ subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)
 # add sample data columns to the count table
 #names(sample_data(testps))
 desired_sample_data <- c("TOC", "P_percent")
-subset_list_extra <- add_sample_data(add_sample_data = TRUE, phyloseq_object = testps, 
+subset_list_extra <- add_sample_data(phyloseq_object = testps, 
   community_tables = subset_list_df, sample_data_names = desired_sample_data)
-
