@@ -14,6 +14,7 @@ variables:
 stages:
   - build
   - test
+  - coverage
 
 build:
   stage: build
@@ -21,6 +22,16 @@ build:
     - R --vanilla -e 'devtools::build()'
   only:
     - merge_requests
+    - master
+
+document:
+  stage: test
+  script:
+    - R --vanilla -e 'devtools::build()'
+    - R --vanilla -e 'devtools::document()'
+  only:
+    - merge_requests
+    - master
 
 test:
   stage: test
@@ -28,4 +39,13 @@ test:
     - R --vanilla -e 'devtools::check()'
   only:
     - merge_requests
-    
+    - master
+
+coverage:
+  stage: coverage
+  script:
+    - R --vanilla -e 'covr::package_coverage(type = c("tests", "examples"))'
+  only:
+    - merge_requests
+    - master
+

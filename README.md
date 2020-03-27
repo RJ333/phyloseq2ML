@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.io-warnemuende.de/janssen/r-package-seq2ml/badges/master/pipeline.svg)](https://gitlab.io-warnemuende.de/janssen/r-package-seq2ml/-/commits/master) [![coverage report](https://gitlab.io-warnemuende.de/janssen/r-package-seq2ml/badges/master/coverage.svg)](https://gitlab.io-warnemuende.de/janssen/r-package-seq2ml/-/commits/master) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+
 # R package phyloseq2ML
 
 ## Main idea
