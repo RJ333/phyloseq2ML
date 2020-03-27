@@ -23,6 +23,15 @@ build:
     - merge_requests
     - master
 
+document:
+  stage: test
+  script:
+    - R --vanilla -e 'devtools::build()'
+    - R --vanilla -e 'devtools::document()'
+  only:
+    - merge_requests
+    - master
+
 test:
   stage: test
   script:
