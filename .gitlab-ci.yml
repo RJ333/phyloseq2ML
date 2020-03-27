@@ -21,6 +21,7 @@ build:
     - R --vanilla -e 'devtools::build()'
   only:
     - merge_requests
+    - master
 
 test:
   stage: test
@@ -28,4 +29,5 @@ test:
     - R --vanilla -e 'devtools::check()'
   only:
     - merge_requests
-    
+    - master
+
