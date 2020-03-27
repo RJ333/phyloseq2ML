@@ -40,3 +40,11 @@ test:
     - merge_requests
     - master
 
+coverage:
+  stage: coverage
+  script:
+    - R --vanilla -e 'covr::package_coverage(type = c("tests", "examples"))'
+  only:
+    - merge_requests
+    - master
+
