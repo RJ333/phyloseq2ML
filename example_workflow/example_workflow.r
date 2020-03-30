@@ -1,13 +1,12 @@
+library(phyloseq)
 library(phyloseq2ML)
 library(futile.logger)
 flog.threshold(TRACE)
 
 data(TNT_communities)
 
-tax_table(TNT_communities) <- tax_table(TNT_communities)[,colnames(tax_table(TNT_communities)) %in% 
-    c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "ASV")]
-
 # modify phyloseq object
+TNT_communities <- add_unique_lineages(TNT_communities)
 testps <- standardize_phyloseq_headers(
   phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
 
@@ -18,7 +17,7 @@ translate_ID(ID = c("ASV02", "ASV17"), tax_level = c("Genus"), taxa_vector_list)
 
 # define subsetting parameters
 thresholds <- c(1500)
-selected_taxa_1 <- setNames(c("To_genus", "To_family"), c("Genus", "Family"))
+selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
 
 # phyloseq objects as list
 subset_list <- list(
