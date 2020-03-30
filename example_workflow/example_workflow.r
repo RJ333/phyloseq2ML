@@ -4,6 +4,9 @@ flog.threshold(TRACE)
 
 data(TNT_communities)
 
+tax_table(TNT_communities) <- tax_table(TNT_communities)[,colnames(tax_table(TNT_communities)) %in% 
+    c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "ASV")]
+
 # modify phyloseq object
 testps <- standardize_phyloseq_headers(
   phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
