@@ -74,11 +74,15 @@ add_unique_lineages <- function(phyloseq_object) {
   if(class(phyloseq_object) != "phyloseq") {
     stop('Provided argument for "phyloseq_object" is not of class "phyloseq"')
   }
-  
+  # get available taxa ranks and create a vector containing an 
+  # interleaved order of columns based on the number of taxa ranks
   tax_columns <- colnames(phyloseq::tax_table(phyloseq_object))
   interleaved <- rep(1:length(tax_columns), each = 2) + 
     (0:1) * length(tax_columns)
   
+  # for each tax rank, create a new column consisting of the concatenated
+  # lineage down to the specific tax rank 
+  # e.g. for tax rank Order: Kingdom_Phylum_Class_Order
   unique_lineages <- list()
   for (tax_rank in tax_columns){ 
     unique_lineages[[paste("To", tax_rank, sep = "_")]] <- 
@@ -86,6 +90,7 @@ add_unique_lineages <- function(phyloseq_object) {
         c(1:which(tax_columns == tax_rank))], 1, paste, collapse = "_"))
   }
   
+  # combine tax_table and the lineages in an alternating (interleaved) order
   unique_lineages_df <- as.data.frame(unique_lineages)
   phyloseq::tax_table(phyloseq_object) <- cbind(as.matrix(unique_lineages_df), 
     phyloseq::tax_table(phyloseq_object))[,interleaved]
