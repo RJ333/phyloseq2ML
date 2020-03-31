@@ -22,7 +22,7 @@ setRepositories()
 devtools::document() # before check
 # turn an R object into a data set as part of the package
 # also add description to R/data.R
-usethis::use_data(TNT_communities)
+usethis::use_data(TNT_communities, overwrite = TRUE)
 usethis::use_data(testps, 
                   taxa_vector_list, 
                   subset_list_df, 
