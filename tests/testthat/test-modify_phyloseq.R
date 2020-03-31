@@ -24,3 +24,8 @@ test_that("Adding unique lineages doubles amount of tax_table cols", {
   expect_equal(ncol(phyloseq::tax_table(phyloseq2ML::add_unique_lineages(TNT_communities))), 
     2 * ncol(phyloseq::tax_table(TNT_communities)))
 })
+
+test_that("order of interleaved columns is correct: last column unchanged", {
+  expect_equal(phyloseq::tax_table(phyloseq2ML::add_unique_lineages(TNT_communities))[,"ASV"], 
+    phyloseq::tax_table(TNT_communities)[ , ncol(phyloseq::tax_table(TNT_communities))])
+})
