@@ -56,7 +56,7 @@ test_that("Length of levels equals bins and labels for multi classification", {
 test_that("Breaks if length of levels does not equal bins and labels for multi classification", {
   expect_error(length(levels(phyloseq2ML::categorize_response_variable(ML_mode = "multi_class", 
     response_data = response_variables, my_breaks = c(-Inf, 0, 3, 5, Inf), 
-     class_labels = c("class1", "class2", "class3", "class4", "class5"), Positive_first = TRUE)[[1]])), 4)
+     class_labels = c("class1", "class2", "class3", "class4", "class5"), Positive_first = TRUE)[[1]])))
 })
 
 test_that("Returns unmodified table for regression", {
