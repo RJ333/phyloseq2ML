@@ -5,7 +5,7 @@ test_that("OTU table correct for given threshold and number of samples", {
 
 test_that("Tax table correct for given threshold and number of samples", {
   expect_equal(digest::sha1(phyloseq::tax_table(phyloseq2ML::filter_subsets(TNT_communities, 1500, 3))),
-               "507a6d94febf9763eb3823b06f857acbff12dc4f")
+               "3098952cdf06acdcc933a140d467fe44162d08ac")
 })
 
 test_that("Sample data correct for given threshold and number of samples", {

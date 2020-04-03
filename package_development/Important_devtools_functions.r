@@ -25,7 +25,8 @@ devtools::document() # before check
 usethis::use_data(TNT_communities, overwrite = TRUE)
 usethis::use_data(testps, 
                   taxa_vector_list, 
-                  subset_list_df, 
+                  subset_list_df,
+                  response_variables,
                   internal = TRUE, overwrite = TRUE)
 
 
