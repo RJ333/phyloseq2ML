@@ -2,6 +2,8 @@
 
 export(add_sample_data)
 export(add_unique_lineages)
+export(categorize_binary)
+export(categorize_multi)
 export(categorize_response_variable)
 export(create_community_table_subsets)
 export(create_taxonomy_lookup)

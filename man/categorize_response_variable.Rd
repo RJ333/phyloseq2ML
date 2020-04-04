@@ -4,44 +4,25 @@
 \alias{categorize_response_variable}
 \title{Categorize continuous response variable columns}
 \usage{
-categorize_response_variable(
-  ML_mode,
-  response_data,
-  my_breaks,
-  class_labels = NULL,
-  Positive_first = TRUE
-)
+categorize_response_variable(ML_mode, response_data, ...)
 }
 \arguments{
-\item{ML_mode}{`binary_class`, `multi_class` or `regression` are available}
+\item{ML_mode}{How many classes should be generated? `binary_class`, 
+`multi_class` or `regression` are valid, `regression` returns unmodified
+response_data}
 
-\item{response_data}{a data.frame where the columns are the continuous 
+\item{response_data}{a data frame where the columns are the continuous 
 response variables}
 
-\item{my_breaks}{the intervals for the binning, specified e.g. 
-as `c(-Inf, 2, Inf)` for `binary_class` or `c(-Inf, 2, 4, 6, Inf)` 
-for `multi_class`}
-
-\item{class_labels}{desired names of the factor levels, only required 
-for `multi_class`. Specified as e.g. `c("Below2", "2to4", "4to62, "Above6")` 
-for breaks `c(-Inf, 2, 4, 6, Inf)`. Default is `NULL`}
-
-\item{Positive_first}{logical for `binary_class`, shall `Positive` become 
-the first factor level? Defaults to `TRUE`}
+\item{...}{arguments passed on to `categorize_binary()` and `categorize_multi()`}
 }
 \value{
-A data frame with factor columns containing the categorized response variables
+A data frame with factor columns containing the categorized response 
+  variables or for `regression` the unmodified data frame
 }
 \description{
-This function places continuous values into bins. The limits of the bins can 
-be specified as well as the name of the bins, if it is more than two. For 
-binary bins, the first one is `Negative` and the second one is `Positive`. 
-By default, `Positive` is then used as first factor level. `Positive` is the 
-class for which the metrics are later on calculated!! E.g. `True positive` 
-are the true positives of class `Positive`.
-Using `multi_class`, the number and names of classes can be freely chosen. 
-Metrics will be calculated for each of the classes. If you choose `regression`, 
-the unmodified table will be returned. The elements in `class_labels` need to 
-be one less compared to the elements in `my_breaks`. To add non-numeric columns 
-as response variables use `cbind()` or `merge()` after this step.
+This function is a wrapper for `categorize_binary()` and `categorize_multi()`, 
+which place continuous values into classes and return factor columns. To add 
+columns which are already factor columns as response variables use `cbind()` 
+or `merge()` after this step.
 }
