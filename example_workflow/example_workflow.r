@@ -40,6 +40,15 @@ desired_response_vars <- c("TNT", "DANT_2.6")
 response_variables <- extract_response_variable(
   response_variables = desired_response_vars, phyloseq_object = testps)
 # cut response numeric values into 3 classes
-responses_final <-categorize_response_variable(ML_mode = "multi_class", 
-  response_data = response_variables, my_breaks = c(-Inf, 0, 3, Inf), 
+responses_final <- categorize_response_variable(
+  ML_mode = "multi_class", 
+  response_data = response_variables, 
+  my_breaks = c(-Inf, 0, 3, Inf), 
   class_labels = c("None", "Below_3", "Above_3"))
+
+# or for two classes
+responses_final2 <- categorize_response_variable(
+  ML_mode = "binary_class", 
+  response_data = response_variables, 
+  my_breaks = c(-Inf, 0, Inf),
+  Positive = FALSE)

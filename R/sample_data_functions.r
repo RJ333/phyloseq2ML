@@ -66,38 +66,30 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
 
 #' Categorize continuous response variable columns
 #'
-#' This function places continuous values into bins. The limits of the bins can 
-#' be specified as well as the name of the bins, if it is more than two. For 
-#' binary bins, the first one is `Negative` and the second one is `Positive`. 
-#' By default, `Positive` is then used as first factor level. `Positive` is the 
-#' class for which the metrics are later on calculated!! E.g. `True positive` 
-#' are the true positives of class `Positive`.
-#' Using `multi_class`, the number and names of classes can be freely chosen. 
-#' Metrics will be calculated for each of the classes. If you choose `regression`, 
-#' the unmodified table will be returned. The elements in `class_labels` need to 
-#' be one less compared to the elements in `my_breaks`. To add non-numeric columns 
-#' as response variables use `cbind()` or `merge()` after this step.
+#' This function is a wrapper for `categorize_binary()` and `categorize_multi()`, 
+#' which place continuous values into classes and return factor columns. To add 
+#' columns which are already factor columns as response variables use `cbind()` 
+#' or `merge()` after this step.
 #'
-#' @param ML_mode `binary_class`, `multi_class` or `regression` are available
-#' @param response_data a data.frame where the columns are the continuous 
-#'   response variables
-#' @param my_breaks the intervals for the binning, specified e.g. 
-#'   as `c(-Inf, 2, Inf)` for `binary_class` or `c(-Inf, 2, 4, 6, Inf)` 
-#'   for `multi_class`
-#' @param class_labels desired names of the factor levels, only required 
-#'   for `multi_class`. Specified as e.g. `c("Below2", "2to4", "4to62, "Above6")` 
-#'   for breaks `c(-Inf, 2, 4, 6, Inf)`. Default is `NULL`
-#' @param Positive_first logical for `binary_class`, shall `Positive` become 
-#' the first factor level? Defaults to `TRUE`
+#' @param ML_mode How many classes should be generated? `binary_class`, 
+#'   `multi_class` or `regression` are valid, `regression` returns unmodified
+#'   response_data
+#' @param response_data a data frame or tibble where the columns are the 
+#'   continuous response variables
+#' @param ... arguments passed on to `categorize_binary()` and `categorize_multi()`
 #'
-#' @return A data frame with factor columns containing the categorized response variables
+#' @return A data frame with factor columns containing the categorized response 
+#'   variables or for `regression` the unmodified data frame
 #'
 #' @export 
-categorize_response_variable <- function(ML_mode, response_data, my_breaks, 
-  class_labels = NULL, Positive_first = TRUE) {
+categorize_response_variable <- function(ML_mode, response_data, my_breaks,
+  class_labels, Positive_first = TRUE, ...) {
+  if(!tibble::is_tibble(response_data) & !is.data.frame(response_data)) {
+    stop("Provided response_data is neither a data frame nor a tibble")
+  }
   # check if all columns and the breaks are numeric
   if(!all(sapply(response_data, is.numeric))) {
-    stop("Provided data.frame contains non-numeric columns")
+    stop("Provided data frame contains non-numeric columns")
   }
   if(!is.numeric(my_breaks)) {
     stop("Provided my_breaks contain non-numeric values")
@@ -108,38 +100,84 @@ categorize_response_variable <- function(ML_mode, response_data, my_breaks,
       please choose from "binary_class", "multi_class", "regression"')
   }
   if (ML_mode == "binary_class") {
-    futile.logger::flog.info("Separating response variable at value ", my_breaks,
-      " into two classes: Positive and Negative")
-    # Split continuous values into Negative and Positive based on my_breaks
-    response_variables_binary <- as.data.frame(apply(response_data, 2, cut, 
-      breaks = my_breaks, labels = c("Negative", "Positive")))
+    categorize_binary(response_data = response_data, my_breaks = my_breaks,
+      Positive_first = Positive_first)
     
-    # Make "positive" the first factor level 
-    if(Positive_first) {
-      for (column in names(response_variables_binary)) {
-        response_variables_binary[[column]] <- stats::relevel(
-          factor(response_variables_binary[[column]]), ref = "Positive")
-      }
-      row.names(response_variables_binary) <- row.names(response_data)
-      response_variables_final <- response_variables_binary
-      futile.logger::flog.info("Positive set to first factor level")
-    } else {
-      # Negative stays first factor level
-      row.names(response_variables_binary) <- row.names(response_data)
-      response_variables_final <- response_variables_binary
-      futile.logger::flog.info("Negative stays first factor level")
-    }
   } else if (ML_mode == "multi_class") {
-    futile.logger::flog.info("Multiple classes, factor levels are alphabetically sorted")
-    response_variables_multi <- as.data.frame(apply(response_data, 2, cut, 
-      breaks = my_breaks, labels = class_labels))
-    row.names(response_variables_multi) <- row.names(response_data)
-    response_variables_final <- response_variables_multi
+    categorize_multi(response_data = response_data, my_breaks = my_breaks, 
+      class_labels = class_labels)
    
   } else if (ML_mode == "regression") {
     futile.logger::flog.info("No categorization required for regression, 
       returning unmodified data")
-    response_variables_final <- response_data
+    response_data
   }
-  response_variables_final
 }
+
+#' Categorize continuous values into two classes
+#'
+#' This function places continuous values into two classes. The first class is 
+#' labelled `Negative` and the second `Positive`. By default, `Positive` is used 
+#' as first factor level and therefore the class for which the metrics are 
+#' later on calculated!! E.g. `True positive` are the true positives of class 
+#' `Positive`.
+#'
+#' @param response_data a data.frame where the columns are the continuous 
+#'   response variables
+#' @param my_breaks the intervals norders to form to bins, specified e.g. 
+#'   as `c(-Inf, 2, Inf)`
+#' @param Positive_first logical, shall `Positive` become the first factor level? 
+#'   Defaults to `TRUE`
+#'
+#' @return A data frame with factor columns containing binary response variables
+#'
+#' @export
+categorize_binary <- function(response_data, my_breaks, Positive_first) {
+  futile.logger::flog.info("Separating response variable at value ", my_breaks,
+    " into two classes: Positive and Negative")
+  # Split continuous values into Negative and Positive based on my_breaks
+  response_variables_binary <- as.data.frame(apply(response_data, 2, cut, 
+    breaks = my_breaks, labels = c("Negative", "Positive")))
+  
+  # Make "positive" the first factor level 
+  if(Positive_first) {
+    for (column in names(response_variables_binary)) {
+      response_variables_binary[[column]] <- stats::relevel(
+        factor(response_variables_binary[[column]]), ref = "Positive")
+    }
+    row.names(response_variables_binary) <- row.names(response_data)
+    futile.logger::flog.info("Positive set to first factor level")
+    response_variables_binary
+
+    
+  } else {
+    # Negative stays first factor level
+    row.names(response_variables_binary) <- row.names(response_data)
+    futile.logger::flog.info("Negative stays first factor level")
+    response_variables_binary
+  }
+}
+
+#' Using `multi_class`, the number and names of classes can be freely chosen.
+#' The elements in `class_labels` need to be one less compared to the elements 
+#' in `my_breaks`. Metrics will be calculated for each of the classes.
+#' 
+#' @param response_data a data.frame where the columns are the continuous 
+#'   response variables
+#' @param my_breaks the intervals for the binning, specified as e.g. 
+#'    `c(-Inf, 2, 4, 6, Inf)` 
+#' @param class_labels desired names of the factor levels, Specified as e.g. 
+#'   `c("Below2", "2to4", "4to6", "Above6")` for breaks `c(-Inf, 2, 4, 6, Inf)`.
+#'
+#' @return A data frame with factor columns containing the categorized 
+#'   response variables
+#'
+#' @export
+categorize_multi <- function(response_data, my_breaks, class_labels) {
+  futile.logger::flog.info("Multiple classes, factor levels are alphabetically sorted")
+  response_variables_multi <- as.data.frame(apply(response_data, 2, cut, 
+    breaks = my_breaks, labels = class_labels))
+  row.names(response_variables_multi) <- row.names(response_data)
+  response_variables_multi
+}
+      
