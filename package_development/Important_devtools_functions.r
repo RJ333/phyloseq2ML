@@ -12,10 +12,12 @@ devtools::
   install()
 
 # Required packages should be added to the DESCRIPTION
-usethis::use_package("methods") 
+usethis::use_package("methods")
+usethis::use_package("phyloseq")
 # if they are only suggests, use:
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
+usethis::use_package("tibble", "Suggests")
 # this allows to install e.g. from bioconductor
 setRepositories()
 # if it complaines about missing documentation, you may not have run this command
