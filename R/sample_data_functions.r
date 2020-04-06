@@ -61,7 +61,7 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
   full_sample_data <- as.data.frame(phyloseq::sample_data(phyloseq_object))
   response_sample_data <- full_sample_data[, names(full_sample_data) %in% response_variables]
   names(response_sample_data) <- gsub(x = names(response_sample_data), pattern = "_", 
-    replacement = "\\.")
+    replacement = ".")
   response_sample_data
 }
 

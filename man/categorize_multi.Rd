@@ -16,7 +16,9 @@ response variables}
 `c(-Inf, 2, 4, 6, Inf)`}
 
 \item{class_labels}{desired names of the factor levels, Specified as e.g. 
-`c("Below2", "2to4", "4to6", "Above6")` for breaks `c(-Inf, 2, 4, 6, Inf)`.}
+`c("Below2", "2to4", "4to6", "Above6")` for breaks `c(-Inf, 2, 4, 6, Inf)`.
+At least one value needs to be a character, the others are then coerced to
+class character}
 }
 \value{
 A data frame with factor columns containing the categorized 
