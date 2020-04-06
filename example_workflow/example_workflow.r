@@ -44,7 +44,7 @@ responses_final <- categorize_response_variable(
   ML_mode = "multi_class", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, 3, Inf), 
-  class_labels = c("None", "Below_3", "Above_3"))
+  class_labels = c("3", 77, 4))
 
 # or for two classes
 responses_final2 <- categorize_response_variable(
