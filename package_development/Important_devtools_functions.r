@@ -12,10 +12,12 @@ devtools::
   install()
 
 # Required packages should be added to the DESCRIPTION
-usethis::use_package("methods") 
+usethis::use_package("methods")
+usethis::use_package("phyloseq")
 # if they are only suggests, use:
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
+usethis::use_package("tibble", "Suggests")
 # this allows to install e.g. from bioconductor
 setRepositories()
 # if it complaines about missing documentation, you may not have run this command
@@ -25,7 +27,8 @@ devtools::document() # before check
 usethis::use_data(TNT_communities, overwrite = TRUE)
 usethis::use_data(testps, 
                   taxa_vector_list, 
-                  subset_list_df, 
+                  subset_list_df,
+                  response_variables,
                   internal = TRUE, overwrite = TRUE)
 
 

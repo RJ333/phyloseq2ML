@@ -2,8 +2,12 @@
 
 export(add_sample_data)
 export(add_unique_lineages)
+export(categorize_binary)
+export(categorize_multi)
+export(categorize_response_variable)
 export(create_community_table_subsets)
 export(create_taxonomy_lookup)
+export(extract_response_variable)
 export(filter_subsets)
 export(standardize_phyloseq_headers)
 export(to_relative_abundance)

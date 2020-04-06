@@ -35,3 +35,20 @@ subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)
 desired_sample_data <- c("TOC", "P_percent")
 subset_list_extra <- add_sample_data(phyloseq_object = testps, 
   community_tables = subset_list_df, sample_data_names = desired_sample_data)
+# get response variables
+desired_response_vars <- c("TNT", "DANT_2.6")
+response_variables <- extract_response_variable(
+  response_variables = desired_response_vars, phyloseq_object = testps)
+# cut response numeric values into 3 classes
+responses_final <- categorize_response_variable(
+  ML_mode = "multi_class", 
+  response_data = response_variables, 
+  my_breaks = c(-Inf, 0, 3, Inf), 
+  class_labels = c("3", 77, 4))
+
+# or for two classes
+responses_final2 <- categorize_response_variable(
+  ML_mode = "binary_class", 
+  response_data = response_variables, 
+  my_breaks = c(-Inf, 0, Inf),
+  Positive = FALSE)
