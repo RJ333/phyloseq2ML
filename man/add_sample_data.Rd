@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample_data_functions.r
 \name{add_sample_data}
 \alias{add_sample_data}
-\title{Select sample data variables and add them to the count tables}
+\title{Select sample data variables and add them to the count tables.}
 \usage{
 add_sample_data(sample_data_names, phyloseq_object, community_tables)
 }

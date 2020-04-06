@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample_data_functions.r
 \name{categorize_binary}
 \alias{categorize_binary}
-\title{Categorize continuous values into two classes}
+\title{Categorize continuous values into two classes.}
 \usage{
 categorize_binary(response_data, my_breaks, Positive_first)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/merged_list_functions.r
 \name{merge_input_response}
 \alias{merge_input_response}
-\title{Merge all community tables with each response variable}
+\title{Merge all community tables with each response variable.}
 \usage{
 merge_input_response(input_tables, response_data)
 }

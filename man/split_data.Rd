@@ -2,7 +2,7 @@
 % Please edit documentation in R/merged_list_functions.r
 \name{split_data}
 \alias{split_data}
-\title{Split data frames according to a ratio into training and test sets}
+\title{Split data frames according to a ratio into training and test sets.}
 \usage{
 split_data(merged_list, split_ratios)
 }

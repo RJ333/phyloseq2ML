@@ -2,9 +2,7 @@
 % Please edit documentation in R/sample_data_functions.r
 \name{categorize_multi}
 \alias{categorize_multi}
-\title{Using `multi_class`, the number and names of classes can be freely chosen.
-The elements in `class_labels` need to be one less compared to the elements 
-in `my_breaks`. Metrics will be calculated for each of the classes.}
+\title{Categorize continuous values into multiple classes.}
 \usage{
 categorize_multi(response_data, my_breaks, class_labels)
 }
