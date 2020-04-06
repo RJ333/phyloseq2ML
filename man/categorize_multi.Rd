@@ -9,14 +9,16 @@ in `my_breaks`. Metrics will be calculated for each of the classes.}
 categorize_multi(response_data, my_breaks, class_labels)
 }
 \arguments{
-\item{response_data}{a data.frame where the columns are the continuous 
+\item{response_data}{a data frame or tibble where the columns are the continuous 
 response variables}
 
 \item{my_breaks}{the intervals for the binning, specified as e.g. 
 `c(-Inf, 2, 4, 6, Inf)`}
 
 \item{class_labels}{desired names of the factor levels, Specified as e.g. 
-`c("Below2", "2to4", "4to6", "Above6")` for breaks `c(-Inf, 2, 4, 6, Inf)`.}
+`c("Below2", "2to4", "4to6", "Above6")` for breaks `c(-Inf, 2, 4, 6, Inf)`.
+At least one value needs to be a character, the others are then coerced to
+class character}
 }
 \value{
 A data frame with factor columns containing the categorized 

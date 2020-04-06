@@ -43,7 +43,8 @@ add_sample_data <- function(sample_data_names, phyloseq_object,
 #' dots, as underscores are later used for string splitting.
 #'
 #' @param response_variables a vector of sample data variable names
-#' @param phyloseq_object this `sample_data()` will be used to receive the columns
+#' @param phyloseq_object the according `sample_data()` will be looked up 
+#'   to receive the response columns
 #'
 #' @return A data frame consisting of the specified columns from `sample_data()`
 #'
@@ -60,7 +61,7 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
   full_sample_data <- as.data.frame(phyloseq::sample_data(phyloseq_object))
   response_sample_data <- full_sample_data[, names(full_sample_data) %in% response_variables]
   names(response_sample_data) <- gsub(x = names(response_sample_data), pattern = "_", 
-    replacement = "\\.")
+    replacement = ".")
   response_sample_data
 }
 
@@ -82,8 +83,7 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
 #'   variables or for `regression` the unmodified data frame
 #'
 #' @export 
-categorize_response_variable <- function(ML_mode, response_data, my_breaks,
-  class_labels, Positive_first = TRUE, ...) {
+categorize_response_variable <- function(ML_mode, response_data, ...) {
   if(!tibble::is_tibble(response_data) & !is.data.frame(response_data)) {
     stop("Provided response_data is neither a data frame nor a tibble")
   }
@@ -91,21 +91,17 @@ categorize_response_variable <- function(ML_mode, response_data, my_breaks,
   if(!all(sapply(response_data, is.numeric))) {
     stop("Provided data frame contains non-numeric columns")
   }
-  if(!is.numeric(my_breaks)) {
-    stop("Provided my_breaks contain non-numeric values")
-  }
+ 
   # check if ML_mode is valid
   if(!ML_mode %in% c("binary_class", "multi_class", "regression")) {
     stop('Mode of analysis not valid, 
       please choose from "binary_class", "multi_class", "regression"')
   }
   if (ML_mode == "binary_class") {
-    categorize_binary(response_data = response_data, my_breaks = my_breaks,
-      Positive_first = Positive_first)
+    categorize_binary(response_data, ...)
     
   } else if (ML_mode == "multi_class") {
-    categorize_multi(response_data = response_data, my_breaks = my_breaks, 
-      class_labels = class_labels)
+    categorize_multi(response_data, ...)
    
   } else if (ML_mode == "regression") {
     futile.logger::flog.info("No categorization required for regression, 
@@ -122,7 +118,7 @@ categorize_response_variable <- function(ML_mode, response_data, my_breaks,
 #' later on calculated!! E.g. `True positive` are the true positives of class 
 #' `Positive`.
 #'
-#' @param response_data a data.frame where the columns are the continuous 
+#' @param response_data a data frame or tibble where the columns are the continuous 
 #'   response variables
 #' @param my_breaks the intervals norders to form to bins, specified e.g. 
 #'   as `c(-Inf, 2, Inf)`
@@ -135,11 +131,14 @@ categorize_response_variable <- function(ML_mode, response_data, my_breaks,
 categorize_binary <- function(response_data, my_breaks, Positive_first) {
   futile.logger::flog.info("Separating response variable at value ", my_breaks,
     " into two classes: Positive and Negative")
+   if(!is.numeric(my_breaks)) {
+    stop("Provided my_breaks contain non-numeric values")
+  }
   # Split continuous values into Negative and Positive based on my_breaks
   response_variables_binary <- as.data.frame(apply(response_data, 2, cut, 
     breaks = my_breaks, labels = c("Negative", "Positive")))
   
-  # Make "positive" the first factor level 
+  # Make "positive" the first factor level in each column
   if(Positive_first) {
     for (column in names(response_variables_binary)) {
       response_variables_binary[[column]] <- stats::relevel(
@@ -162,18 +161,25 @@ categorize_binary <- function(response_data, my_breaks, Positive_first) {
 #' The elements in `class_labels` need to be one less compared to the elements 
 #' in `my_breaks`. Metrics will be calculated for each of the classes.
 #' 
-#' @param response_data a data.frame where the columns are the continuous 
+#' @param response_data a data frame or tibble where the columns are the continuous 
 #'   response variables
 #' @param my_breaks the intervals for the binning, specified as e.g. 
 #'    `c(-Inf, 2, 4, 6, Inf)` 
 #' @param class_labels desired names of the factor levels, Specified as e.g. 
 #'   `c("Below2", "2to4", "4to6", "Above6")` for breaks `c(-Inf, 2, 4, 6, Inf)`.
-#'
+#'   At least one value needs to be a character, the others are then coerced to
+#'   class character
 #' @return A data frame with factor columns containing the categorized 
 #'   response variables
 #'
 #' @export
 categorize_multi <- function(response_data, my_breaks, class_labels) {
+   if(!is.numeric(my_breaks)) {
+    stop("Provided my_breaks contain non-numeric values")
+   }
+  if(!is.character(class_labels)) {
+    stop("Provided class_labels are not of type character")
+  }
   futile.logger::flog.info("Multiple classes, factor levels are alphabetically sorted")
   response_variables_multi <- as.data.frame(apply(response_data, 2, cut, 
     breaks = my_breaks, labels = class_labels))

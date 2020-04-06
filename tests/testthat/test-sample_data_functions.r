@@ -30,39 +30,55 @@ test_that("Check that underscores are converted to dots", {
 })
 
 test_that("TNT Positive is first level when TRUE", {
-  expect_equal(levels(phyloseq2ML::categorize_response_variable(ML_mode = "binary_class", 
+  categorized <- phyloseq2ML::categorize_response_variable(ML_mode = "binary_class", 
     response_data = response_variables, my_breaks = c(-Inf, 0, Inf), 
-     class_labels = NULL, Positive_first = TRUE)[[1]])[1], "Positive")
+    Positive_first = TRUE)[[1]]
+  
+  expect_equal(levels(categorized)[1], "Positive")
 })
 
 test_that("TNT Negative is first level when FALSE", {
-  expect_equal(levels(phyloseq2ML::categorize_response_variable(ML_mode = "binary_class", 
+  categorized <- phyloseq2ML::categorize_response_variable(ML_mode = "binary_class", 
     response_data = response_variables, my_breaks = c(-Inf, 0, Inf), 
-     class_labels = NULL, Positive_first = FALSE)[[1]])[1], "Negative")
+    Positive_first = FALSE)[[1]]
+  
+  expect_equal(levels(categorized)[1], "Negative")
 })
 
 test_that("Length of levels is 2 for binary classification", {
-  expect_equal(length(levels(phyloseq2ML::categorize_response_variable(ML_mode = "binary_class", 
+  categorized <- phyloseq2ML::categorize_response_variable(ML_mode = "binary_class", 
     response_data = response_variables, my_breaks = c(-Inf, 0, Inf), 
-     class_labels = NULL, Positive_first = TRUE)[[1]])), 2)
+    Positive_first = TRUE)
+  
+  expect_equal(length(levels(categorized[[1]])), 2)
 })
 
 test_that("Length of levels equals bins and labels for multi classification", {
-  expect_equal(length(levels(phyloseq2ML::categorize_response_variable(ML_mode = "multi_class", 
+  categorized <- phyloseq2ML::categorize_response_variable(ML_mode = "multi_class", 
     response_data = response_variables, my_breaks = c(-Inf, 0, 3, 5, Inf), 
-     class_labels = c("class1", "class2", "class3", "class4"), Positive_first = TRUE)[[1]])), 4)
+     class_labels = c("class1", "class2", "class3", "class4"))
+  expect_equal(length(levels(categorized[[1]])), 4)
 })
 
 test_that("Breaks if length of levels does not equal bins and labels for multi classification", {
-  expect_error(length(levels(phyloseq2ML::categorize_response_variable(ML_mode = "multi_class", 
+  expect_error(phyloseq2ML::categorize_response_variable(ML_mode = "multi_class", 
     response_data = response_variables, my_breaks = c(-Inf, 0, 3, 5, Inf), 
-     class_labels = c("class1", "class2", "class3", "class4", "class5"), Positive_first = TRUE)[[1]])))
+     class_labels = c("class1", "class2", "class3", "class4", "class5")))
+  
+})
+
+test_that("Breaks if no label is of type character for multi classification", {
+  expect_error(phyloseq2ML::categorize_response_variable(ML_mode = "multi_class", 
+    response_data = response_variables, my_breaks = c(-Inf, 0, 3, 5, Inf), 
+     class_labels = c(1, 2, 3, 4)))
+  
 })
 
 test_that("Returns unmodified table for regression", {
-  expect_equal(phyloseq2ML::categorize_response_variable(ML_mode = "regression", 
+  not_categorized <- phyloseq2ML::categorize_response_variable(ML_mode = "regression", 
     response_data = response_variables, my_breaks = c(-Inf, 0, 3, 5, Inf), 
-     class_labels = c("class1", "class2", "class3", "class4", "class5"), Positive_first = TRUE), response_variables)
+     class_labels = c("class1", "class2", "class3", "class4", "class5"))
+  expect_equal(not_categorized, response_variables)
 })
 
 
