@@ -9,9 +9,9 @@ split_data(merged_list, split_ratios)
 \arguments{
 \item{merged_list}{a list of data frames}
 
-\item{split_ratios}{a numerical vector of ratios from 0 - 1 indicating the 
+\item{split_ratios}{a numerical vector of ratios from 0 to 1 indicating the 
 training fraction after the split, e.g. `c(0.75, 0.8)` for two rounds of
-splits with resulting training sets of 75 and 80 % of the total samples.}
+splits with resulting training sets of 75 and 80 percent of the total samples}
 }
 \value{
 A named nested list, containing both parts of the splitted data frame. 
@@ -19,7 +19,7 @@ A named nested list, containing both parts of the splitted data frame.
 }
 \description{
 This function applies a split to the data frames contained in the input list. 
-It first groups the data frames based on their number of rows. It then iteratives
+It first groups the data frames based on their number of rows. It then iterates
 over the data frames in each group and the provided split ratios to separate
 each data frame into a train and a test set. A nested list is returned having
 the names as first level and the respective split data sets on second level.
