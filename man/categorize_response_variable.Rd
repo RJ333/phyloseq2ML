@@ -11,8 +11,8 @@ categorize_response_variable(ML_mode, response_data, ...)
 `multi_class` or `regression` are valid, `regression` returns unmodified
 response_data}
 
-\item{response_data}{a data frame where the columns are the continuous 
-response variables}
+\item{response_data}{a data frame or tibble where the columns are the 
+continuous response variables}
 
 \item{...}{arguments passed on to `categorize_binary()` and `categorize_multi()`}
 }

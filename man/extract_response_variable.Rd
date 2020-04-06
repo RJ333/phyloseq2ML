@@ -9,7 +9,8 @@ extract_response_variable(response_variables, phyloseq_object)
 \arguments{
 \item{response_variables}{a vector of sample data variable names}
 
-\item{phyloseq_object}{this `sample_data()` will be used to receive the columns}
+\item{phyloseq_object}{the according `sample_data()` will be looked up 
+to receive the response columns}
 }
 \value{
 A data frame consisting of the specified columns from `sample_data()`
