@@ -1,4 +1,4 @@
-#' Merge all community tables with each response variable
+#' Merge all community tables with each response variable.
 #'
 #' This function merges the prepared input tables (consisting of community tables
 #' and optionally added sample data) with the prepared response data frame.
@@ -14,7 +14,7 @@
 #'
 #' @export
 merge_input_response <- function(input_tables, response_data) {
-  if(!tibble::is_tibble(response_data) & !is.data.frame(response_data)) {
+  if(!(tibble::is_tibble(response_data) | is.data.frame(response_data))) {
     stop("Provided response_data is neither a data frame nor a tibble")
   }
   input_counter <- 0
@@ -39,7 +39,7 @@ merge_input_response <- function(input_tables, response_data) {
   return(merged_list)
 }
 
-#' Split data frames according to a ratio into training and test sets
+#' Split data frames according to a ratio into training and test sets.
 #'
 #' This function applies a split to the data frames contained in the input list. 
 #' It first groups the data frames based on their number of rows. It then iterates
