@@ -39,7 +39,6 @@ merge_input_response <- function(input_tables, response_data) {
   return(merged_list)
 }
 
-
 #' Split data frames according to a ratio into training and test sets
 #'
 #' This function applies a split to the data frames contained in the input list. 
