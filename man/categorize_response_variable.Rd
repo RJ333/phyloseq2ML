@@ -4,15 +4,22 @@
 \alias{categorize_response_variable}
 \title{Categorize continuous response variable columns}
 \usage{
-categorize_response_variable(ML_mode, response_data, ...)
+categorize_response_variable(
+  ML_mode,
+  response_data,
+  my_breaks,
+  class_labels,
+  Positive_first = TRUE,
+  ...
+)
 }
 \arguments{
 \item{ML_mode}{How many classes should be generated? `binary_class`, 
 `multi_class` or `regression` are valid, `regression` returns unmodified
 response_data}
 
-\item{response_data}{a data frame where the columns are the continuous 
-response variables}
+\item{response_data}{a data frame or tibble where the columns are the 
+continuous response variables}
 
 \item{...}{arguments passed on to `categorize_binary()` and `categorize_multi()`}
 }
