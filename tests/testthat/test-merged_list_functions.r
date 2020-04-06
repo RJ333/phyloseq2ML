@@ -24,11 +24,13 @@ test_that("Breaks for non numeric split values", {
   expect_error(phyloseq2ML::split_data(merged_input_tables, c(0.6, "hello", 0.8)))
 })
 
-test_that("Breaks for values outside 0 - 1 range", {
+test_that("Breaks for values below 0 - 1 range", {
   expect_error(phyloseq2ML::split_data(merged_input_tables, c(0.6, -1)))
-  expect_error(phyloseq2ML::split_data(merged_input_tables, c(0.6, 3)))
 })
 
+test_that("Breaks for values above 0 - 1 range", {
+expect_error(phyloseq2ML::split_data(merged_input_tables, c(0.6, 3)))
+})
 test_that("Train and test set were created", {
   splitted <- phyloseq2ML::split_data(merged_input_tables, c(0.6, 0.8))
   expect_true(exists("train_set", where = splitted[[1]]))
