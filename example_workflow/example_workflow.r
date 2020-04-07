@@ -1,7 +1,6 @@
 library(phyloseq)
 library(phyloseq2ML)
-library(futile.logger)
-flog.threshold(TRACE)
+futile.logger::flog.threshold(TRACE)
 
 data(TNT_communities)
 
@@ -65,8 +64,15 @@ merged_input_regression <- merge_input_response(subset_list_extra, responses_reg
 
 # dummify input tables for keras ANN
 keras_merged <- dummify_input_tables(merged_input_tables)
+keras_merged_regression <- dummify_input_tables(merged_input_regression)
 splitted_keras <- split_data(keras_merged, c(0.6, 0.8))
+splitted_keras_regression <- split_data(keras_merged_regression, c(0.6, 0.8))
+# oversampling
 oversampled_keras <- oversample(splitted_keras, 2, 0.5)
+oversampled_keras_regression <- oversample(splitted_keras_regression, 2, 0.5)
+# scaling
+scaled_keras <- scaling(oversampled_keras)
+scaled_keras_regression <- scaling(oversampled_keras_regression)
 
 ###### for ranger
 

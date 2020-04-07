@@ -28,18 +28,25 @@ devtools::document() # before check
 # also add description to R/data.R
 usethis::use_data(TNT_communities, overwrite = TRUE)
 usethis::use_data(testps, 
-                  taxa_vector_list, 
-                  subset_list_df,
-                  subset_list_extra,
-                  response_variables,
-                  responses_final2,
-                  responses_regression,
-                  merged_input_regression,
-                  merged_input_tables,
-                  splitted_input,
-                  splitted_input_regression,
-                  internal = TRUE, overwrite = TRUE)
-
+  taxa_vector_list, 
+  subset_list_df,
+  subset_list_extra,
+  response_variables,
+  responses_final2,
+  responses_regression,
+  merged_input_regression,
+  merged_input_tables,
+  keras_merged,
+  keras_merged_regression,
+  splitted_keras,
+  splitted_keras_regression,
+  oversampled_keras,
+  oversampled_keras_regression,
+  scaled_keras,
+  scaled_keras_regression,
+  splitted_input,
+  splitted_input_regression,
+  internal = TRUE, overwrite = TRUE)
 
 # first command to setup the structure
 usethis::use_testthat()
