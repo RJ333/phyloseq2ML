@@ -1,3 +1,4 @@
+#dummify_input_tables
 test_that("Breaks for wrong structure of input list", {
   expect_error(phyloseq2ML::dummify_input_tables(splitted_input))
 })
@@ -16,6 +17,7 @@ test_that("Returns unmodified table if no factor columns present", {
 })
 
 
+# scaling
 test_that("Scaling returns unmodified response dummy col", {
   scaled_keras <- phyloseq2ML::scaling(oversampled_keras)
   target_scaled <- scaled_keras[[1]][["train_set"]][,ncol(scaled_keras[[1]][["train_set"]])]
@@ -54,3 +56,40 @@ test_that("Scaling ignored response var: mean to 0 and SD to 1 are not true", {
 test_that("Breaks for wrong structure of input list", {
   expect_error(phyloseq2ML::scaling(merged_input_tables))
 })
+
+
+# inputtables_to_keras
+test_that("Breaks for wrong structure of input list", {
+  expect_error(phyloseq2ML::inputtables_to_keras(merged_input_tables))
+})
+
+test_that("Detect dummy response labels for train and test set", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
+  train_target_scaled <- final[[1]][["trainset_labels"]]
+  test_target_scaled <- final[[1]][["testset_labels"]]
+  expect_true(is.dummy(train_target_scaled))
+  expect_true(is.dummy(test_target_scaled))
+})
+
+test_that("Detect non-dummy response labels for regression train and test set", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras_regression)
+  train_target_scaled <- final[[1]][["trainset_labels"]]
+  test_target_scaled <- final[[1]][["testset_labels"]]
+  expect_true(!is.dummy(train_target_scaled) & is.numeric(train_target_scaled))
+  expect_true(!is.dummy(test_target_scaled) & is.numeric(test_target_scaled))
+})
+
+test_that("Train and test sets exist and are not NULL", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
+  train_data <- final[[1]][["trainset_data"]]
+  test_data <- final[[1]][["testset_data"]]
+  expect_true(!is.null(train_data))
+  expect_true(!is.null(test_data))
+})
+
+test_that("Input and output list have same length", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
+  all_length <- unique(length(final), length(scaled_keras), length(oversampled_keras), length(splitted_keras))
+  expect_equal(all_length, length(final))
+})
+
