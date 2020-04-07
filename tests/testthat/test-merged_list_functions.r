@@ -57,8 +57,9 @@ test_that("Oversampling is ignored for copy_number 0", {
 })
 
 test_that("Oversampling multiplies length of train set", {
-  oversampled <- phyloseq2ML::oversample(splitted_input, 2, 0.5)
-  expect_equal(nrow(oversampled[[1]][["train_set"]]), 3 * nrow(splitted_input[[1]][["train_set"]]))
+  copies <- 3
+  oversampled <- phyloseq2ML::oversample(splitted_input, copies, 0.5)
+  expect_equal(nrow(oversampled[[1]][["train_set"]]), (copies + 1) * nrow(splitted_input[[1]][["train_set"]]))
 })
 
 test_that("Oversampling breaks for negative copy number", {
@@ -75,4 +76,8 @@ test_that("Oversampling breaks for negative noise factor", {
 
 test_that("Oversampling breaks for non numeric noise_factor", {
   expect_error(phyloseq2ML::oversample(splitted_input, 1, "hello"))
+})
+
+test_that("Oversampling breaks for too high noise_factor", {
+  expect_error(phyloseq2ML::oversample(splitted_input, 1, 101))
 })

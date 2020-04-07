@@ -24,10 +24,10 @@ A list of lists, the list item name is updated to reflect the number
 \description{
 This function creates copies of existing observations in the training set 
 with a specified amount of noise added to each numeric variable/observation 
-combination with a non-zero value. This includes taxa abundance and also 
+combination with a non-zero value using data.table. This includes taxa abundance and also 
 sample data variables. Pure integer columns are ignored, as they are either 
 all 0s or dummy columns (only 0 and 1) and represent factor levels. The 
-response variable is also ignored. Copies are named the following: 
-original: Sample_1, first copy: Sample_1.1, second copy: Sample_1.2 and so on
+response variable is also ignored. Copies are named according to this scheme: 
+original: "Sample_1", first copy: "Sample_1.1", second copy: "Sample_1.2" etc
 The actual work is performed by internal `oversample_and_noise()` function.
 }
