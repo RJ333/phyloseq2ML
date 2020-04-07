@@ -83,12 +83,10 @@ scaling <- function(input_tables) {
     #exclude dummy variables from scaling; exclude non-dummy response (regression)
     if (is.dummy(response_column)) {
       not_to_scale_columns <- dummy_columns
-      futile.logger::flog.info("Dummy response variable ", response_column, 
-        "is excluded from scaling")
+      futile.logger::flog.info("Dummy variables are excluded from scaling")
     } else if (!is.dummy(response_column)) {
       not_to_scale_columns <- c(dummy_columns, response_column)
-      futile.logger::flog.info("Continuous response variable ", response_column, 
-        "is excluded from scaling")
+      futile.logger::flog.info("Dummy variables and continuous response variable is excluded from scaling")
     }
     
     # calculate mean and standard deviation from training data
@@ -112,3 +110,60 @@ scaling <- function(input_tables) {
   }
   data_list 
 }
+
+#' Separate independent variables from response column for keras.
+#'
+#' This functions converts the prepared list into the keras tensorflow required 
+#' shape. This means that the independent predictor variables are separated from 
+#' the response variable. A given dummy response variable is represented by as 
+#' many columns as it originally had levels, because the output layer of the 
+#' neural network consists of one node per level. This step is skipped for 
+#' non-dummy numerical response variables, e.g. as in case of regression.
+#' 
+#' @param final_input_tables a list of splitted input tables. The "train_set" and 
+#'   "test_set" tables need to be located at e.g `final_input_tables[[1]][["train_set"]]`
+#'   and `final_input_tables[[1]][["test_set"]]`, respectively
+#'   
+#' @return A list of lists of splitted table_list items
+#'
+#' @export
+inputtables_to_keras <- function(final_input_tables) {
+  
+  if(!exists("train_set", where = final_input_tables[[1]]))
+  stop('Error: Provided list does not contain a training set at location 
+    "final_input_tables[[1]][["train_set"]].')
+  
+    if(!exists("test_set", where = final_input_tables[[1]]))
+  stop('Error: Provided list does not contain a training set at location 
+    "final_input_tables[[1]][["test_set"]].')
+  
+  counter <- 0
+  data_list <- list()
+  for (current_table in final_input_tables) {
+    train_set <- current_table$train_set
+    test_set <- current_table$test_set
+    counter <- counter + 1
+    current_name <- names(final_input_tables)[counter]
+    response_column <- names(train_set)[ncol(train_set)]
+
+    # separate input data "X" from response variable "y" for keras
+    X_train <- as.matrix(train_set[, !names(train_set) %in% response_column])
+    X_train[is.nan(X_train)] <- 0
+    X_test <- as.matrix(test_set[, !names(test_set) %in% response_column])
+    X_test[is.nan(X_test)] <- 0
+    
+    if (is.dummy(train_set[[response_column]])) {
+      y_train <- keras::to_categorical(train_set[[response_column]])
+      y_test <- keras::to_categorical(test_set[[response_column]])
+    } else if (!is.dummy(train_set[[response_column]])) {
+      y_train <- train_set[[response_column]]
+      y_test <- test_set[[response_column]]
+    }
+
+    data_list[[current_name]] <- list(
+      trainset_data = X_train, trainset_labels = y_train, 
+      testset_data = X_test, testset_labels = y_test)
+  }
+  data_list 
+}
+
