@@ -14,7 +14,12 @@
 #'
 #' @export
 dummify_input_tables <- function(input_tables) {
-  dummy_data_list <- vector(mode = "list", length = length(input_tables))
+  
+  if(!is.data.frame(input_tables[[1]])) {
+    stop('No data frame for dummification found at "input_tables[[1]]"')
+  }
+  
+  dummy_data_list <- list()
   for (table_index in seq_along(input_tables)) {
     
     current_name <- names(input_tables)[table_index]
@@ -23,20 +28,17 @@ dummify_input_tables <- function(input_tables) {
     factor_column_ids <- names(current_table)[sapply(current_table, is.factor)]
     
     if (length(factor_column_ids) > 0) {
-      # if factor columns present, replace those with dummy columns
+      # if factor columns present, add corresponding dummy columns
       tmp <- fastDummies::dummy_cols(current_table, remove_first_dummy = TRUE)
-      #print(names(tmp))
-      #print(!names(tmp) %in% factor_column_ids)
       row.names(tmp) <- row.names(current_table)
-      # only update the former factor columns
+      # exclude the original factor columns
       dummy_data_list[[table_index]] <- tmp[ , !names(tmp) %in% factor_column_ids]
-      futile.logger::flog.info("names of columns changed to dummy columns: \n", 
-        factor_column_ids, "\n")
+      futile.logger::flog.info("names of columns changed to dummy columns:", 
+        factor_column_ids, capture = TRUE)
     } else {
       dummy_data_list[[table_index]] <- current_table
       futile.logger::flog.info("No categorical columns detected, returning unmodified input table")
     }
-    # pass the names on
     names(dummy_data_list)[table_index] <- current_name
   }
   dummy_data_list
