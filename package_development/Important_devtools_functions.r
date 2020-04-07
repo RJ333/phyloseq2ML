@@ -14,6 +14,7 @@ devtools::
 # Required packages should be added to the DESCRIPTION
 usethis::use_package("methods")
 usethis::use_package("phyloseq")
+usethis::use_package("data.table")
 # if they are only suggests, use:
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
@@ -31,7 +32,11 @@ usethis::use_data(testps,
                   subset_list_extra,
                   response_variables,
                   responses_final2,
+                  responses_regression,
+                  merged_input_regression,
                   merged_input_tables,
+                  splitted_input,
+                  splitted_input_regression,
                   internal = TRUE, overwrite = TRUE)
 
 
