@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample_data_functions.r
 \name{extract_response_variable}
 \alias{extract_response_variable}
-\title{Extract response variable columns from phyloseq sample data slot}
+\title{Extract response variable columns from phyloseq sample data slot.}
 \usage{
 extract_response_variable(response_variables, phyloseq_object)
 }

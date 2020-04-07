@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample_data_functions.r
 \name{categorize_response_variable}
 \alias{categorize_response_variable}
-\title{Categorize continuous response variable columns}
+\title{Categorize continuous response variable columns.}
 \usage{
 categorize_response_variable(ML_mode, response_data, ...)
 }

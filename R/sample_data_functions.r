@@ -1,4 +1,4 @@
-#' Select sample data variables and add them to the count tables
+#' Select sample data variables and add them to the count tables.
 #'
 #' This function selects specified columns from the sample data of a phyloseq object
 #' and iteratively merges each count table with the specified sample data columns.
@@ -36,7 +36,7 @@ add_sample_data <- function(sample_data_names, phyloseq_object,
   community_sample_data_list
 }
 
-#' Extract response variable columns from phyloseq sample data slot
+#' Extract response variable columns from phyloseq sample data slot.
 #'
 #' This function extracts specified columns from the sample data slot of a 
 #' phyloseq object. It also replaces underscores in those column headers with 
@@ -65,7 +65,7 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
   response_sample_data
 }
 
-#' Categorize continuous response variable columns
+#' Categorize continuous response variable columns.
 #'
 #' This function is a wrapper for `categorize_binary()` and `categorize_multi()`, 
 #' which place continuous values into classes and return factor columns. To add 
@@ -110,7 +110,7 @@ categorize_response_variable <- function(ML_mode, response_data, ...) {
   }
 }
 
-#' Categorize continuous values into two classes
+#' Categorize continuous values into two classes.
 #'
 #' This function places continuous values into two classes. The first class is 
 #' labelled `Negative` and the second `Positive`. By default, `Positive` is used 
@@ -157,6 +157,8 @@ categorize_binary <- function(response_data, my_breaks, Positive_first) {
   }
 }
 
+#' Categorize continuous values into multiple classes.
+#'
 #' Using `multi_class`, the number and names of classes can be freely chosen.
 #' The elements in `class_labels` need to be one less compared to the elements 
 #' in `my_breaks`. Metrics will be calculated for each of the classes.
