@@ -60,6 +60,16 @@ responses_regression <- categorize_response_variable(
 # merge the input tables with the response variables
 merged_input_tables <- merge_input_response(subset_list_extra, responses_final2)
 merged_input_regression <- merge_input_response(subset_list_extra, responses_regression)
+
+###### for keras
+
+# dummify input tables for keras ANN
+keras_merged <- dummify_input_tables(merged_input_tables)
+splitted_keras <- split_data(keras_merged, c(0.6, 0.8))
+oversampled_keras <- oversample(splitted_keras, 2, 0.5)
+
+###### for ranger
+
 # split merged list into training and test parts
 splitted_input <- split_data(merged_input_tables, c(0.6, 0.8))
 splitted_input_regression <- split_data(merged_input_regression, c(0.6, 0.8))
@@ -69,5 +79,3 @@ str(splitted_input, max = 2)
 oversampled_input <- oversample(splitted_input, 2, 0.5)
 not_oversampled_input <- oversample(splitted_input, 0, 0.5)
 oversampled_regression <- oversample(splitted_input_regression, 2, 0.5)
-min(table(oversampled_regression[[1]][["train_set"]][["DANT.2.6"]]))
-
