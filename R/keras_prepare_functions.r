@@ -43,3 +43,72 @@ dummify_input_tables <- function(input_tables) {
   }
   dummy_data_list
 }
+
+#' Apply scaling to numeric columns in test and train sets.
+#'
+#' To promote the convergence in neural net trainings, it is of advantage to have
+#' the input variable values in a similar range. This can be achieved by scaling
+#' the numeric values. The mean is subtracted from all values and then all values
+#' are divided by the standard deviation (SD). This yields values centered around 
+#' 0 with an SD of 1. Mean and SD are calculated ONLY based on training data (
+#' e.g. https://stackoverflow.com/a/49444783). Dummy columns and a non-dummy 
+#' response variable, as in regression use cases, are excluded from scaling. 
+#' 
+#' @param input_tables a list of splitted input tables. The "train_set" and 
+#'   "test_set" tables need to be located at e.g `input_tables[[1]][["train_set"]]`
+#'   and `input_tables[[1]][["test_set"]]`, respectively
+#' @return A list of same structure as the input list, with scaled numeric columns
+#'
+#' @export
+scaling <- function(input_tables) {
+  
+  if(!exists("train_set", where = input_tables[[1]]))
+  stop('Error: Provided list does not contain a training set at location 
+    "input_tables[[1]][["train_set"]].')
+  
+    if(!exists("test_set", where = input_tables[[1]]))
+  stop('Error: Provided list does not contain a training set at location 
+    "input_tables[[1]][["test_set"]].')
+  
+  counter <- 0
+  data_list <- list()
+  for (current_table in input_tables) {
+    train_set <- current_table$train_set
+    test_set <- current_table$test_set
+    counter <- counter + 1
+    current_name <- names(input_tables)[counter]
+    response_column <- names(train_set)[ncol(train_set)]
+    dummy_columns <- names(train_set)[vapply(train_set, is.dummy, logical(1))]
+    
+    #exclude dummy variables from scaling; exclude non-dummy response (regression)
+    if (is.dummy(response_column)) {
+      not_to_scale_columns <- dummy_columns
+      futile.logger::flog.info("Dummy response variable ", response_column, 
+        "is excluded from scaling")
+    } else if (!is.dummy(response_column)) {
+      not_to_scale_columns <- c(dummy_columns, response_column)
+      futile.logger::flog.info("Continuous response variable ", response_column, 
+        "is excluded from scaling")
+    }
+    
+    # calculate mean and standard deviation from training data
+    train_mean <- apply(
+      train_set[, !names(train_set) %in% not_to_scale_columns], 2, mean)
+    train_sd <- apply(
+      train_set[, !names(train_set) %in% not_to_scale_columns], 2, stats::sd)
+
+    # apply mean and SD to train and test data
+    scaled_train_columns <- scale(
+      train_set[, !names(train_set) %in% not_to_scale_columns], 
+      center = train_mean, scale = train_sd)
+    scaled_test_columns <- scale(
+      test_set[, !names(test_set) %in% not_to_scale_columns], 
+      center = train_mean, scale = train_sd)
+    
+    # replace unscaled with scales columns by name
+    train_set[, colnames(scaled_train_columns)] <- scaled_train_columns
+    test_set[, colnames(scaled_test_columns)] <- scaled_test_columns
+    data_list[[current_name]] <- list(train_set = train_set, test_set = test_set)
+  }
+  data_list 
+}
