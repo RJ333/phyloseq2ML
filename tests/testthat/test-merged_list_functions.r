@@ -77,3 +77,7 @@ test_that("Oversampling breaks for negative noise factor", {
 test_that("Oversampling breaks for non numeric noise_factor", {
   expect_error(phyloseq2ML::oversample(splitted_input, 1, "hello"))
 })
+
+test_that("Oversampling breaks for too high noise_factor", {
+  expect_error(phyloseq2ML::oversample(splitted_input, 1, 101))
+})

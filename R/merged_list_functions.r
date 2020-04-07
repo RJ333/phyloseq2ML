@@ -169,15 +169,14 @@ oversample_and_noise <- function(split_table, copy_number, noise_factor) {
     stop("Error: copy_number needs to be numeric")
   } else if (copy_number%%1 != 0) {
     stop("Error: copy_number needs to be an integer")
-  }
-  
-  if (copy_number < 0)
+  } else if (copy_number < 0) {
     stop("Error: copy_number can't be negative")
+  }
   
   if(!is.numeric(noise_factor)) {
     stop("Provided noise factor needs to be numeric") 
-  } else if (noise_factor < 0) {
-    stop("Error: noise_factor can't be negative")
+  } else if (!all(noise_factor >= 0 & noise_factor <= 100)) {
+    stop("Provided split ratios are not in range 0 - 100") 
   }
 
   if (copy_number == 0) {
