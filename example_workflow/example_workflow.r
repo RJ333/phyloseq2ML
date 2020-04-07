@@ -1,6 +1,7 @@
 library(phyloseq)
 library(phyloseq2ML)
-futile.logger::flog.threshold(TRACE)
+library(futile.logger)
+flog.threshold(TRACE)
 
 data(TNT_communities)
 
@@ -73,6 +74,10 @@ oversampled_keras_regression <- oversample(splitted_keras_regression, 2, 0.5)
 # scaling
 scaled_keras <- scaling(oversampled_keras)
 scaled_keras_regression <- scaling(oversampled_keras_regression)
+ready_keras <- inputtables_to_keras(scaled_keras)
+ready_keras_regression <- inputtables_to_keras(scaled_keras_regression)
+str(ready_keras, max = 2)
+str(ready_keras_regression, max = 2)
 
 ###### for ranger
 
