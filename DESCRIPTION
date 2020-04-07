@@ -17,7 +17,8 @@ Imports:
     phyloseq,
     futile.logger,
     Biostrings,
-    data.table
+    data.table,
+    keras
 RoxygenNote: 7.0.2
 Suggests: 
     testthat (>= 2.1.0),

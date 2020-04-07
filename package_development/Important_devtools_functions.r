@@ -15,6 +15,7 @@ devtools::
 usethis::use_package("methods")
 usethis::use_package("phyloseq")
 usethis::use_package("data.table")
+usethis::use_package("keras")
 # if they are only suggests, use:
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
