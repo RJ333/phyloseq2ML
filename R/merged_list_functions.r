@@ -156,8 +156,9 @@ oversample <- function(splitted_list, copy_number, noise_factor) {
 #' @param split_table a list consisting of "train_set" and "test_set"
 #' @param copy_number an integer specifying the number of copies, 0 means no 
 #'   oversampling takes place and `noise_factor` is ignored
-#' @param noise_factor a value >= 0 specifing the relative amount of noise randomly 
-#'   added or substracted to/from the original value e.g. 0.05 == +-5 \% noise
+#' @param noise_factor a value between 0 and 100 (100 equals 10,000 \% noise) 
+#'   specifing the relative amount of noise randomly added or substracted to/from 
+#'   the original value. e.g. 0.05 == +-5 \% noise
 #' @import data.table 
 #' 
 #' @return A list of lists, the list item name is updated to reflect the number 
