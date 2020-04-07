@@ -97,11 +97,11 @@ split_data <- function(merged_list, split_ratios) {
 #'
 #' This function creates copies of existing observations in the training set 
 #' with a specified amount of noise added to each numeric variable/observation 
-#' combination with a non-zero value. This includes taxa abundance and also 
+#' combination with a non-zero value using data.table. This includes taxa abundance and also 
 #' sample data variables. Pure integer columns are ignored, as they are either 
 #' all 0s or dummy columns (only 0 and 1) and represent factor levels. The 
-#' response variable is also ignored. Copies are named the following: 
-#' original: Sample_1, first copy: Sample_1.1, second copy: Sample_1.2 and so on
+#' response variable is also ignored. Copies are named according to this scheme: 
+#' original: "Sample_1", first copy: "Sample_1.1", second copy: "Sample_1.2" etc
 #' The actual work is performed by internal `oversample_and_noise()` function.
 #' 
 #' @param splitted_list a list of complimentary training and test data sets named
@@ -119,29 +119,8 @@ split_data <- function(merged_list, split_ratios) {
 oversample <- function(splitted_list, copy_number, noise_factor) {
   
   if(!exists("train_set", where = splitted_list[[1]]))
-    stop('Error: Provided list does not contain a "train_set" 
-      item at the correct position')
-  
-  if (!is.numeric(copy_number)) 
-    stop("Error: copy_number needs to be numeric")
-  
-  if (copy_number%%1 != 0) 
-    stop("Error: copy_number needs to be an integer")
-  
-  if (copy_number < 0)
-    stop("Error: copy_number can't be negative")
-    
-  if (noise_factor < 0)
-    stop("Error: noise_factor can't be negative")
-
-  if(!is.numeric(noise_factor))
-    stop("Provided noise factor needs to be numeric")
-  
-  if (copy_number == 0) {
-    futile.logger::flog.warn("No oversampling demanded, returning unmodified 
-      list with updated names. Noise factor ignored") 
-    noise_factor <- 0
-  }
+    stop('Error: Provided list does not contain a training set at location 
+      "splitted_list[[1]][["train_set"]].')
    
   oversample_counter <- 0
   oversampled_list <- list()
@@ -163,10 +142,16 @@ oversample <- function(splitted_list, copy_number, noise_factor) {
   oversampled_list
 }
 
-
 #' Replicate observations with added noise.
 #'
-#' This function gets called by `oversample`, see description there. 
+#' This function gets called by `oversample` and creates copies of samples with
+#' a specified amount of random noise. For more information see the docstring of
+#' `oversample`. 
+#' The anonymous data.table function for replication and noise addition acts on
+#' all columns which are numeric, but neither the response variable or 0/1 only
+#' columns, as these are either dummy variables or empty columns. It copies each
+#' row of a train set as often as defined by `copy_number` and adds or substracts
+#' randomly the amount of `noise_factor`
 #' 
 #' @param split_table a list consisting of "train_set" and "test_set"
 #' @param copy_number an integer specifying the number of copies, 0 means no 
@@ -180,32 +165,49 @@ oversample <- function(splitted_list, copy_number, noise_factor) {
 #'
 oversample_and_noise <- function(split_table, copy_number, noise_factor) {
   
+  if (!is.numeric(copy_number)) {
+    stop("Error: copy_number needs to be numeric")
+  } else if (copy_number%%1 != 0) {
+    stop("Error: copy_number needs to be an integer")
+  }
+  
+  if (copy_number < 0)
+    stop("Error: copy_number can't be negative")
+  
+  if(!is.numeric(noise_factor)) {
+    stop("Provided noise factor needs to be numeric") 
+  } else if (noise_factor < 0) {
+    stop("Error: noise_factor can't be negative")
+  }
+
+  if (copy_number == 0) {
+    futile.logger::flog.warn("No oversampling demanded, returning unmodified 
+      list with updated names. Noise factor ignored.") 
+    noise_factor <- 0
+  }
+  
   train_tmp <- split_table$train_set
   test_tmp <- split_table$test_set
   
   # select the column to add noise:
-  # only numeric columns...
   all_numeric_cols <- names(train_tmp)[sapply(train_tmp, is.numeric)]
-  # ...but not the response variable (in case of regression)
   response_col <- names(train_tmp)[ncol(train_tmp)]
-  # ... and also not dummy columns or completely 0 columns
   integer_cols <- names(train_tmp)[vapply(train_tmp, is.dummy, logical(1))]
   ignore_cols <- unique(c(integer_cols, response_col))
  
   # these are the columns to be modified with random noise
-  cols <- subset(all_numeric_cols, !all_numeric_cols %in% ignore_cols)
+  noise_cols <- subset(all_numeric_cols, !all_numeric_cols %in% ignore_cols)
   
   # replicate samples and add random noise to each value
-  # "Sample" corresponds to former row.names, .SD and .N are data.table functions
-  if(copy_number > 0) {
+  noised_copies <- NULL
+  
+  if (copy_number > 0) {
     noised_copies <- lapply(c(1:copy_number), function(current_copy) {
       data.table::copy(train_tmp)[,
-        c("Sample", cols) := c(.(paste(Sample, current_copy, sep = ".")), 
+        c("Sample", noise_cols) := c(.(paste(Sample, current_copy, sep = ".")), 
           .SD + .SD * sample(c(-noise_factor, noise_factor), 
-          .N * ncol(.SD), TRUE)), .SDcols = cols]
+          .N * ncol(.SD), TRUE)), .SDcols = noise_cols]
     })
-  } else {
-    noised_copies <- NULL
   }
   
   # bind original and noised samples

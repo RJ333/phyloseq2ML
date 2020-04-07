@@ -20,5 +20,12 @@ A list of lists, the list item name is updated to reflect the number
   of copies and the noise value
 }
 \description{
-This function gets called by `oversample`, see description there.
+This function gets called by `oversample` and creates copies of samples with
+a specified amount of random noise. For more information see the docstring of
+`oversample`. 
+The anonymous data.table function for replication and noise addition acts on
+all columns which are numeric, but neither the response variable or 0/1 only
+columns, as these are either dummy variables or empty columns. It copies each
+row of a train set as often as defined by `copy_number` and adds or substracts
+randomly the amount of `noise_factor`
 }
