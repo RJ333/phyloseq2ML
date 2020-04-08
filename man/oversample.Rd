@@ -9,7 +9,7 @@ oversample(splitted_list, copy_number, noise_factor)
 \arguments{
 \item{splitted_list}{a list of complimentary training and test data sets named
 "train_set" and "test_set", e.g `mylist[[1]][["train_set"]]` and 
-`mylist[[1]][["test_set"]]` for the first list item.}
+`mylist[[1]][["test_set"]]` for the first list item}
 
 \item{copy_number}{an integer specifying the number of copies, 0 means no 
 oversampling takes place and `noise_factor` is ignored}
