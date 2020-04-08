@@ -7,7 +7,7 @@
 categorize_multi(response_data, my_breaks, class_labels)
 }
 \arguments{
-\item{response_data}{a data frame or tibble where the columns are the continuous 
+\item{response_data}{a data frame where the columns are the continuous 
 response variables}
 
 \item{my_breaks}{the intervals for the binning, specified as e.g. 
