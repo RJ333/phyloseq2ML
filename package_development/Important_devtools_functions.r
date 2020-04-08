@@ -37,6 +37,7 @@ usethis::use_data(testps,
                   merged_input_tables,
                   splitted_input,
                   splitted_input_regression,
+                  oversampled_input,
                   internal = TRUE, overwrite = TRUE)
 
 

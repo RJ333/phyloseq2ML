@@ -12,5 +12,5 @@ test_that("Breaks for unnamed list", {
 })
 
 test_that("Breaks for early list with missing parameters in name", {
-  expect_true(phyloseq2ML::extract_parameters(subset_list_df))
+  expect_error(phyloseq2ML::extract_parameters(subset_list_df))
 })
