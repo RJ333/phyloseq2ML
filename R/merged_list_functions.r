@@ -14,8 +14,8 @@
 #'
 #' @export
 merge_input_response <- function(input_tables, response_data) {
-  if(!(tibble::is_tibble(response_data) | is.data.frame(response_data))) {
-    stop("Provided response_data is neither a data frame nor a tibble")
+  if(!is.data.frame(response_data)) {
+    stop("Provided response_data is not a data frame")
   }
   input_counter <- 0
   response_counter <- 0

@@ -7,7 +7,7 @@
 categorize_binary(response_data, my_breaks, Positive_first)
 }
 \arguments{
-\item{response_data}{a data frame or tibble where the columns are the continuous 
+\item{response_data}{a data frame where the columns are the continuous 
 response variables}
 
 \item{my_breaks}{the intervals norders to form to bins, specified e.g. 

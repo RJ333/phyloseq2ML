@@ -9,7 +9,7 @@ scaling(input_tables)
 \arguments{
 \item{input_tables}{a list of splitted input tables. The "train_set" and 
 "test_set" tables need to be located at e.g `input_tables[[1]][["train_set"]]`
-and `input_tables[[1]][["test_set"]]`, respectively}
+and `input_tables[[1]][["test_set"]]`, respectively.}
 }
 \value{
 A list of same structure as the input list, with scaled numeric columns

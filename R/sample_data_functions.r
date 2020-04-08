@@ -75,7 +75,7 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
 #' @param ML_mode How many classes should be generated? `binary_class`, 
 #'   `multi_class` or `regression` are valid, `regression` returns unmodified
 #'   response_data
-#' @param response_data a data frame or tibble where the columns are the 
+#' @param response_data a data frame where the columns are the 
 #'   continuous response variables
 #' @param ... arguments passed on to `categorize_binary()` and `categorize_multi()`
 #'
@@ -84,8 +84,8 @@ extract_response_variable <- function(response_variables, phyloseq_object) {
 #'
 #' @export 
 categorize_response_variable <- function(ML_mode, response_data, ...) {
-  if(!tibble::is_tibble(response_data) & !is.data.frame(response_data)) {
-    stop("Provided response_data is neither a data frame nor a tibble")
+  if(!is.data.frame(response_data)) {
+    stop("Provided response_data is not a data frame")
   }
   # check if all columns and the breaks are numeric
   if(!all(sapply(response_data, is.numeric))) {
@@ -118,7 +118,7 @@ categorize_response_variable <- function(ML_mode, response_data, ...) {
 #' later on calculated!! E.g. `True positive` are the true positives of class 
 #' `Positive`.
 #'
-#' @param response_data a data frame or tibble where the columns are the continuous 
+#' @param response_data a data frame where the columns are the continuous 
 #'   response variables
 #' @param my_breaks the intervals norders to form to bins, specified e.g. 
 #'   as `c(-Inf, 2, Inf)`
@@ -163,7 +163,7 @@ categorize_binary <- function(response_data, my_breaks, Positive_first) {
 #' The elements in `class_labels` need to be one less compared to the elements 
 #' in `my_breaks`. Metrics will be calculated for each of the classes.
 #' 
-#' @param response_data a data frame or tibble where the columns are the continuous 
+#' @param response_data a data frame where the columns are the continuous 
 #'   response variables
 #' @param my_breaks the intervals for the binning, specified as e.g. 
 #'    `c(-Inf, 2, 4, 6, Inf)` 
