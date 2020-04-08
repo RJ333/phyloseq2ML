@@ -19,6 +19,8 @@ extract_parameters <- function(input_list) {
     stop('List item names incorrectly formatted, they contain too few "_"')
   }
   
+  # split the names at all "_" and select the correct proportion
+  # representing the desired parameter
   result_table$ML_object <- names(input_list)
   result_table$Primerset <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 2))
@@ -34,7 +36,7 @@ extract_parameters <- function(input_list) {
     as.character(names(input_list)), '_'), "[", 11))
   result_table$Threshold <- as.numeric(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 4))
-  
+  # here we first split at "." and then at "_" to get the Tax_level
   tax_level_unclean <- sapply(strsplit(
     as.character(names(input_list)), '\\.'), "[", 2)
   result_table$Tax_level <- as.factor(sapply(strsplit(
