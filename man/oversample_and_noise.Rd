@@ -28,5 +28,5 @@ The anonymous data.table function for replication and noise addition acts on
 all columns which are numeric, but neither the response variable or 0/1 only
 columns, as these are either dummy variables or empty columns. It copies each
 row of a train set as often as defined by `copy_number` and adds or substracts
-randomly the amount of `noise_factor`
+randomly the amount of `noise_factor`.
 }

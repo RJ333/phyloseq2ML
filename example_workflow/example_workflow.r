@@ -90,3 +90,6 @@ str(splitted_input, max = 2)
 oversampled_input <- oversample(splitted_input, 2, 0.5)
 not_oversampled_input <- oversample(splitted_input, 0, 0.5)
 oversampled_regression <- oversample(splitted_input_regression, 2, 0.5)
+
+# set up a parameter data.frame
+parameter_df <- extract_parameters(oversampled_input)
