@@ -7,8 +7,7 @@ test_that("Response variable changed from factor to dummy", {
   dummified <- phyloseq2ML::dummify_input_tables(merged_input_tables)
   target_factor <- merged_input_tables[[1]][,ncol(merged_input_tables[[1]])]
   target_dummified <- dummified[[1]][,ncol(dummified[[1]])]
-  expect_true(is.dummy(target_dummified))
-  expect_true(is.factor(target_factor))
+  expect_true(all(is.dummy(target_dummified), is.factor(target_factor)))
 })
 
 test_that("Returns unmodified table if no factor columns present", {
@@ -32,27 +31,35 @@ test_that("Scaling returns unmodified response regression col", {
   expect_equal(target_scaled, target_oversampled)
 })
 
-test_that("Scaling took place on non-dummy columns setting mean to 0 and SD to 1", {
+test_that("Scaling took place on non-dummy columns setting mean to 0", {
   scaled_keras <- phyloseq2ML::scaling(oversampled_keras)
   train_set <- scaled_keras[[1]][["train_set"]]
   dummy_columns <- names(train_set)[vapply(train_set, is.dummy, logical(1))]
   mean_scaled <- round(sum(apply(train_set[, !names(train_set) %in% dummy_columns], 2, mean)))
-  standard_dev_scaled <- mean(apply(train_set[, !names(train_set) %in% dummy_columns], 2, stats::sd))
   expect_equal(mean_scaled, 0) 
+})
+
+test_that("Scaling took place on non-dummy columns setting SD to 1", {
+  scaled_keras <- phyloseq2ML::scaling(oversampled_keras)
+  train_set <- scaled_keras[[1]][["train_set"]]
+  dummy_columns <- names(train_set)[vapply(train_set, is.dummy, logical(1))]
+  standard_dev_scaled <- mean(apply(train_set[, !names(train_set) %in% dummy_columns], 2, stats::sd))
   expect_equal(standard_dev_scaled, 1)
 })
 
-test_that("Scaling ignored response var: mean to 0 and SD to 1 are not true", {
+test_that("Scaling ignored response var: SD to 1 not true for all columns", {
   scaled_keras_regression <- phyloseq2ML::scaling(oversampled_keras_regression)
   train_set <- scaled_keras_regression[[1]][["train_set"]]
-  # this time including the numeric response var
-  mean_scaled <- mean(apply(train_set, 2, mean))
   standard_dev_scaled <- mean(apply(train_set, 2, stats::sd))
-  # testing if two values are not equal
-  expect_false(isTRUE(all.equal(mean_scaled, 0))) 
   expect_false(isTRUE(all.equal(standard_dev_scaled, 1)))
 })
 
+test_that("Scaling ignored response var: mean to 0 not true for all columns", {
+  scaled_keras_regression <- phyloseq2ML::scaling(oversampled_keras_regression)
+  train_set <- scaled_keras_regression[[1]][["train_set"]]
+  mean_scaled <- mean(apply(train_set, 2, mean))
+  expect_false(isTRUE(all.equal(mean_scaled, 0))) 
+})
 test_that("Breaks for wrong structure of input list", {
   expect_error(phyloseq2ML::scaling(merged_input_tables))
 })
@@ -63,27 +70,39 @@ test_that("Breaks for wrong structure of input list", {
   expect_error(phyloseq2ML::inputtables_to_keras(merged_input_tables))
 })
 
-test_that("Detect dummy response labels for train and test set", {
+test_that("Detect dummy response labels for train set", {
   final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
   train_target_scaled <- final[[1]][["trainset_labels"]]
-  test_target_scaled <- final[[1]][["testset_labels"]]
   expect_true(is.dummy(train_target_scaled))
+})
+
+test_that("Detect dummy response labels for test set", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
+  test_target_scaled <- final[[1]][["testset_labels"]]
   expect_true(is.dummy(test_target_scaled))
 })
 
-test_that("Detect non-dummy response labels for regression train and test set", {
+test_that("Detect non-dummy response labels for regression train set", {
   final <- phyloseq2ML::inputtables_to_keras(scaled_keras_regression)
   train_target_scaled <- final[[1]][["trainset_labels"]]
-  test_target_scaled <- final[[1]][["testset_labels"]]
   expect_true(!is.dummy(train_target_scaled) & is.numeric(train_target_scaled))
+})
+
+test_that("Detect non-dummy response labels for regression test set", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras_regression)
+  test_target_scaled <- final[[1]][["testset_labels"]]
   expect_true(!is.dummy(test_target_scaled) & is.numeric(test_target_scaled))
 })
 
-test_that("Train and test sets exist and are not NULL", {
+test_that("Train set exists and is not NULL", {
   final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
   train_data <- final[[1]][["trainset_data"]]
-  test_data <- final[[1]][["testset_data"]]
   expect_true(!is.null(train_data))
+})
+
+test_that("Test set exists and is not NULL", {
+  final <- phyloseq2ML::inputtables_to_keras(scaled_keras)
+  test_data <- final[[1]][["testset_data"]]
   expect_true(!is.null(test_data))
 })
 
@@ -92,4 +111,3 @@ test_that("Input and output list have same length", {
   all_length <- unique(length(final), length(scaled_keras), length(oversampled_keras), length(splitted_keras))
   expect_equal(all_length, length(final))
 })
-
