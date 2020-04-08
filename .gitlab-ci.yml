@@ -36,7 +36,6 @@ document:
 test:
   stage: test
   script:
-    - R --vanilla -e 'keras::install_keras(tensorflow = "default")'
     - R --vanilla -e 'devtools::check()'
   only:
     - merge_requests
