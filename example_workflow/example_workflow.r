@@ -71,3 +71,5 @@ not_oversampled_input <- oversample(splitted_input, 0, 0.5)
 oversampled_regression <- oversample(splitted_input_regression, 2, 0.5)
 min(table(oversampled_regression[[1]][["train_set"]][["DANT.2.6"]]))
 
+# set up a data.frame
+parameter_df <- extract_parameters(oversampled_input)
