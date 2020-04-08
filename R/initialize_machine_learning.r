@@ -39,7 +39,7 @@ extract_parameters <- function(input_list) {
     as.character(names(input_list)), '\\.'), "[", 2)
   result_table$Tax_level <- as.factor(sapply(strsplit(
     tax_level_unclean, '_'), "[", 1))
-  
+
   result_table
 }
 
