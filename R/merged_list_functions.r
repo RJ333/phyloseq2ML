@@ -106,7 +106,7 @@ split_data <- function(merged_list, split_ratios) {
 #' 
 #' @param splitted_list a list of complimentary training and test data sets named
 #'   "train_set" and "test_set", e.g `mylist[[1]][["train_set"]]` and 
-#'   `mylist[[1]][["test_set"]]` for the first list item.
+#'   `mylist[[1]][["test_set"]]` for the first list item
 #' @param copy_number an integer specifying the number of copies, 0 means no 
 #'   oversampling takes place and `noise_factor` is ignored
 #' @param noise_factor a value >= 0 specifing the relative amount of noise randomly 
@@ -151,7 +151,7 @@ oversample <- function(splitted_list, copy_number, noise_factor) {
 #' all columns which are numeric, but neither the response variable or 0/1 only
 #' columns, as these are either dummy variables or empty columns. It copies each
 #' row of a train set as often as defined by `copy_number` and adds or substracts
-#' randomly the amount of `noise_factor`
+#' randomly the amount of `noise_factor`.
 #' 
 #' @param split_table a list consisting of "train_set" and "test_set"
 #' @param copy_number an integer specifying the number of copies, 0 means no 

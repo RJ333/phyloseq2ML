@@ -56,7 +56,7 @@ dummify_input_tables <- function(input_tables) {
 #' 
 #' @param input_tables a list of splitted input tables. The "train_set" and 
 #'   "test_set" tables need to be located at e.g `input_tables[[1]][["train_set"]]`
-#'   and `input_tables[[1]][["test_set"]]`, respectively.
+#'   and `input_tables[[1]][["test_set"]]`, respectively
 #' @return A list of same structure as the input list, with scaled numeric columns
 #'
 #' @export
@@ -122,7 +122,7 @@ scaling <- function(input_tables) {
 #' 
 #' @param final_input_tables a list of splitted input tables. The "train_set" and 
 #'   "test_set" tables need to be located at e.g `final_input_tables[[1]][["train_set"]]`
-#'   and `final_input_tables[[1]][["test_set"]]`, respectively.
+#'   and `final_input_tables[[1]][["test_set"]]`, respectively
 #'   
 #' @return A list of lists of splitted table_list items
 #'
