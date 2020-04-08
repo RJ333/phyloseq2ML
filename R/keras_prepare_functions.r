@@ -84,7 +84,7 @@ scaling <- function(input_tables) {
     if (is.dummy(response_column)) {
       not_to_scale_columns <- dummy_columns
       futile.logger::flog.info("Dummy variables are excluded from scaling")
-    } else if (!is.dummy(response_column)) {
+    } else {
       not_to_scale_columns <- c(dummy_columns, response_column)
       futile.logger::flog.info("Dummy variables and continuous response variable is excluded from scaling")
     }
@@ -155,7 +155,7 @@ inputtables_to_keras <- function(final_input_tables) {
     if (is.dummy(train_set[[response_column]])) {
       y_train <- keras::to_categorical(train_set[[response_column]])
       y_test <- keras::to_categorical(test_set[[response_column]])
-    } else if (!is.dummy(train_set[[response_column]])) {
+    } else {
       y_train <- train_set[[response_column]]
       y_test <- test_set[[response_column]]
     }
