@@ -200,6 +200,7 @@ oversample_and_noise <- function(split_table, copy_number, noise_factor) {
   
   # replicate samples and add random noise to each value
   noised_copies <- NULL
+  . = Sample = NULL # due to NSE notes in R CMD check
   
   if (copy_number > 0) {
     noised_copies <- lapply(c(1:copy_number), function(current_copy) {
