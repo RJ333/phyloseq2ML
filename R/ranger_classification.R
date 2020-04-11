@@ -143,7 +143,11 @@ prediction_accuracy <- function(predicted_rf, test_set) {
 #'
 #' @export
 calculate_classification_metrics <- function(result_table) {
-
+  
+  if(!"Number_of_samples" %in% colnames(result_table)) {
+    stop("Number_of_samples as required column is missing")
+  }
+    
   # general values
   result_table$Positive <- result_table$True_positive + result_table$False_negative
   result_table$Negative <- result_table$True_negative + result_table$False_positive
