@@ -131,9 +131,6 @@ store_classification <- function(trained_rf, predicted_rf = NULL,
   results$Seconds_elapsed <- as.numeric(timings[["elapsed"]]) 
   results$Vars_percent <- as.numeric(results$Variables_sampled / 
     results$Number_independent_vars) * 100
-  results$Used_memory_Mb <- as.numeric(try(system(
-    "free --mega  | grep ^Mem | tr -s ' ' | cut -d ' ' -f 3", intern = TRUE)))
-  print(results)
   results <- classification_metrics(results)
   results
 }

@@ -27,7 +27,6 @@ dependencies:
   - cairo=1.16.0=hfb77d84_1002
   - curl=7.68.0=hf8cf82a_0
   - fontconfig=2.13.1=h86ecdb6_1001
-  - free
   - freetype=2.10.0=he983fc9_1
   - fribidi=1.0.5=h516909a_1002
   - gcc_impl_linux-64=7.3.0=hd420e75_5
