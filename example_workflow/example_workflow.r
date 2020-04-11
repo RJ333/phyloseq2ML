@@ -40,14 +40,14 @@ desired_response_vars <- c("TNT", "DANT_2.6")
 response_variables <- extract_response_variable(
   response_variables = desired_response_vars, phyloseq_object = testps)
 # cut response numeric values into 3 classes
-responses_final <- categorize_response_variable(
+responses_multi <- categorize_response_variable(
   ML_mode = "multi_class", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, 3, Inf), 
-  class_labels = c("3", 77, 4))
+  class_labels = c("none", "below_3", "above_3"))
 
 # or for two classes
-responses_final2 <- categorize_response_variable(
+responses_binary <- categorize_response_variable(
   ML_mode = "binary_class", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, Inf),
@@ -58,23 +58,33 @@ responses_regression <- categorize_response_variable(
   response_data = response_variables)
 
 # merge the input tables with the response variables
-merged_input_tables <- merge_input_response(subset_list_extra, responses_final2)
+merged_input_binary <- merge_input_response(subset_list_extra, responses_binary)
+merged_input_multi <- merge_input_response(subset_list_extra, responses_multi)
 merged_input_regression <- merge_input_response(subset_list_extra, responses_regression)
 
 ###### for keras
 
 # dummify input tables for keras ANN
-keras_merged <- dummify_input_tables(merged_input_tables)
-keras_merged_regression <- dummify_input_tables(merged_input_regression)
-splitted_keras <- split_data(keras_merged, c(0.6, 0.8))
-splitted_keras_regression <- split_data(keras_merged_regression, c(0.6, 0.8))
+keras_dummy_binary <- dummify_input_tables(merged_input_binary)
+keras_dummy_multi <- dummify_input_tables(merged_input_multi)
+keras_dummy_regression <- dummify_input_tables(merged_input_regression)
+splitted_keras_binary <- split_data(keras_dummy_binary, c(0.6, 0.8))
+splitted_keras_multi <- split_data(keras_dummy_multi, c(0.6, 0.8))
+splitted_keras_regression <- split_data(keras_dummy_regression, c(0.6, 0.8))
+
 # oversampling
-oversampled_keras <- oversample(splitted_keras, 2, 0.5)
+oversampled_keras_binary <- oversample(splitted_keras_binary, 2, 0.5)
+oversampled_keras_multi <- oversample(splitted_keras_multi, 2, 0.5)
 oversampled_keras_regression <- oversample(splitted_keras_regression, 2, 0.5)
+
 # scaling
-scaled_keras <- scaling(oversampled_keras)
+scaled_keras_binary <- scaling(oversampled_keras_binary)
+scaled_keras_multi <- scaling(oversampled_keras_multi)
 scaled_keras_regression <- scaling(oversampled_keras_regression)
-ready_keras <- inputtables_to_keras(scaled_keras)
+
+# keras format
+ready_keras_binary <- inputtables_to_keras(scaled_keras_binary)
+ready_keras_multi <- inputtables_to_keras(scaled_keras_multi)
 ready_keras_regression <- inputtables_to_keras(scaled_keras_regression)
 str(ready_keras, max = 2)
 str(ready_keras_regression, max = 2)
@@ -82,29 +92,32 @@ str(ready_keras_regression, max = 2)
 ###### for ranger
 
 # split merged list into training and test parts
-splitted_input <- split_data(merged_input_tables, c(0.6, 0.8))
+splitted_input_binary <- split_data(merged_input_binary, c(0.6, 0.8))
+splitted_input_multi <- split_data(merged_input_multi, c(0.6, 0.8))
 splitted_input_regression <- split_data(merged_input_regression, c(0.6, 0.8))
 str(splitted_input, max = 2)
 
 # oversampling
-oversampled_input <- oversample(splitted_input, 2, 0.5)
-not_oversampled_input <- oversample(splitted_input, 0, 0.5)
-oversampled_regression <- oversample(splitted_input_regression, 2, 0.5)
+oversampled_input_binary <- oversample(splitted_input_binary, 1, 0.5)
+oversampled_input_multi <- oversample(splitted_input_multi, 1, 0.5)
+oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
 
 # set up a parameter data.frame
-parameter_df <- extract_parameters(oversampled_input)
+parameter_df <- extract_parameters(oversampled_input_multi)
 
 ##### when to refactor target variable?
 hyper_grid <- expand.grid(
-  ML_object = names(oversampled_input),
+  ML_object = names(oversampled_input_multi),
   Number_of_trees = c(151),
   Mtry_factor = c(1),
   Importance_mode = c("none"),
-  Cycle = 1:10)
+  Cycle = 1:5)
 
 master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
 # string arguments needs to be passed as character, not factor level 
 master_grid$Target <- as.character(master_grid$Target)
+
+test_grid <- head(master_grid, 1)
 
 # running ranger
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
