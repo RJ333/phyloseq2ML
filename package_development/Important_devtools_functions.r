@@ -18,6 +18,7 @@ usethis::use_package("data.table")
 usethis::use_package("keras")
 usethis::use_package("tensorflow")
 usethis::use_package("ranger")
+usethis::use_package("purrr")
 # if they are only suggests, use:
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
@@ -33,6 +34,7 @@ usethis::use_data(testps,
   taxa_vector_list, 
   subset_list_df,
   subset_list_extra,
+  response_variables,
   # types of response variables
   responses_multi,
   responses_binary,
