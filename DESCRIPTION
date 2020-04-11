@@ -1,6 +1,6 @@
 Package: phyloseq2ML
 Title: Connects Phyloseq To Ranger And Keras
-Version: 0.2
+Version: 0.3
 Authors@R: 
     person(given = "René",
            family = "Janßen",
@@ -18,7 +18,8 @@ Imports:
     futile.logger,
     Biostrings,
     data.table,
-    keras
+    keras,
+    ranger
 RoxygenNote: 7.0.2
 Suggests: 
     testthat (>= 2.1.0),
