@@ -41,17 +41,17 @@ response_variables <- extract_response_variable(
   response_variables = desired_response_vars, phyloseq_object = testps)
 # cut response numeric values into 3 classes
 responses_multi <- categorize_response_variable(
-  ML_mode = "multi_class", 
+  ML_mode = "classification", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, 3, Inf), 
   class_labels = c("none", "below_3", "above_3"))
 
 # or for two classes
 responses_binary <- categorize_response_variable(
-  ML_mode = "binary_class", 
+  ML_mode = "classification", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, Inf),
-  Positive = TRUE)
+  class_labels = c("below_0", "above_0"))
 
 responses_regression <- categorize_response_variable(
   ML_mode = "regression", 
