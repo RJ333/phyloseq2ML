@@ -93,3 +93,21 @@ oversampled_regression <- oversample(splitted_input_regression, 2, 0.5)
 
 # set up a parameter data.frame
 parameter_df <- extract_parameters(oversampled_input)
+
+##### when to refactor target variable?
+hyper_grid <- expand.grid(
+  ML_object = names(oversampled_input),
+  Number_of_trees = c(151),
+  Mtry_factor = c(1),
+  Importance_mode = c("none"),
+  Cycle = 1:10)
+
+master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
+# string arguments needs to be passed as character, not factor level 
+master_grid$Target <- as.character(master_grid$Target)
+
+# running ranger
+master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
+    ranger_classification, the_list = oversampled_input, master_grid = master_grid, step = "training")
+# extract list elements within data frame into rows
+results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
