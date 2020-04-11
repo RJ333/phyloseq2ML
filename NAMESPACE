@@ -2,8 +2,7 @@
 
 export(add_sample_data)
 export(add_unique_lineages)
-export(categorize_binary)
-export(categorize_multi)
+export(categorize)
 export(categorize_response_variable)
 export(classification_metrics)
 export(create_community_table_subsets)
