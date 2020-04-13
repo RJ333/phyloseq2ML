@@ -72,6 +72,8 @@ splitted_keras_binary <- split_data(keras_dummy_binary, c(0.6, 0.8))
 splitted_keras_multi <- split_data(keras_dummy_multi, c(0.6, 0.8))
 splitted_keras_regression <- split_data(keras_dummy_regression, c(0.6, 0.8))
 
+keras_dummy_multi[[1]]
+
 # oversampling
 oversampled_keras_binary <- oversample(splitted_keras_binary, 2, 0.5)
 oversampled_keras_multi <- oversample(splitted_keras_multi, 2, 0.5)
@@ -82,12 +84,16 @@ scaled_keras_binary <- scaling(oversampled_keras_binary)
 scaled_keras_multi <- scaling(oversampled_keras_multi)
 scaled_keras_regression <- scaling(oversampled_keras_regression)
 
+scaled_keras_multi[[1]][["train_set"]]
+
 # keras format
 ready_keras_binary <- inputtables_to_keras(scaled_keras_binary)
 ready_keras_multi <- inputtables_to_keras(scaled_keras_multi)
 ready_keras_regression <- inputtables_to_keras(scaled_keras_regression)
-str(ready_keras, max = 2)
-str(ready_keras_regression, max = 2)
+str(ready_keras_binary, max = 2)
+str(ready_keras_multi, max = 2)
+
+ready_keras_multi[[1]][["trainset_labels"]]
 
 ###### for ranger
 
@@ -105,7 +111,8 @@ oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
 # set up a parameter data.frame
 parameter_df <- extract_parameters(oversampled_input_multi)
 
-##### when to refactor target variable?
+####### for ranger
+##### include step here?
 hyper_grid <- expand.grid(
   ML_object = names(oversampled_input_multi),
   Number_of_trees = c(151),
@@ -124,3 +131,39 @@ master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_gri
     ranger_classification, the_list = oversampled_input, master_grid = master_grid, step = "training")
 # extract list elements within data frame into rows
 results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
+
+####### for keras
+parameter_df
+
+hyper_grid <- expand.grid(
+  ML_object = names(ready_keras_multi),
+  Epochs = 30, 
+  Batch_size = 2, 
+  k_fold = 4, 
+  current_k_fold = 1:4,
+  Early_callback = "val_loss",
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "softmax", # sigmoid for binary
+  Optimizer_function = "rmsprop",
+  Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
+  Metric = "accuracy",
+  Cycle = 1:5,
+  step = "training",
+  Classification = "multiclass")
+
+master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
+
+run_keras(Target, ML_object, Cycle, .row, the_list, Epochs, Batch_size, k_fold, current_k_fold, 
+  Early_callback, first_layer_units = Layer1_units, second_layer_units = Layer2_units, 
+  dropout_rate_1 = Dropout_layer1, dropout_rate_2 = Dropout_layer2, 
+  dense_activation_fun = Dense_activation_function, output_activation_fun = Output_activation_function, 
+  optimizer_param = Optimizer_function, loss_param = Loss_function, metric = Metric)
+
+the_grid$results <- purrr::pmap(cbind(the_grid, .row = rownames(the_grid)), 
+  run_keras, the_list = the_list, ...)
+    
+the_grid <- as.data.frame(tidyr::unnest(the_grid, results))
+the_grid <- as.data.frame(tidyr::unnest(the_grid, results))
+the_grid
