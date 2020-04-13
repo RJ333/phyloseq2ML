@@ -27,7 +27,6 @@ ranger_classification <- function(master_grid, Target, ML_object, Cycle,
   if(is.null(the_list[[ML_object]])) {
     stop("Names in the_list and master_grid do not match")
   }
-  class(Target)
   if(!is.character(Target)) {
     stop("ranger requires Target as character to work with purr::pmap()")
   }
