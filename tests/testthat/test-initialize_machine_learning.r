@@ -1,10 +1,10 @@
 test_that("Length of df equals list length", {
-  expect_equal(nrow(phyloseq2ML::extract_parameters(oversampled_input)), 
-    length(oversampled_input))
+  expect_equal(nrow(phyloseq2ML::extract_parameters(oversampled_input_binary)), 
+    length(oversampled_input_binary))
 })
 
 test_that("Check that no NAs are created", {
-  expect_false(all(is.na(phyloseq2ML::extract_parameters(oversampled_input))))
+  expect_false(all(is.na(phyloseq2ML::extract_parameters(oversampled_input_multi))))
 })
 
 test_that("Breaks for unnamed list", {
