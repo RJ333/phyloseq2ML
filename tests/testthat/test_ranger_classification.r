@@ -74,14 +74,6 @@ test_that("Breaks if the input list is not correct", {
 })
 
 # store_classification
-test_that("Breaks if timing value is not named elapsed", {
-  data(iris)
-  tmp <- ranger::ranger(Species ~., data = iris)
-  expect_error(phyloseq2ML::store_classification(tmp, tmp$confusion.matrix, 
-    timings = 7, n_classes = 3, step = "training")
-  )
-})
-
 test_that("Breaks if no test_set is provided", {
   data(iris)
   tmp <- ranger::ranger(Species ~., data = iris)
@@ -89,7 +81,7 @@ test_that("Breaks if no test_set is provided", {
   confusion_matrix <- table(true = iris$Species, 
       predicted = tmp2$predictions)
   expect_error(phyloseq2ML::store_classification(trained_rf =  tmp, predicted_rf = tmp2, 
-    confusion_matrix = confusion_matrix, timings = c("elapsed" = 3), n_classes = 3, 
+    confusion_matrix = confusion_matrix, n_classes = 3, 
     step = "prediction", test_set = NULL)
   )
 })
@@ -101,7 +93,7 @@ test_that("Breaks if no prediction.ranger class object is provided", {
   confusion_matrix <- table(true = iris$Species, 
       predicted = tmp2$predictions)
   expect_error(phyloseq2ML::store_classification(trained_rf =  tmp, predicted_rf = tmp, 
-    confusion_matrix = confusion_matrix, timings = c("elapsed" = 3), n_classes = 3, 
+    confusion_matrix = confusion_matrix, n_classes = 3, 
     step = "prediction", test_set = iris)
   )
 })
@@ -110,7 +102,7 @@ test_that("Breaks if classes are not provided", {
   data(iris)
   tmp <- ranger::ranger(Species ~., data = iris)
   expect_error(phyloseq2ML::store_classification(tmp, tmp$confusion.matrix, 
-    timings = c("elapsed" = 3), n_classes = NULL, step = "training")
+    n_classes = NULL, step = "training")
   )
 })
 
@@ -118,7 +110,7 @@ test_that("Breaks for using wrong step string", {
   data(iris)
   tmp <- ranger::ranger(Species ~., data = iris)
   expect_error(phyloseq2ML::store_classification(tmp, tmp$confusion.matrix, 
-    timings = c("elapsed" = 3), n_classes = 3, step = "no")
+    n_classes = 3, step = "no")
   )
 })
 
@@ -126,7 +118,7 @@ test_that("Breaks if not using ranger object", {
   data(iris)
   tmp <- ranger::ranger(Species ~., data = iris)
   expect_error(phyloseq2ML::store_classification("hello", confusion_matrix = tmp$confusion.matrix, 
-    timings = c("elapsed" = 3), n_classes = 3, step = "training")
+    n_classes = 3, step = "training")
   )
 })
 
@@ -134,7 +126,7 @@ test_that("Breaks if no confusion matrix is provided", {
   data(iris)
   tmp <- ranger::ranger(Species ~., data = iris)
   expect_error(phyloseq2ML::store_classification(tmp, confusion_matrix = NULL, 
-    timings = c("elapsed" = 3), n_classes = 3, step = "training")
+    n_classes = 3, step = "training")
   )
 })
 
