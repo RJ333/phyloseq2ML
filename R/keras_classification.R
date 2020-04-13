@@ -14,13 +14,14 @@
 #' @param optimizer_param the optimizer function
 #' @param loss_param the loss function
 #' @param metric which metrics to monitor
+#' @param ... further arguments
 #'
 #' @return a compiled keras sequential model with two hidden layers
 #'
 #' @export
 build_the_model <- function(train_data, first_layer_units, second_layer_units, 
   classes, dropout_rate_1, dropout_rate_2, dense_activation_fun, 
-  output_activation_fun, optimizer_param, loss_param, metric) {
+  output_activation_fun, optimizer_param, loss_param, metric, ...) {
   
   model <- keras::keras_model_sequential() %>%
     keras::layer_dense(units = first_layer_units, 
@@ -38,6 +39,10 @@ build_the_model <- function(train_data, first_layer_units, second_layer_units,
   model
 }
   
+paste_something <- function(Noise_copies, dense_activation_fun) {
+  paste(Noise_copies, dense_activation_fun)
+}
+
 #' Run keras tensorflow classification
 #' 
 #' This functions calls keras tensorflow using the parameter values in each row 
@@ -56,13 +61,24 @@ build_the_model <- function(train_data, first_layer_units, second_layer_units,
 #' @param the_list The input tables list
 #' @param master_grid the data frame containing all parameter combinations
 #' @param .row current row of master_grid
-#' @param ... further parameters passed on to `build_the_model()`
+#' @param Layer1_units integer, number of units in the first hidden layer
+#' @param Layer2_units integer, number of units in the second hidden layer
+#' @param Dropout_layer1 the rate of dropout nodes for layer 1
+#' @param Dropout_layer2 the rate of dropout nodes for layer 2
+#' @param Dense_activation_function the activation function for the hidden layers
+#' @param Output_activation_function the activation function for the output layer
+#' @param Optimizer_function the optimizer function
+#' @param Loss_function the loss function
+#' @param Metric which metrics to monitor
 #'
 #' @return a compiled keras sequential model with two hidden layers
 #'
 #' @export
-run_keras <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold, 
-  current_k_fold, Early_callback, Delay, step, the_list, master_grid, .row, ...) {
+keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold, 
+  current_k_fold, Early_callback, Delay, step, the_list, master_grid, .row, 
+  Layer1_units, Layer2_units, Dense_activation_function, Dropout_layer1, Dropout_layer2, 
+  Output_activation_function, Optimizer_function, Loss_function, Metric) {
+  
   if(!all(c("Target", "ML_object", "Cycle", "Epochs", "Batch_size", "k_fold", 
     "current_k_fold", "Early_callback", "Delay") %in% colnames(master_grid))) {
     stop("Keras parameters do not match column names in master_grid")
@@ -71,26 +87,34 @@ run_keras <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold,
     stop("Names in the_list and master_grid do not match")
   }
   stopifnot(step == "training" | step == "prediction")
-  
-  futile.logger::flog.info(.row, "of", nrow(master_grid), capture = TRUE)
-  
+  print(1)
+  #print(paste_something(...))
+  state <- paste("Row", .row, "of", nrow(master_grid))
+  futile.logger::flog.info(state)
   community_table <- the_list[[ML_object]]
   training_data <- community_table[["trainset_data"]]
   training_labels <- community_table[["trainset_labels"]]
+  print(2)
   classes <- ncol(training_labels)
   lookup <- stats::setNames(c(colnames(training_labels)), c(0:(classes - 1)))
-  
+  print(3)
   if (step == "prediction" & (k_fold != 1 | current_k_fold != 1)) {
-    futile.logger::flog.info("current k_fold of", k_fold, "set to 1 for prediction step", capture = TRUE)
+    overwrite_kfold <- paste("current k_fold of", k_fold, "set to 1 for prediction step")
+    futile.logger::flog.info(overwrite_kfold)
+    print(4)
     k_fold <- 1
     current_k_fold <- 1
   } else if (step == "training") {
     indices <- sample(1:nrow(training_data))
+    print(5)
     folds <- cut(1:length(indices), breaks = k_fold, labels = FALSE)
   }
   
   if (step == "training") {
-    futile.logger::flog.info("k_fold", current_k_fold, "of", k_fold, capture = TRUE)
+    print(6)
+    kfold_msg <- paste("k_fold", current_k_fold, "of", k_fold)
+    futile.logger::flog.info(kfold_msg)
+    print(7)
     validation_indices <- which(folds == current_k_fold, arr.ind = TRUE)    
     validation_data <- training_data[validation_indices, ]
     validation_targets <- training_labels[validation_indices, ]
@@ -98,8 +122,19 @@ run_keras <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold,
     partial_train_targets <- training_labels[-validation_indices, ]
     
     # build and compile model
-    model <- build_the_model(train_data = training_data, classes = classes, ...)
-
+   # model <- build_the_model(train_data = training_data, classes = classes, ...)
+    model <- build_the_model(train_data = training_data, 
+      first_layer_units = Layer1_units, 
+      second_layer_units = Layer2_units,
+      dropout_rate_1 = Dropout_layer1, 
+      dropout_rate_2 = Dropout_layer2, 
+      classes = classes,
+      dense_activation_fun = Dense_activation_function, 
+      output_activation_fun = Output_activation_function, 
+      optimizer_param = Optimizer_function, 
+      loss_param = Loss_function,
+      metric = Metric)
+    print(8)
     # train model 
     timing_part_1 <- system.time({
       history <- model %>% keras::fit(
@@ -114,15 +149,26 @@ run_keras <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold,
         validation_data = list(validation_data, validation_targets),
         verbose = 0)
     })
-    
+    print(9)
   } else if (step == "prediction") {
     validation_data <- community_table[["testset_data"]]
     validation_targets <- community_table[["testset_labels"]]
     partial_train_data <- training_data
     partial_train_targets <- training_labels
     # build and compile model
-    model <- build_the_model(train_data = training_data, classes = classes, ...)
-   
+   # model <- build_the_model(train_data = training_data, classes = classes, ...)
+    model <- build_the_model(train_data = training_data, 
+      first_layer_units = Layer1_units, 
+      second_layer_units = Layer2_units,
+      dropout_rate_1 = Dropout_layer1, 
+      dropout_rate_2 = Dropout_layer2, 
+      classes = classes,
+      dense_activation_fun = Dense_activation_function, 
+      output_activation_fun = Output_activation_function, 
+      optimizer_param = Optimizer_function, 
+      loss_param = Loss_function,
+      metric = Metric)
+    
     # train model 
     timing_part_1 <- system.time({
       history <- model %>% keras::fit(
@@ -141,26 +187,30 @@ run_keras <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold,
   
   # predict classes
   timing_part_2 <- system.time({val_predictions <- model %>% keras::predict_classes(validation_data)})
-  
+  print(10)
   # prepare results
   factor_targets <- categoric_to_factor(validation_targets)
   predicted <- data.frame(factor_targets, val_predictions)
   predicted_labels <- data.frame(lapply(predicted, function(i) lookup[as.character(i)]))
   row.names(predicted_labels) <- row.names(validation_data)
+  predicted_labels$val_predictions <- factor(predicted_labels$val_predictions, 
+                               levels = colnames(training_labels))
+  
+  print(11)
   # calculate confusion matrix
   confusion_matrix <- table(
     true = predicted_labels$factor_targets,
     predicted = predicted_labels$val_predictions
   )
+
+  print(confusion_matrix)
+  print(12)
   
   # store all results
   store_binary_results(hist = history, timing = timing_part_1 + timing_part_2, 
     prediction_table = predicted_labels, confusion_matrix = confusion_matrix, 
     train_data = training_data, n_classes = classes)
-  
-  # print(confusion_matrix)
-  # print(model)
-  # print(history)
+
 }
 
 #' Reverse keras::to_categorical
@@ -199,14 +249,17 @@ categoric_to_factor <- function(matrix) {
 #' @export
 store_binary_results <- function(hist, timing, prediction_table, n_classes,
   confusion_matrix, train_data) {
-
+  print(13)
   results <- data.frame()
   # extract classifications for each class, every class becomes own row
   for (class in 1:n_classes) {
     results[class, "Class"] <- row.names(confusion_matrix)[class] 
+    print(14)
     results[class, "True_positive"] <- confusion_matrix[class, class]
+    print(15)
     results[class, "False_positive"] <- sum(confusion_matrix[,class]) - 
       confusion_matrix[class,class]
+    print(16)
     results[class, "True_negative"] <- sum(confusion_matrix[-class, -class])
     results[class, "False_negative"] <- sum(confusion_matrix[class,]) - 
       confusion_matrix[class,class]

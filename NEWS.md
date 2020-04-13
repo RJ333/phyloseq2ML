@@ -1,3 +1,7 @@
+Version 0.4
+
+*  Keras tensorflow classification runs using purrr:pmap including metrics implemented
+
 Version 0.3
     
 *  Ranger classification runs using purrr:pmap including metrics implemented

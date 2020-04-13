@@ -15,7 +15,8 @@ build_the_model(
   output_activation_fun,
   optimizer_param,
   loss_param,
-  metric
+  metric,
+  ...
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ the output layer}
 \item{loss_param}{the loss function}
 
 \item{metric}{which metrics to monitor}
+
+\item{...}{further arguments}
 }
 \value{
 a compiled keras sequential model with two hidden layers

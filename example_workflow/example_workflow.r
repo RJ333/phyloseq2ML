@@ -108,10 +108,10 @@ oversampled_input_binary <- oversample(splitted_input_binary, 1, 0.5)
 oversampled_input_multi <- oversample(splitted_input_multi, 1, 0.5)
 oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
 
+####### for ranger
 # set up a parameter data.frame
 parameter_df <- extract_parameters(oversampled_input_multi)
 
-####### for ranger
 ##### include step here?
 hyper_grid <- expand.grid(
   ML_object = names(oversampled_input_multi),
@@ -128,20 +128,24 @@ test_grid <- head(master_grid, 1)
 
 # running ranger
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
-    ranger_classification, the_list = oversampled_input, master_grid = master_grid, step = "training")
+    ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid, step = "training")
 # extract list elements within data frame into rows
 results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
 
-####### for keras
-parameter_df
+####### for keras multi
+# set up a parameter data.frame
+parameter_keras_multi <- extract_parameters(ready_keras_multi)
+parameter_keras_multi
 
-hyper_grid <- expand.grid(
+hyper_keras_multi <- expand.grid(
   ML_object = names(ready_keras_multi),
   Epochs = 30, 
   Batch_size = 2, 
   k_fold = 4, 
   current_k_fold = 1:4,
   Early_callback = "val_loss",
+  Layer1_units = 30,
+  Layer2_units = 8,
   Dropout_layer1 = 0.2,
   Dropout_layer2 = 0.0,
   Dense_activation_function = "relu",
@@ -149,21 +153,52 @@ hyper_grid <- expand.grid(
   Optimizer_function = "rmsprop",
   Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
   Metric = "accuracy",
-  Cycle = 1:5,
+  Cycle = 1:3,
   step = "training",
-  Classification = "multiclass")
+  Classification = "multiclass",
+  Delay = 2)
 
-master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
+master_keras_multi <- merge(parameter_keras_multi, hyper_keras_multi, by = "ML_object")
 
-run_keras(Target, ML_object, Cycle, .row, the_list, Epochs, Batch_size, k_fold, current_k_fold, 
-  Early_callback, first_layer_units = Layer1_units, second_layer_units = Layer2_units, 
-  dropout_rate_1 = Dropout_layer1, dropout_rate_2 = Dropout_layer2, 
-  dense_activation_fun = Dense_activation_function, output_activation_fun = Output_activation_function, 
-  optimizer_param = Optimizer_function, loss_param = Loss_function, metric = Metric)
+# order by current_k_fold 
+test_keras_multi <- head(master_keras_multi, 30)
 
-the_grid$results <- purrr::pmap(cbind(the_grid, .row = rownames(the_grid)), 
-  run_keras, the_list = the_list, ...)
-    
-the_grid <- as.data.frame(tidyr::unnest(the_grid, results))
-the_grid <- as.data.frame(tidyr::unnest(the_grid, results))
-the_grid
+test_keras_multi$results <- purrr::pmap(cbind(test_keras_multi, .row = rownames(test_keras_multi)), 
+  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi)
+keras_df_multi <-  as.data.frame(tidyr::unnest(test_keras_multi, results))
+
+
+####### for keras binary
+# set up a parameter data.frame
+parameter_keras_binary <- extract_parameters(ready_keras_binary)
+parameter_keras_binary
+
+hyper_keras_binary <- expand.grid(
+  ML_object = names(ready_keras_binary),
+  Epochs = 30, 
+  Batch_size = 2, 
+  k_fold = 4, 
+  current_k_fold = 1:4,
+  Early_callback = "val_loss",
+  Layer1_units = 30,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "sigmoid", # sigmoid for binary
+  Optimizer_function = "rmsprop",
+  Loss_function = "binary_crossentropy", # binary_crossentropy for binary
+  Metric = "accuracy",
+  Cycle = 1:3,
+  step = "training",
+  Classification = "binary",
+  Delay = 2)
+
+master_keras_binary <- merge(parameter_keras_binary, hyper_keras_binary, by = "ML_object")
+
+# order by current_k_fold 
+test_keras_binary <- head(master_keras_binary, 30)
+
+test_keras_binary$results <- purrr::pmap(cbind(test_keras_binary, .row = rownames(test_keras_binary)), 
+  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary)
+keras_df_binary <-  as.data.frame(tidyr::unnest(test_keras_binary, results))

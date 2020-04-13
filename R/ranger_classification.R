@@ -31,8 +31,9 @@ ranger_classification <- function(master_grid, Target, ML_object, Cycle,
     stop("ranger requires Target as character to work with purr::pmap()")
   }
   stopifnot(step == "training" | step == "prediction")
-  
-  futile.logger::flog.info(.row, "of", nrow(master_grid), capture = TRUE)
+ # print(.row)
+  #print(nrow(master_grid))
+  futile.logger::flog.info(.row, "of", nrow(master_grid), capture = TRUE, digits = NULL)
   all_vars <- ncol(the_list[[ML_object]][["train_set"]]) - 1
   # multiply sqrt of variables with Mtry_factor; if greater than available 
   # number of variables, select all variables
