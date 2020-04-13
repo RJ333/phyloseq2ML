@@ -23,6 +23,9 @@ usethis::use_package("purrr")
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
 usethis::use_package("fastDummies", "Suggests")
+# to make use %>%
+usethis::use_pipe()
+
 # this allows to install e.g. from bioconductor
 setRepositories()
 # if it complaines about missing documentation, you may not have run this command
