@@ -1,12 +1,15 @@
 #' Turn response column levels into dummy variables.
 #'
-#' The factor columns of an input table must be turned into dummy tables so 
+#' The factor columns of an input table must be turned into dummy variables so 
 #' keras can work with it. This function detects factor columns and turns them 
-#' into dummy columns. In theory, a two level factor column would be represented 
-#' by two complementary columns consisting of 0 and 1, which are dependent on
-#' each other. To prevent this known as the dummy trap, the first of these 
-#' columns is always removed. If no factor columns are detected, the list will 
-#' be returned unmodified along with an info.
+#' into dummy columns. First, as many columns are created as there are factor 
+#' levels in the origin column, so a 2-level factor column would be represented 
+#' by two complementary columns consisting of 0s and 1s. However, these are 
+#' dependent on each other, which is known as the dummy trap. Therefore, the first 
+#' of a given number of dummy columns per factor column is removed. If no factor 
+#' columns are detected, the list will be returned unmodified along with an info. 
+#' The response column is ignored, as it will be modified later using 
+#' `keras::to_categorical()`.
 #'
 #' @param input_tables a list of input tables before splitting or oversampling
 #'
@@ -24,15 +27,22 @@ dummify_input_tables <- function(input_tables) {
     
     current_name <- names(input_tables)[table_index]
     current_table <- input_tables[[table_index]]
-    # which of the variables are factors
-    factor_column_ids <- names(current_table)[sapply(current_table, is.factor)]
+    predictor_table <- current_table[, -ncol(current_table)]
+    response_id <- names(current_table)[ncol(current_table)]
+    response_col <- current_table[, ncol(current_table)]
+    # which of the variables (except the response) are factors
+    factor_column_ids <- names(predictor_table)[sapply(predictor_table, is.factor)]
     
     if (length(factor_column_ids) > 0) {
       # if factor columns present, add corresponding dummy columns
-      tmp <- fastDummies::dummy_cols(current_table, remove_first_dummy = TRUE)
-      row.names(tmp) <- row.names(current_table)
-      # exclude the original factor columns
-      dummy_data_list[[table_index]] <- tmp[ , !names(tmp) %in% factor_column_ids]
+      tmp <- fastDummies::dummy_cols(predictor_table, remove_first_dummy = TRUE)
+      row.names(tmp) <- row.names(predictor_table)
+      # exclude the original factor columns, add and name response variable
+      tmp <- tmp[ , !names(tmp) %in% factor_column_ids]
+      tmp2 <- cbind(tmp, response_col)
+      names(tmp2)[ncol(tmp2)] <- response_id
+      dummy_data_list[[table_index]] <- tmp2
+      
       futile.logger::flog.info("names of columns changed to dummy columns:", 
         factor_column_ids, capture = TRUE)
     } else {
@@ -80,14 +90,10 @@ scaling <- function(input_tables) {
     response_column <- names(train_set)[ncol(train_set)]
     dummy_columns <- names(train_set)[vapply(train_set, is.dummy, logical(1))]
     
-    #exclude dummy variables from scaling; exclude non-dummy response (regression)
-    if (is.dummy(response_column)) {
-      not_to_scale_columns <- dummy_columns
-      futile.logger::flog.info("Dummy variables are excluded from scaling")
-    } else {
-      not_to_scale_columns <- c(dummy_columns, response_column)
-      futile.logger::flog.info("Dummy variables and continuous response variable is excluded from scaling")
-    }
+    #exclude dummy variables and response factor column from scaling
+    not_to_scale_columns <- c(dummy_columns, response_column)
+    futile.logger::flog.info("Dummy variables and continuous or factor response 
+      variable is excluded from scaling")
     
     # calculate mean and standard deviation from training data
     train_mean <- apply(
@@ -137,29 +143,36 @@ inputtables_to_keras <- function(final_input_tables) {
     stop('Error: Provided list does not contain a training set at location 
       "final_input_tables[[1]][["test_set"]].')
   
+  
   counter <- 0
   data_list <- list()
+  
   for (current_table in final_input_tables) {
     train_set <- current_table$train_set
     test_set <- current_table$test_set
     counter <- counter + 1
     current_name <- names(final_input_tables)[counter]
     response_column <- names(train_set)[ncol(train_set)]
-
+    if(!((is.factor(train_set[[response_column]])) | is.numeric(train_set[[response_column]]))) {
+      stop("Response column is neither numeric for regression nor factor for classification")
+    }
+      
     # separate input data "X" from response variable "y" for keras
     X_train <- as.matrix(train_set[, !names(train_set) %in% response_column])
     X_train[is.nan(X_train)] <- 0
     X_test <- as.matrix(test_set[, !names(test_set) %in% response_column])
     X_test[is.nan(X_test)] <- 0
-    
-    if (is.dummy(train_set[[response_column]])) {
-      y_train <- keras::to_categorical(train_set[[response_column]])
-      y_test <- keras::to_categorical(test_set[[response_column]])
+    if (is.factor(train_set[[response_column]])) {
+      # reduce level values by 1 to fit python 0-based indexing
+      y_train <- keras::to_categorical(as.numeric(train_set[[response_column]]) - 1)
+      y_test <- keras::to_categorical(as.numeric(test_set[[response_column]]) - 1)
+      # add class levels as name attribute to matrix
+      attr(y_train, "dimnames")[[2]] <- levels(train_set[[response_column]])
+      attr(y_test, "dimnames")[[2]] <- levels(test_set[[response_column]])
     } else {
       y_train <- train_set[[response_column]]
       y_test <- test_set[[response_column]]
     }
-
     data_list[[current_name]] <- list(
       trainset_data = X_train, trainset_labels = y_train, 
       testset_data = X_test, testset_labels = y_test)

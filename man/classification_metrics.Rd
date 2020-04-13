@@ -15,5 +15,5 @@ the result_table with additional metrics
 \description{
 This function calculates a bunch of classification performance metrics to help
 evaluate the quality of the classification. For more info onto the calculated
-values see e.g. https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers
+values see e.g. [Binary Classification Metrics](https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers)
 }
