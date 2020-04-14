@@ -190,8 +190,6 @@ classification_metrics <- function(result_table, Number_of_samples =
       Number_of_samples
   result_table$True_negative_rate <- result_table$True_negative / 
     (result_table$True_negative + result_table$False_positive)
-  # make sure no NaN are created by division by 0
-  result_table$True_negative_rate[is.nan(result_table$True_negative_rate)] <- 1
   result_table$Precision <- result_table$True_positive /
     (result_table$True_positive + result_table$False_positive)
   result_table$Recall <- result_table$True_positive /
@@ -200,5 +198,10 @@ classification_metrics <- function(result_table, Number_of_samples =
     (result_table$Precision + result_table$Recall))
   result_table$Balanced_accuracy <- (result_table$Recall + 
     result_table$True_negative_rate) / 2
+  if (any(sapply(result_table, is.nan))) {
+    futile.logger::flog.warn("Classification metrics containing NaN have been 
+      generated probably due to division by 0. Poor classification performances 
+      and/or small class sizes might be the reason.")
+  }
   result_table
 }

@@ -23,6 +23,10 @@ build_the_model <- function(train_data, Layer1_units, Layer2_units, classes,
   Dropout_layer1, Dropout_layer2, Dense_activation_function, 
   Output_activation_function, Optimizer_function, Loss_function, Metric, ...) {
   
+  if(dim(train_data)[[2]] < 1) {
+    stop("Provided training data has no columns, can't determine input layer shape")
+  }
+  
   # network architecture
   model <- keras::keras_model_sequential() %>%
     keras::layer_dense(units = Layer1_units, 
@@ -72,7 +76,12 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
     stop("Keras parameters do not match column names in master_grid")
   }
   if(is.null(the_list[[ML_object]])) {
-    stop("Names in the_list and master_grid do not match")
+    stop("Names of items in the_list and ML_object in master_grid do not match")
+  }
+  if(!exists(c("trainset_labels", "trainset_data", "testset_labels", 
+    "testset_data"), where = the_list[[1]])) {
+    stop("Item in the_list does not have all required elements:
+      trainset_labels, trainset_data, testset_labels, testset_data")
   }
   stopifnot(step == "training" | step == "prediction")
 
@@ -82,14 +91,14 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
   training_data <- community_table[["trainset_data"]]
   training_labels <- community_table[["trainset_labels"]]
   classes <- ncol(training_labels)
+  if(classes < 2) {
+    stop("Less then 2 classes found, response variable setup seems incorrect")
+  }
   # lookup to translate between factor levels and class labels
   lookup <- stats::setNames(c(colnames(training_labels)), c(0:(classes - 1)))
   
   if (step == "prediction" & (k_fold != 1 | current_k_fold != 1)) {
-    overwrite_kfold <- paste("current k_fold of", k_fold, "set to 1 for prediction step")
-    futile.logger::flog.info(overwrite_kfold)
-    k_fold <- 1
-    current_k_fold <- 1
+    stop("k_fold and current_k_fold need to be 1 for prediction")
   } else if (step == "training") {
     indices <- sample(1:nrow(training_data))
     folds <- cut(1:length(indices), breaks = k_fold, labels = FALSE)
@@ -149,12 +158,17 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
   }
   
   # predict classes
-  timing_part_2 <- system.time({val_predictions <- model %>% keras::predict_classes(validation_data)})
+  timing_part_2 <- system.time({val_predictions <- model %>% 
+    keras::predict_classes(validation_data)})
 
   # prepare results
   factor_targets <- categoric_to_factor(validation_targets)
   predicted <- data.frame(factor_targets, val_predictions)
-  predicted_labels <- data.frame(lapply(predicted, function(i) lookup[as.character(i)]))
+  predicted_labels <- data.frame(lapply(predicted, function(i) 
+    lookup[as.character(i)]))
+  if (nrow(predicted_labels) != nrow(validation_data)) {
+    stop("Length of predictions and data to be predicted differs")
+  }
   # provide all classes as factor levels, otherwise confusion matrix breaks if
   # a class is not predicted at all
   predicted_labels$val_predictions <- factor(predicted_labels$val_predictions, 
@@ -206,6 +220,12 @@ categoric_to_factor <- function(matrix) {
 #' @export
 store_classification_results <- function(hist, timing, prediction_table, n_classes,
   confusion_matrix, train_data) {
+  
+  if(!is.data.frame(prediction_table)) {
+    stop("prediction table is not a data frame")
+  } else if(nrow(prediction_table) == 0) {
+    stop("prediction table is empty")
+  }
   
   results <- data.frame()
   # extract classifications for each class, every class becomes own row
