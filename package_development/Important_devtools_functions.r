@@ -76,8 +76,6 @@ usethis::use_data(testps,
   
   # keras run
   test_keras_binary_training,
-  test_keras_binary_prediction,
-  test_keras_multi_training,
   test_keras_multi_prediction,
   
   ###### for ranger
