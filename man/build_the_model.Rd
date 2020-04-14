@@ -6,42 +6,42 @@
 \usage{
 build_the_model(
   train_data,
-  first_layer_units,
-  second_layer_units,
+  Layer1_units,
+  Layer2_units,
   classes,
-  dropout_rate_1,
-  dropout_rate_2,
-  dense_activation_fun,
-  output_activation_fun,
-  optimizer_param,
-  loss_param,
-  metric,
+  Dropout_layer1,
+  Dropout_layer2,
+  Dense_activation_function,
+  Output_activation_function,
+  Optimizer_function,
+  Loss_function,
+  Metric,
   ...
 )
 }
 \arguments{
 \item{train_data}{a table of training data}
 
-\item{first_layer_units}{integer, number of units in the first hidden layer}
+\item{Layer1_units}{integer, number of units in the first hidden layer}
 
-\item{second_layer_units}{integer, number of units in the second hidden layer}
+\item{Layer2_units}{integer, number of units in the second hidden layer}
 
 \item{classes}{integer, number of classes and therefore number of units in 
 the output layer}
 
-\item{dropout_rate_1}{the rate of dropout nodes for layer 1}
+\item{Dropout_layer1}{the rate of dropout nodes for layer 1}
 
-\item{dropout_rate_2}{the rate of dropout nodes for layer 2}
+\item{Dropout_layer2}{the rate of dropout nodes for layer 2}
 
-\item{dense_activation_fun}{the activation function for the hidden layers}
+\item{Dense_activation_function}{the activation function for the hidden layers}
 
-\item{output_activation_fun}{the activation function for the output layer}
+\item{Output_activation_function}{the activation function for the output layer}
 
-\item{optimizer_param}{the optimizer function}
+\item{Optimizer_function}{the optimizer function}
 
-\item{loss_param}{the loss function}
+\item{Loss_function}{the loss function}
 
-\item{metric}{which metrics to monitor}
+\item{Metric}{which metrics to monitor}
 
 \item{...}{further arguments}
 }

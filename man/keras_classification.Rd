@@ -18,15 +18,7 @@ keras_classification(
   the_list,
   master_grid,
   .row,
-  Layer1_units,
-  Layer2_units,
-  Dense_activation_function,
-  Dropout_layer1,
-  Dropout_layer2,
-  Output_activation_function,
-  Optimizer_function,
-  Loss_function,
-  Metric
+  ...
 )
 }
 \arguments{
@@ -56,23 +48,7 @@ keras_classification(
 
 \item{.row}{current row of master_grid}
 
-\item{Layer1_units}{integer, number of units in the first hidden layer}
-
-\item{Layer2_units}{integer, number of units in the second hidden layer}
-
-\item{Dense_activation_function}{the activation function for the hidden layers}
-
-\item{Dropout_layer1}{the rate of dropout nodes for layer 1}
-
-\item{Dropout_layer2}{the rate of dropout nodes for layer 2}
-
-\item{Output_activation_function}{the activation function for the output layer}
-
-\item{Optimizer_function}{the optimizer function}
-
-\item{Loss_function}{the loss function}
-
-\item{Metric}{which metrics to monitor}
+\item{...}{additional features passed by pmap call}
 }
 \value{
 a compiled keras sequential model with two hidden layers
