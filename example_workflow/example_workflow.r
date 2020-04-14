@@ -127,6 +127,7 @@ master_grid$Target <- as.character(master_grid$Target)
 test_grid <- head(master_grid, 1)
 
 # running ranger
+#### check confusion matrix levels multi, adjust flog.info paste message
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
     ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid, step = "training")
 # extract list elements within data frame into rows
@@ -143,7 +144,7 @@ hyper_keras_multi <- expand.grid(
   Batch_size = 2, 
   k_fold = 4, 
   current_k_fold = 1:4,
-  Early_callback = "val_loss",
+  Early_callback = "val_loss", # for prediction use accuracy
   Layer1_units = 30,
   Layer2_units = 8,
   Dropout_layer1 = 0.2,
@@ -154,14 +155,14 @@ hyper_keras_multi <- expand.grid(
   Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
   Metric = "accuracy",
   Cycle = 1:3,
-  step = "training",
+  step = "prediction",
   Classification = "multiclass",
   Delay = 2)
 
 master_keras_multi <- merge(parameter_keras_multi, hyper_keras_multi, by = "ML_object")
 
 # order by current_k_fold 
-test_keras_multi <- head(master_keras_multi, 30)
+test_keras_multi <- head(master_keras_multi, 2)
 
 test_keras_multi$results <- purrr::pmap(cbind(test_keras_multi, .row = rownames(test_keras_multi)), 
   keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi)
@@ -179,7 +180,7 @@ hyper_keras_binary <- expand.grid(
   Batch_size = 2, 
   k_fold = 4, 
   current_k_fold = 1:4,
-  Early_callback = "val_loss",
+  Early_callback = "accuracy", #prediction: "accuracy", training: "val_loss"
   Layer1_units = 30,
   Layer2_units = 8,
   Dropout_layer1 = 0.2,
@@ -190,14 +191,14 @@ hyper_keras_binary <- expand.grid(
   Loss_function = "binary_crossentropy", # binary_crossentropy for binary
   Metric = "accuracy",
   Cycle = 1:3,
-  step = "training",
+  step = "prediction",
   Classification = "binary",
   Delay = 2)
 
 master_keras_binary <- merge(parameter_keras_binary, hyper_keras_binary, by = "ML_object")
 
 # order by current_k_fold 
-test_keras_binary <- head(master_keras_binary, 30)
+test_keras_binary <- head(master_keras_binary, 2)
 
 test_keras_binary$results <- purrr::pmap(cbind(test_keras_binary, .row = rownames(test_keras_binary)), 
   keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary)
