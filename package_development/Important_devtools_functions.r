@@ -74,6 +74,12 @@ usethis::use_data(testps,
   ready_keras_multi,
   ready_keras_regression,
   
+  # keras run
+  test_keras_binary_training,
+  test_keras_binary_prediction,
+  test_keras_multi_training,
+  test_keras_multi_prediction,
+  
   ###### for ranger
   # split merged list into training and test parts
   splitted_input_binary,

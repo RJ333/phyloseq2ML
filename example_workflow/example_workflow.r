@@ -136,7 +136,6 @@ results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
 ####### for keras multi
 # set up a parameter data.frame
 parameter_keras_multi <- extract_parameters(ready_keras_multi)
-parameter_keras_multi
 
 hyper_keras_multi <- expand.grid(
   ML_object = names(ready_keras_multi),
@@ -144,7 +143,7 @@ hyper_keras_multi <- expand.grid(
   Batch_size = 2, 
   k_fold = 4, 
   current_k_fold = 1:4,
-  Early_callback = "val_loss", # for prediction use accuracy
+  Early_callback = "val_loss", #prediction: "accuracy", training: "val_loss"
   Layer1_units = 30,
   Layer2_units = 8,
   Dropout_layer1 = 0.2,
@@ -155,24 +154,27 @@ hyper_keras_multi <- expand.grid(
   Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
   Metric = "accuracy",
   Cycle = 1:3,
-  step = "prediction",
+  step = "training",
   Classification = "multiclass",
   Delay = 2)
 
 master_keras_multi <- merge(parameter_keras_multi, hyper_keras_multi, by = "ML_object")
 
 # order by current_k_fold 
-test_keras_multi <- head(master_keras_multi, 2)
+#test_keras_multi_prediction <- head(master_keras_multi, 2)
+#test_keras_multi_training <- head(master_keras_multi, 2)
 
-test_keras_multi$results <- purrr::pmap(cbind(test_keras_multi, .row = rownames(test_keras_multi)), 
-  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi)
-keras_df_multi <-  as.data.frame(tidyr::unnest(test_keras_multi, results))
+test_keras_multi_training$results <- purrr::pmap(cbind(test_keras_multi_training, .row = rownames(test_keras_multi_training)), 
+  keras_classification, the_list = ready_keras_multi_training, master_grid = test_keras_multi_training)
+keras_df_multi_training <-  as.data.frame(tidyr::unnest(test_keras_multi_training, results))
 
+test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
+  keras_classification, the_list = ready_keras_multi_prediction, master_grid = test_keras_multi_prediction)
+keras_df_multi_prediction <-  as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
 
 ####### for keras binary
 # set up a parameter data.frame
 parameter_keras_binary <- extract_parameters(ready_keras_binary)
-parameter_keras_binary
 
 hyper_keras_binary <- expand.grid(
   ML_object = names(ready_keras_binary),
@@ -186,9 +188,9 @@ hyper_keras_binary <- expand.grid(
   Dropout_layer1 = 0.2,
   Dropout_layer2 = 0.0,
   Dense_activation_function = "relu",
-  Output_activation_function = "sigmoid", # sigmoid for binary
+  Output_activation_function = "softmax", # sigmoid for binary
   Optimizer_function = "rmsprop",
-  Loss_function = "binary_crossentropy", # binary_crossentropy for binary
+  Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
   Metric = "accuracy",
   Cycle = 1:3,
   step = "prediction",
@@ -198,8 +200,13 @@ hyper_keras_binary <- expand.grid(
 master_keras_binary <- merge(parameter_keras_binary, hyper_keras_binary, by = "ML_object")
 
 # order by current_k_fold 
-test_keras_binary <- head(master_keras_binary, 2)
+test_keras_binary_prediction <- head(master_keras_binary, 2)
+#test_keras_binary_training <- head(master_keras_binary, 2)
 
-test_keras_binary$results <- purrr::pmap(cbind(test_keras_binary, .row = rownames(test_keras_binary)), 
-  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary)
-keras_df_binary <-  as.data.frame(tidyr::unnest(test_keras_binary, results))
+test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
+  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
+keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
+
+test_keras_binary_prediction$results <- purrr::pmap(cbind(test_keras_binary_prediction, .row = rownames(test_keras_binary_prediction)), 
+  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_prediction)
+keras_df_binary_prediction <-  as.data.frame(tidyr::unnest(test_keras_binary_prediction, results))
