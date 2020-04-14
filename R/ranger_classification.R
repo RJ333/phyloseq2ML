@@ -170,10 +170,13 @@ prediction_accuracy <- function(predicted_rf, test_set) {
 classification_metrics <- function(result_table, Number_of_samples = 
     result_table$Number_of_samples) {
   
+  if(length(result_table) == 0) {
+    stop("result table is empty")
+  }
   if(!is.numeric(Number_of_samples)) {
     stop("Number_of_samples needs to be numeric")
   }
-    
+ 
   # general values
   result_table$Positive <- result_table$True_positive + result_table$False_negative
   result_table$Negative <- result_table$True_negative + result_table$False_positive

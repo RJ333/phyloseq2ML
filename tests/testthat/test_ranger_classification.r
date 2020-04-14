@@ -150,3 +150,14 @@ test_that("Returns numeric value", {
   prediction <- stats::predict(tmp, data = iris)
   expect_true(is.numeric(phyloseq2ML::prediction_accuracy(prediction, iris)))
 })
+
+# classification_metrics
+test_that("Breaks if number of samples argument is not numeric", {
+  df <- data.frame()
+  expect_error(phyloseq2ML::classification_metrics(df, "hello"))
+})
+
+test_that("Breaks if result table is empty", {
+  df <- data.frame()
+  expect_error(phyloseq2ML::classification_metrics(df, df$Number_of_samples))
+})
