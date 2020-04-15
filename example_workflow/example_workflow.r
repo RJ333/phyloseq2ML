@@ -107,17 +107,17 @@ oversampled_input_binary <- oversample(splitted_input_binary, 1, 0.5)
 oversampled_input_multi <- oversample(splitted_input_multi, 1, 0.5)
 oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
 
-####### for ranger
+####### ranger classification
 # set up a parameter data.frame
 parameter_df <- extract_parameters(oversampled_input_multi)
 
-##### include step here?
 hyper_grid <- expand.grid(
   ML_object = names(oversampled_input_multi),
   Number_of_trees = c(151),
   Mtry_factor = c(1),
   Importance_mode = c("none"),
-  Cycle = 1:5)
+  Cycle = 1:5,
+  step = "training")
 
 master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
 # string arguments needs to be passed as character, not factor level 
@@ -125,12 +125,35 @@ master_grid$Target <- as.character(master_grid$Target)
 
 test_grid <- head(master_grid, 1)
 
+master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
+    ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid)
+results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
+
+
+#### ranger regression
+parameter_regress <- extract_parameters(oversampled_regression)
+
+hyper_grid_regress <- expand.grid(
+  ML_object = names(oversampled_regression),
+  Number_of_trees = c(151),
+  Mtry_factor = c(1),
+  Importance_mode = c("none"),
+  Cycle = 1:5,
+  step = "prediction")
+
+master_grid_regress <- merge(parameter_regress, hyper_grid_regress, by = "ML_object")
+# string arguments needs to be passed as character, not factor level 
+master_grid_regress$Target <- as.character(master_grid_regress$Target)
+
+test_grid_regress <- head(master_grid_regress, 1)
+
 # running ranger
 #### check confusion matrix levels multi, adjust flog.info paste message
-master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
-    ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid, step = "training")
+master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
+    ranger_regression, the_list = oversampled_regression, master_grid = master_grid_regress)
 # extract list elements within data frame into rows
-results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
+results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
+
 
 ####### for keras multi
 # set up a parameter data.frame
