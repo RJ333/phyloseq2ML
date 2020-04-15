@@ -229,3 +229,70 @@ test_keras_binary_training <- head(master_keras_binary, 2)
 test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
   keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
 keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
+
+####### for keras regression
+# set up a parameter data.frame
+parameter_keras_regression <- extract_parameters(ready_keras_regression)
+
+hyper_keras_regression_training <- expand.grid(
+  ML_object = names(ready_keras_regression),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 4, 
+  current_k_fold = 1:4,
+  Early_callback = "mae",
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Optimizer_function = "rmsprop",
+  Loss_function = "mse",
+  Metric = "mae",
+  Cycle = 1:3,
+  step = "training",
+  Delay = 2)
+
+master_keras_regression_training <- merge(parameter_keras_regression, hyper_keras_regression_training, by = "ML_object")
+master_keras_regression_training <- master_keras_regression_training[order(
+  master_keras_regression_training$ML_object, 
+  master_keras_regression_training$Cycle, 
+  master_keras_regression_training$current_k_fold), ]
+
+test_keras_regression_training <- head(master_keras_regression_training, 2)
+
+test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
+  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_training)
+keras_df_regression_training <-  as.data.frame(tidyr::unnest(test_keras_regression_training, results))
+
+#### regression prediction
+hyper_keras_regression_prediction <- expand.grid(
+  ML_object = names(ready_keras_regression),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 1, 
+  current_k_fold = 1,
+  Early_callback = "mae",
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Optimizer_function = "rmsprop",
+  Loss_function = "mse",
+  Metric = "mae",
+  Cycle = 1:3,
+  step = "prediction",
+  Delay = 2)
+
+master_keras_regression_prediction <- merge(parameter_keras_regression, hyper_keras_regression_prediction, by = "ML_object")
+master_keras_regression_prediction <- master_keras_regression_prediction[order(
+  master_keras_regression_prediction$ML_object, 
+  master_keras_regression_prediction$Cycle, 
+  master_keras_regression_prediction$current_k_fold), ]
+
+test_keras_regression_prediction <- head(master_keras_regression_prediction, 2)
+
+test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
+  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_prediction)
+keras_df_regression_prediction <-  as.data.frame(tidyr::unnest(test_keras_regression_prediction, results))
