@@ -21,7 +21,7 @@
 #' @export
 build_the_model <- function(train_data, Layer1_units, Layer2_units, classes, 
   Dropout_layer1, Dropout_layer2, Dense_activation_function, 
-  Output_activation_function, Optimizer_function, Loss_function, Metric, ...) {
+  Output_activation_function = NULL, Optimizer_function, Loss_function, Metric, ...) {
   
   if(dim(train_data)[[2]] < 1) {
     stop("Provided training data has no columns, can't determine input layer shape")

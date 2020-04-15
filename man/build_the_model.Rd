@@ -12,7 +12,7 @@ build_the_model(
   Dropout_layer1,
   Dropout_layer2,
   Dense_activation_function,
-  Output_activation_function,
+  Output_activation_function = NULL,
   Optimizer_function,
   Loss_function,
   Metric,
