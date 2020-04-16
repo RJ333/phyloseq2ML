@@ -6,9 +6,9 @@ flog.threshold(TRACE)
 data(TNT_communities)
 
 # modify phyloseq object
-TNT_communities <- add_unique_lineages(TNT_communities)
+TNT_communities2 <- add_unique_lineages(TNT_communities)
 testps <- standardize_phyloseq_headers(
-  phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
+  phyloseq_object = TNT_communities2, taxa_prefix = "ASV", use_sequences = FALSE)
 
 # translate ASVs to genus
 levels_tax_dictionary <- c("Family", "Genus")
@@ -16,7 +16,7 @@ taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
 translate_ID(ID = c("ASV02", "ASV17"), tax_level = c("Genus"), taxa_vector_list)
 
 # define subsetting parameters
-thresholds <- c(1500)
+thresholds <- 1500
 selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
 
 # phyloseq objects as list
@@ -123,12 +123,11 @@ master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
 # string arguments needs to be passed as character, not factor level 
 master_grid$Target <- as.character(master_grid$Target)
 
-test_grid <- head(master_grid, 1)
+test_grid <- head(master_grid, 2)
 
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
     ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid)
 results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
-
 
 #### ranger regression
 parameter_regress <- extract_parameters(oversampled_regression)
@@ -142,16 +141,12 @@ hyper_grid_regress <- expand.grid(
   step = "prediction")
 
 master_grid_regress <- merge(parameter_regress, hyper_grid_regress, by = "ML_object")
-# string arguments needs to be passed as character, not factor level 
 master_grid_regress$Target <- as.character(master_grid_regress$Target)
-
 test_grid_regress <- head(master_grid_regress, 1)
 
 # running ranger
-#### check confusion matrix levels multi, adjust flog.info paste message
 master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
     ranger_regression, the_list = oversampled_regression, master_grid = master_grid_regress)
-# extract list elements within data frame into rows
 results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
 
 
