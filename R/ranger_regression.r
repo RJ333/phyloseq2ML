@@ -118,7 +118,7 @@ store_regression <- function(trained_rf, predicted_rf = NULL,
       mean(training_data[, ncol(training_data)]))
     
   } else if (step == "prediction") {
-
+    
     residuals <- test_data[, ncol(test_data)] - predicted_rf$predictions
     results$Number_of_samples <- as.numeric(predicted_rf$num.samples)
     results$Rsquared_all <- stats::cor(test_data[, ncol(test_data)], 

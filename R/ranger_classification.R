@@ -201,6 +201,16 @@ classification_metrics <- function(result_table, Number_of_samples =
     (result_table$Precision + result_table$Recall))
   result_table$Balanced_accuracy <- (result_table$Recall + 
     result_table$True_negative_rate) / 2
+  result_table$False_discovery_rate <- 1 - result_table$Precision
+  result_table$Matthews_cor_coef <- (
+    result_table$True_positive * result_table$True_negative - 
+      result_table$False_positive * result_table$False_negative) /
+    sqrt(
+      (result_table$True_positive + result_table$False_positive) * 
+      (result_table$True_positive + result_table$False_negative) *
+      (result_table$True_negative + result_table$False_positive) *
+      (result_table$True_negative + result_table$False_negative)
+      )
   if (any(sapply(result_table, is.nan))) {
     futile.logger::flog.warn("Classification metrics containing NaN have been 
       generated probably due to division by 0. Poor classification performances 

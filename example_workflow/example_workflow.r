@@ -149,6 +149,10 @@ master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = row
     ranger_regression, the_list = oversampled_regression, master_grid = master_grid_regress)
 results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
 
+test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
+    ranger_regression, the_list = oversampled_regression, master_grid = test_grid_regress)
+results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
+
 
 ####### for keras multi
 # set up a parameter data.frame
