@@ -185,7 +185,7 @@ master_keras_multi <- master_keras_multi[order(
   master_keras_multi$ML_object, 
   master_keras_multi$Cycle, 
   master_keras_multi$current_k_fold), ]
-
+rownames(master_keras_multi) <- NULL
 test_keras_multi_prediction <- head(master_keras_multi, 2)
 
 test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
@@ -222,7 +222,7 @@ master_keras_binary <- master_keras_binary[order(
   master_keras_binary$ML_object, 
   master_keras_binary$Cycle, 
   master_keras_binary$current_k_fold), ]
-
+rownames(master_keras_binary) <- NULL
 test_keras_binary_training <- head(master_keras_binary, 2)
 
 test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
@@ -257,7 +257,7 @@ master_keras_regression_training <- master_keras_regression_training[order(
   master_keras_regression_training$ML_object, 
   master_keras_regression_training$Cycle, 
   master_keras_regression_training$current_k_fold), ]
-
+rownames(master_keras_regression_training) <- NULL
 test_keras_regression_training <- head(master_keras_regression_training, 2)
 
 test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
@@ -289,7 +289,7 @@ master_keras_regression_prediction <- master_keras_regression_prediction[order(
   master_keras_regression_prediction$ML_object, 
   master_keras_regression_prediction$Cycle, 
   master_keras_regression_prediction$current_k_fold), ]
-
+rownames(master_keras_regression_prediction) <- NULL
 test_keras_regression_prediction <- head(master_keras_regression_prediction, 2)
 
 test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
