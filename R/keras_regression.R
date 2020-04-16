@@ -111,7 +111,7 @@ keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fol
   
   # predict classes
   timing_part_2 <- system.time({val_predictions <- model %>% 
-    keras::predict_classes(validation_data)})
+    stats::predict(validation_data)})
 
   # return results data.frame
   store_regression_results(hist = history, timing = timing_part_1 + timing_part_2, 
@@ -142,9 +142,10 @@ store_regression_results <- function(hist, timing, true_values, predicted_values
   } else if(nrow(training_data) == 0) {
     stop("training_data is empty")
   }
-  
+  if(is.dummy(predicted_values)) {
+    futile.logger::flog.warn("Predicted values are only 0 or 1, did you rather predict classes?")
+  }
   residuals <- true_values - predicted_values
-  
   results <- data.frame(
     Number_of_samples_train = hist$params$samples,
     Number_of_samples_validate = length(true_values),

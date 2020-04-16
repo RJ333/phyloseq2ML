@@ -26,7 +26,7 @@ build_the_model <- function(train_data, Layer1_units, Layer2_units, classes,
   if(dim(train_data)[[2]] < 1) {
     stop("Provided training data has no columns, can't determine input layer shape")
   }
-  
+
   # network architecture
   model <- keras::keras_model_sequential() %>%
     keras::layer_dense(units = Layer1_units, 
