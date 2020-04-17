@@ -179,4 +179,3 @@ inputtables_to_keras <- function(final_input_tables) {
   }
   data_list 
 }
-

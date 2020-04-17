@@ -54,13 +54,13 @@ test_that("Breaks if current_k_fold > 1 for prediction", {
 # test store regression
 test_that("Breaks if training_data is not a matrix", {
   empty_df <- data.frame()
-  expect_error(store_regression_results(hist, timing = 0, true_values = c(0,5,4,3,2,5), 
+  expect_error(store_regression_results(hist, true_values = c(0,5,4,3,2,5), 
     predicted_values = c(0,5,4,3,2,5), training_data = empty_df))
 })
 
 test_that("Breaks if training_data is an empty matrix", {
   empty_matrix <- matrix(, nrow = 0, ncol = 3)
-  expect_error(store_regression_results(hist, timing = 0, true_values = c(0,5,4,3,2,5), 
+  expect_error(store_regression_results(hist, true_values = c(0,5,4,3,2,5), 
     predicted_values = c(0,5,4,3,2,5), training_data = empty_matrix))
 })
 

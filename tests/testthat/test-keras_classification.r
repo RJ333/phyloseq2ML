@@ -80,12 +80,12 @@ test_that("Breaks if current_k_fold > 1 for prediction", {
 # test store classification
 test_that("Breaks for empty data.frames", {
   empty_df <- data.frame()
-  expect_error(store_classification_results(hist, timing = 0, prediction_table = empty_df, 
+  expect_error(store_classification_results(hist, prediction_table = empty_df, 
     n_classes = 3, confusion_matrix = NULL, train_data = empty_df))
 })
 
 test_that("Breaks for non-data.frames", {
-  expect_error(store_classification_results(hist, timing = 0, prediction_table = NULL, 
+  expect_error(store_classification_results(hist, prediction_table = NULL, 
     n_classes = 3, confusion_matrix = NULL, train_data = empty_df))
 })
 

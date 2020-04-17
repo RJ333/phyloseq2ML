@@ -71,19 +71,18 @@ keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fol
     model <- build_the_model(train_data = training_data, classes = classes, ...)
   
     # train model 
-    timing_part_1 <- system.time({
-      history <- model %>% keras::fit(
-        partial_train_data, 
-        partial_train_targets,
-        epochs = Epochs, 
-        batch_size = Batch_size, 
-        callbacks = keras::callback_early_stopping(
-          monitor = Early_callback,
-          patience = Delay,          
-          verbose = 0),
-        validation_data = list(validation_data, validation_targets),
-        verbose = 0)
-    })
+    history <- model %>% keras::fit(
+      partial_train_data, 
+      partial_train_targets,
+      epochs = Epochs, 
+      batch_size = Batch_size, 
+      callbacks = keras::callback_early_stopping(
+        monitor = Early_callback,
+        patience = Delay,          
+        verbose = 0),
+      validation_data = list(validation_data, validation_targets),
+      verbose = 0)
+      
   } else if (step == "prediction") {
     validation_data <- community_table[["testset_data"]]
     validation_targets <- community_table[["testset_labels"]]
@@ -94,27 +93,24 @@ keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fol
     model <- build_the_model(train_data = training_data, classes = classes, ...)
     
     # train model 
-    timing_part_1 <- system.time({
-      history <- model %>% keras::fit(
-        partial_train_data, 
-        partial_train_targets,
-        epochs = Epochs, 
-        batch_size = Batch_size, 
-        callbacks = keras::callback_early_stopping(
-          monitor = Early_callback,
-          patience = Delay,          
-          verbose = 0),
-        test_split = 0.0,
-        verbose = 0)
-    })
+    history <- model %>% keras::fit(
+      partial_train_data, 
+      partial_train_targets,
+      epochs = Epochs, 
+      batch_size = Batch_size, 
+      callbacks = keras::callback_early_stopping(
+        monitor = Early_callback,
+        patience = Delay,          
+        verbose = 0),
+      test_split = 0.0,
+      verbose = 0)
   }
   
   # predict classes
-  timing_part_2 <- system.time({val_predictions <- model %>% 
-    stats::predict(validation_data)})
+  val_predictions <- model %>% stats::predict(validation_data)
 
   # return results data.frame
-  store_regression_results(hist = history, timing = timing_part_1 + timing_part_2, 
+  store_regression_results(hist = history, 
     predicted_values = val_predictions, true_values = validation_targets, 
     training_data = training_data)
 }
@@ -127,7 +123,6 @@ keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fol
 #' various measures to describe the difference.
 #'
 #' @param hist the keras history object
-#' @param timing the timings from the machine learning steps
 #' @param true_values the values to be predicted from `trainset_labels` or `testset_labels`
 #' @param predicted_values numerical vector of predicted values
 #' @param training_data the training set data.frame
@@ -135,7 +130,7 @@ keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fol
 #' @return A data frame with one row per keras run and class
 #'
 #' @export
-store_regression_results <- function(hist, timing, true_values, predicted_values, training_data) {
+store_regression_results <- function(hist, true_values, predicted_values, training_data) {
   
   if(!is.matrix(training_data)) {
     stop("training_data is not a matrix")
@@ -155,8 +150,7 @@ store_regression_results <- function(hist, timing, true_values, predicted_values
     MAE = mean(abs(residuals)),
     Residual_sum_squares = as.numeric(sum(residuals^2)),
     Scatter_index = as.numeric(sqrt(mean(residuals^2)) / 
-      mean(true_values)),
-    Seconds_elapsed = timing[["elapsed"]]
+      mean(true_values))
   )
   # calculate R squared https://stackoverflow.com/a/40901487
   results$Rsquared <- stats::cor(true_values, predicted_values) ^ 2

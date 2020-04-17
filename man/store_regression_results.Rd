@@ -4,18 +4,10 @@
 \alias{store_regression_results}
 \title{Store results from keras tf regression training and prediction}
 \usage{
-store_regression_results(
-  hist,
-  timing,
-  true_values,
-  predicted_values,
-  training_data
-)
+store_regression_results(hist, true_values, predicted_values, training_data)
 }
 \arguments{
 \item{hist}{the keras history object}
-
-\item{timing}{the timings from the machine learning steps}
 
 \item{true_values}{the values to be predicted from `trainset_labels` or `testset_labels`}
 
