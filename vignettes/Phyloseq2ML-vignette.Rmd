@@ -1,0 +1,46 @@
+---
+title: "Phyloseq2ML-vignette"
+author: "René Janßen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Phyloseq2ML-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(phyloseq2ML)
+library(phyloseq)
+```
+
+## Before starting
+
+### Background
+If you are completely new to Machine Learning (ML) or even to R at all, you might want to do some reading first (you probably already have). 
+
+### Suggestions
+There is a package called `speedyseq` available on github, you can install it using:
+
+```r
+devtools::install_github("mikemc/speedyseq")
+```
+It replaces a couple of phyloseq included functions with a faster version. For this package, we are only interested in a faster version of `tax_glom`, but as a phyloseq user, having a quicker `ps_melt` function might be even more interesting.
+
+### Purpose of this package
+
+Having landed rather accidently in the world of ML (and bioinformatics before that), I realized that when you know your stuff, it is hard to get back to the mind of a person who does not know yet. It makes it even harder to get along in a new area of work such as programming-based work if people tell you, how you can easily do stuff (like write your own package). I suppose more people do not have a background in programming at all, just like me. That is a problem, as there is a lot to explore which can make your life actually easier, but you need to invest the learning time and it sounds complicated. On the other hand, you might not be intersted in the computer stuff, you want to have the results to get back to interpretation, the lab or writing a paper. 
+
+A large amount of time is spent on data formatting and ppreparation for the actual tasks. When I realized that it takes me murch more effort to get the code together for my current project, I thought there should be a way so not everyone has to go through this. Especially, if you just want to have a short glimpse if ML works on your data.
+
+mor  working on  is the most complex (in relative terms) that I've written or used so far. As there is so much people, who just get thrown into an informatic task ound with
+
+
+### Why are these methods implemented?
