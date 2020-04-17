@@ -24,8 +24,12 @@ usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
 usethis::use_package("fastDummies", "Suggests")
 usethis::use_package("tidyr", "Suggests")
+usethis::use_package("speedyseq", "Suggests")
 # to make use %>%
 usethis::use_pipe()
+
+# setup a vignette for the package
+usethis::use_vignette("Phyloseq2ML-vignette")
 
 # this allows to install e.g. from bioconductor
 setRepositories()
