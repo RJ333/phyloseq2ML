@@ -1,4 +1,4 @@
-library(phyloseq)
+library(speedyseq)
 library(phyloseq2ML)
 library(futile.logger)
 flog.threshold(TRACE)
@@ -186,7 +186,7 @@ master_keras_multi <- master_keras_multi[order(
   master_keras_multi$Cycle, 
   master_keras_multi$current_k_fold), ]
 rownames(master_keras_multi) <- NULL
-test_keras_multi_prediction <- head(master_keras_multi, 2)
+test_keras_multi_prediction <- head(master_keras_multi, 4)
 
 test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
   keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
