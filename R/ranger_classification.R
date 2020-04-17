@@ -30,6 +30,9 @@ ranger_classification <- function(master_grid, Target, ML_object, Cycle,
   if(!is.character(Target)) {
     stop("ranger requires Target as character to work with purr::pmap()")
   }
+  if(!is.factor(the_list[[ML_object]][["train_set"]][[Target]])) {
+    stop("Response variable is not a factor")
+  }
   stopifnot(step == "training" | step == "prediction")
  # print(.row)
   #print(nrow(master_grid))

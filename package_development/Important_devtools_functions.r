@@ -93,6 +93,7 @@ usethis::use_data(testps,
   # running ranger
   parameter_df,
   test_grid,
+  test_grid_regress,
   internal = TRUE, overwrite = TRUE)
 
 # first command to setup the structure
