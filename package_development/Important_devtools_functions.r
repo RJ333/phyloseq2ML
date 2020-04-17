@@ -105,7 +105,10 @@ usethis::use_test()
 # and this command finally runs the tests
 devtools::test()
 
+# merge feature branches into develop
+# new tags for merge requests from develop into master
 # the last commit e.g. for a new function allows to bump the version number
+# also adjust DESCRIPTION
 git tag -a "0.1"
 git push --tags
 
