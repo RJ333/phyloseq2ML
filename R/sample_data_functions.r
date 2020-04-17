@@ -137,7 +137,7 @@ categorize <- function(response_data, my_breaks, class_labels) {
     breaks = my_breaks, labels = class_labels))
   row.names(response_variables) <- row.names(response_data)
   # check if classes contain values
-  least_class <- min(lengths(sapply(response_variables, unique)))
+  least_class <- min(lengths(lapply(response_variables, unique)))
   if (least_class != length(class_labels)) {
     futile.logger::flog.warn("Empty classes detected, consider adjusting my_breaks")
   }

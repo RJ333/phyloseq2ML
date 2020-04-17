@@ -6,9 +6,9 @@ flog.threshold(TRACE)
 data(TNT_communities)
 
 # modify phyloseq object
-TNT_communities <- add_unique_lineages(TNT_communities)
+TNT_communities2 <- add_unique_lineages(TNT_communities)
 testps <- standardize_phyloseq_headers(
-  phyloseq_object = TNT_communities, taxa_prefix = "ASV", use_sequences = FALSE)
+  phyloseq_object = TNT_communities2, taxa_prefix = "ASV", use_sequences = FALSE)
 
 # translate ASVs to genus
 levels_tax_dictionary <- c("Family", "Genus")
@@ -16,7 +16,7 @@ taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
 translate_ID(ID = c("ASV02", "ASV17"), tax_level = c("Genus"), taxa_vector_list)
 
 # define subsetting parameters
-thresholds <- c(1500)
+thresholds <- 1500
 selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
 
 # phyloseq objects as list
@@ -123,12 +123,11 @@ master_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
 # string arguments needs to be passed as character, not factor level 
 master_grid$Target <- as.character(master_grid$Target)
 
-test_grid <- head(master_grid, 1)
+test_grid <- head(master_grid, 2)
 
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
     ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid)
 results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
-
 
 #### ranger regression
 parameter_regress <- extract_parameters(oversampled_regression)
@@ -142,17 +141,17 @@ hyper_grid_regress <- expand.grid(
   step = "prediction")
 
 master_grid_regress <- merge(parameter_regress, hyper_grid_regress, by = "ML_object")
-# string arguments needs to be passed as character, not factor level 
 master_grid_regress$Target <- as.character(master_grid_regress$Target)
-
 test_grid_regress <- head(master_grid_regress, 1)
 
 # running ranger
-#### check confusion matrix levels multi, adjust flog.info paste message
 master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
     ranger_regression, the_list = oversampled_regression, master_grid = master_grid_regress)
-# extract list elements within data frame into rows
 results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
+
+test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
+    ranger_regression, the_list = oversampled_regression, master_grid = test_grid_regress)
+results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
 
 
 ####### for keras multi
@@ -186,7 +185,7 @@ master_keras_multi <- master_keras_multi[order(
   master_keras_multi$ML_object, 
   master_keras_multi$Cycle, 
   master_keras_multi$current_k_fold), ]
-
+rownames(master_keras_multi) <- NULL
 test_keras_multi_prediction <- head(master_keras_multi, 2)
 
 test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
@@ -223,9 +222,76 @@ master_keras_binary <- master_keras_binary[order(
   master_keras_binary$ML_object, 
   master_keras_binary$Cycle, 
   master_keras_binary$current_k_fold), ]
-
+rownames(master_keras_binary) <- NULL
 test_keras_binary_training <- head(master_keras_binary, 2)
 
 test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
   keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
 keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
+
+####### for keras regression
+# set up a parameter data.frame
+parameter_keras_regression <- extract_parameters(ready_keras_regression)
+
+hyper_keras_regression_training <- expand.grid(
+  ML_object = names(ready_keras_regression),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 4, 
+  current_k_fold = 1:4,
+  Early_callback = "mae",
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Optimizer_function = "rmsprop",
+  Loss_function = "mse",
+  Metric = "mae",
+  Cycle = 1:3,
+  step = "training",
+  Delay = 2)
+
+master_keras_regression_training <- merge(parameter_keras_regression, hyper_keras_regression_training, by = "ML_object")
+master_keras_regression_training <- master_keras_regression_training[order(
+  master_keras_regression_training$ML_object, 
+  master_keras_regression_training$Cycle, 
+  master_keras_regression_training$current_k_fold), ]
+rownames(master_keras_regression_training) <- NULL
+test_keras_regression_training <- head(master_keras_regression_training, 2)
+
+test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
+  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_training)
+keras_df_regression_training <-  as.data.frame(tidyr::unnest(test_keras_regression_training, results))
+
+#### regression prediction
+hyper_keras_regression_prediction <- expand.grid(
+  ML_object = names(ready_keras_regression),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 1, 
+  current_k_fold = 1,
+  Early_callback = "mae",
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Optimizer_function = "rmsprop",
+  Loss_function = "mse",
+  Metric = "mae",
+  Cycle = 1:3,
+  step = "prediction",
+  Delay = 2)
+
+master_keras_regression_prediction <- merge(parameter_keras_regression, hyper_keras_regression_prediction, by = "ML_object")
+master_keras_regression_prediction <- master_keras_regression_prediction[order(
+  master_keras_regression_prediction$ML_object, 
+  master_keras_regression_prediction$Cycle, 
+  master_keras_regression_prediction$current_k_fold), ]
+rownames(master_keras_regression_prediction) <- NULL
+test_keras_regression_prediction <- head(master_keras_regression_prediction, 2)
+
+test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
+  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_prediction)
+keras_df_regression_prediction <-  as.data.frame(tidyr::unnest(test_keras_regression_prediction, results))

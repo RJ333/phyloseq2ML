@@ -21,12 +21,12 @@
 #' @export
 build_the_model <- function(train_data, Layer1_units, Layer2_units, classes, 
   Dropout_layer1, Dropout_layer2, Dense_activation_function, 
-  Output_activation_function, Optimizer_function, Loss_function, Metric, ...) {
+  Output_activation_function = NULL, Optimizer_function, Loss_function, Metric, ...) {
   
   if(dim(train_data)[[2]] < 1) {
     stop("Provided training data has no columns, can't determine input layer shape")
   }
-  
+
   # network architecture
   model <- keras::keras_model_sequential() %>%
     keras::layer_dense(units = Layer1_units, 
@@ -119,19 +119,18 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
     model <- build_the_model(train_data = training_data, classes = classes, ...)
   
     # train model 
-    timing_part_1 <- system.time({
-      history <- model %>% keras::fit(
-        partial_train_data, 
-        partial_train_targets,
-        epochs = Epochs, 
-        batch_size = Batch_size, 
-        callbacks = keras::callback_early_stopping(
-          monitor = Early_callback,
-          patience = Delay,          
-          verbose = 0),
-        validation_data = list(validation_data, validation_targets),
-        verbose = 0)
-    })
+    history <- model %>% keras::fit(
+      partial_train_data, 
+      partial_train_targets,
+      epochs = Epochs, 
+      batch_size = Batch_size, 
+      callbacks = keras::callback_early_stopping(
+        monitor = Early_callback,
+        patience = Delay,          
+        verbose = 0),
+      validation_data = list(validation_data, validation_targets),
+      verbose = 0)
+    
   } else if (step == "prediction") {
     validation_data <- community_table[["testset_data"]]
     validation_targets <- community_table[["testset_labels"]]
@@ -142,24 +141,21 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
     model <- build_the_model(train_data = training_data, classes = classes, ...)
     
     # train model 
-    timing_part_1 <- system.time({
-      history <- model %>% keras::fit(
-        partial_train_data, 
-        partial_train_targets,
-        epochs = Epochs, 
-        batch_size = Batch_size, 
-        callbacks = keras::callback_early_stopping(
-          monitor = Early_callback,
-          patience = Delay,          
-          verbose = 0),
-        test_split = 0.0,
-        verbose = 0)
-    })
+    history <- model %>% keras::fit(
+      partial_train_data, 
+      partial_train_targets,
+      epochs = Epochs, 
+      batch_size = Batch_size, 
+      callbacks = keras::callback_early_stopping(
+        monitor = Early_callback,
+        patience = Delay,          
+        verbose = 0),
+      test_split = 0.0,
+      verbose = 0)
   }
   
   # predict classes
-  timing_part_2 <- system.time({val_predictions <- model %>% 
-    keras::predict_classes(validation_data)})
+  val_predictions <- model %>% keras::predict_classes(validation_data)
 
   # prepare results
   factor_targets <- categoric_to_factor(validation_targets)
@@ -179,7 +175,7 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
     predicted = predicted_labels$val_predictions)
 
   # return results data.frame
-  store_classification_results(hist = history, timing = timing_part_1 + timing_part_2, 
+  store_classification_results(hist = history,
     prediction_table = predicted_labels, confusion_matrix = confusion_matrix, 
     train_data = training_data, n_classes = classes)
 }
@@ -209,7 +205,6 @@ categoric_to_factor <- function(matrix) {
 #' various metrics for classification performance are calculated for each class.
 #'
 #' @param hist the keras history object
-#' @param timing the timings from the machine learning steps
 #' @param prediction_table the data.frame comparing predictions and true values
 #' @param n_classes the number of classes for classification
 #' @param confusion_matrix the confusion matrix generated from `prediction_table`
@@ -218,7 +213,7 @@ categoric_to_factor <- function(matrix) {
 #' @return A data frame with one row per keras run and class
 #'
 #' @export
-store_classification_results <- function(hist, timing, prediction_table, n_classes,
+store_classification_results <- function(hist, prediction_table, n_classes,
   confusion_matrix, train_data) {
   
   if(!is.data.frame(prediction_table)) {
@@ -241,7 +236,6 @@ store_classification_results <- function(hist, timing, prediction_table, n_class
   results$Number_of_samples_train <- hist$params$samples
   results$Number_of_samples_validate <- nrow(prediction_table)
   results$Number_independent_vars <- ncol(train_data)
-  results$Seconds_elapsed <- timing[["elapsed"]]
   results <- classification_metrics(results, results$Number_of_samples_validate)
   results
 }

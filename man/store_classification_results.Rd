@@ -6,7 +6,6 @@
 \usage{
 store_classification_results(
   hist,
-  timing,
   prediction_table,
   n_classes,
   confusion_matrix,
@@ -15,8 +14,6 @@ store_classification_results(
 }
 \arguments{
 \item{hist}{the keras history object}
-
-\item{timing}{the timings from the machine learning steps}
 
 \item{prediction_table}{the data.frame comparing predictions and true values}
 

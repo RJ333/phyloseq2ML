@@ -74,6 +74,10 @@ add_unique_lineages <- function(phyloseq_object) {
   if(class(phyloseq_object) != "phyloseq") {
     stop('Provided argument for "phyloseq_object" is not of class "phyloseq"')
   }
+  if(any(grepl("To_", phyloseq::rank_names(phyloseq_object)))) {
+    futile.logger::flog.warn('rank_names(phyloseq_object) already contain the pattern "To_",
+      unique lineages already added?')
+  }
   # get available taxa ranks and create a vector containing an 
   # interleaved order of columns based on the number of taxa ranks
   tax_columns <- colnames(phyloseq::tax_table(phyloseq_object))

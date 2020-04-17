@@ -15,7 +15,6 @@ test_that("Returns unmodified table if no factor columns present", {
   expect_equal(dummified[[1]], merged_input_regression[[1]])
 })
 
-
 # scaling
 test_that("Scaling returns unmodified response dummy col", {
   scaled_keras <- phyloseq2ML::scaling(oversampled_keras_multi)
@@ -65,7 +64,6 @@ test_that("Scaling ignored response var: mean to 0 not true for all columns", {
 test_that("Breaks for wrong structure of input list", {
   expect_error(phyloseq2ML::scaling(merged_input_binary))
 })
-
 
 # inputtables_to_keras
 test_that("Breaks for wrong structure of input list", {

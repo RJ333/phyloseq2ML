@@ -44,6 +44,23 @@ test_that("Length of output rows equals input rows times classes", {
   expect_equal(nrow(keras_df_multi_prediction), classes * nrow(test_keras_multi_prediction))
 })
 
+test_that("Number of caes per class corresponds to TP + FN for each case, also
+  Number of Samples fits number of predicted cases", {
+  keras_trues <- table(oversampled_keras_multi[[test_keras_multi_prediction$ML_object[1]]][["test_set"]][[as.character(
+    test_keras_multi_prediction$Target[1])]])
+  
+  test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
+    keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
+  keras_testing <- as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
+  
+  result_sub_keras <- subset(keras_testing, ML_object == as.character(test_keras_multi_prediction$ML_object[1]))
+  keras_predicteds <- result_sub_keras[["True_positive"]] + result_sub_keras[["False_negative"]]
+  
+  expect_true(all(result_sub_keras[["Number_of_samples_validate"]] == result_sub_keras[["True_positive"]] + 
+      result_sub_keras[["False_negative"]] + result_sub_keras[["False_positive"]] + result_sub_keras[["True_negative"]]))
+  expect_true(all(keras_predicteds %in% keras_trues))
+})
+
 test_that("Breaks if k_fold > 1 for prediction", {
   test_keras_multi_prediction$k_fold <- 2
   # run keras
@@ -63,12 +80,12 @@ test_that("Breaks if current_k_fold > 1 for prediction", {
 # test store classification
 test_that("Breaks for empty data.frames", {
   empty_df <- data.frame()
-  expect_error(store_classification_results(hist, timing = 0, prediction_table = empty_df, 
+  expect_error(store_classification_results(hist, prediction_table = empty_df, 
     n_classes = 3, confusion_matrix = NULL, train_data = empty_df))
 })
 
 test_that("Breaks for non-data.frames", {
-  expect_error(store_classification_results(hist, timing = 0, prediction_table = NULL, 
+  expect_error(store_classification_results(hist, prediction_table = NULL, 
     n_classes = 3, confusion_matrix = NULL, train_data = empty_df))
 })
 
