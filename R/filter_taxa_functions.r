@@ -29,7 +29,8 @@ filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
 #' This subsetting function allows to create multiple combinations of subsets 
 #' from a list of phyloseq objects. The lowest taxonomic level 
 #' (usually ASV or OTU) is always included, further taxonomic levels can be 
-#' specified as described below.
+#' specified as described below. The call to `phyloseq::tax_glom` can be slow, 
+#' therefore package `speedyseq` is used, if installed.
 #'
 #' @param subset_list a list of phyloseq objects
 #' @param thresholds an integer vector specifying the input
@@ -69,13 +70,23 @@ create_community_table_subsets <- function(subset_list, thresholds,
     names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".ASV")
     subset_list_comb <- subset_list_filtered
   } else {
-    futile.logger::flog.info("Applying taxonomic agglomeration")
-    subset_list_filtered_tax <- unlist(lapply(subset_list_filtered, function(xx) {
-      lapply(tax_levels, function(yy) {
-        phyloseq::tax_glom(xx, taxrank = yy)
-      }
-      )}
-    ))
+    if(!requireNamespace("speedyseq", quietly = TRUE)) {
+      futile.logger::flog.info("Applying taxonomic agglomeration, speed could be improved by installing speedyseq")
+      subset_list_filtered_tax <- unlist(lapply(subset_list_filtered, function(xx) {
+        lapply(tax_levels, function(yy) {
+          phyloseq::tax_glom(xx, taxrank = yy)
+        }
+        )}
+      ))
+    } else {
+      futile.logger::flog.info("Applying taxonomic agglomeration")
+      subset_list_filtered_tax <- unlist(lapply(subset_list_filtered, function(xx) {
+        lapply(tax_levels, function(yy) {
+          speedyseq::tax_glom(xx, taxrank = yy)
+        }
+        )}
+      ))
+    }  
     names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".ASV")
     subset_list_comb <- c(subset_list_filtered, subset_list_filtered_tax)
   }

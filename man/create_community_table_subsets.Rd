@@ -29,5 +29,6 @@ A list of subsetted community tables for each combination of
 This subsetting function allows to create multiple combinations of subsets 
 from a list of phyloseq objects. The lowest taxonomic level 
 (usually ASV or OTU) is always included, further taxonomic levels can be 
-specified as described below.
+specified as described below. The call to `phyloseq::tax_glom` can be slow, 
+therefore package `speedyseq` is used, if installed.
 }
