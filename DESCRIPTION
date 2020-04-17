@@ -1,6 +1,6 @@
 Package: phyloseq2ML
 Title: Connects Phyloseq To Ranger And Keras
-Version: 0.3
+Version: 0.4
 Authors@R: 
     person(given = "René",
            family = "Janßen",
@@ -20,9 +20,11 @@ Imports:
     data.table,
     keras,
     ranger,
-    purrr
+    purrr,
+    magrittr
 RoxygenNote: 7.0.2
 Suggests: 
     testthat (>= 2.1.0),
     digest,
-    fastDummies
+    fastDummies,
+    tidyr

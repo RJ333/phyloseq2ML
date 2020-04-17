@@ -106,8 +106,6 @@ categorize_response_variable <- function(ML_mode, response_data, ...) {
   }
 }
 
-
-
 #' Categorize continuous values into classes.
 #'
 #' The number and names of classes can be freely chosen.
@@ -128,16 +126,20 @@ categorize_response_variable <- function(ML_mode, response_data, ...) {
 #'
 #' @export
 categorize <- function(response_data, my_breaks, class_labels) {
-   if(!is.numeric(my_breaks)) {
+   if (!is.numeric(my_breaks)) {
     stop("Provided my_breaks contain non-numeric values")
    }
-  if(!is.character(class_labels)) {
+  if (!is.character(class_labels)) {
     stop("Provided class_labels are not of type character")
   }
   futile.logger::flog.info("Factor levels are alphabetically sorted")
-  response_variables_multi <- as.data.frame(apply(response_data, 2, cut, 
+  response_variables <- as.data.frame(apply(response_data, 2, cut, 
     breaks = my_breaks, labels = class_labels))
-  row.names(response_variables_multi) <- row.names(response_data)
-  response_variables_multi
+  row.names(response_variables) <- row.names(response_data)
+  # check if classes contain values
+  least_class <- min(lengths(sapply(response_variables, unique)))
+  if (least_class != length(class_labels)) {
+    futile.logger::flog.warn("Empty classes detected, consider adjusting my_breaks")
+  }
+  response_variables
 }
-      

@@ -72,6 +72,8 @@ splitted_keras_binary <- split_data(keras_dummy_binary, c(0.6, 0.8))
 splitted_keras_multi <- split_data(keras_dummy_multi, c(0.6, 0.8))
 splitted_keras_regression <- split_data(keras_dummy_regression, c(0.6, 0.8))
 
+keras_dummy_multi[[1]]
+
 # oversampling
 oversampled_keras_binary <- oversample(splitted_keras_binary, 2, 0.5)
 oversampled_keras_multi <- oversample(splitted_keras_multi, 2, 0.5)
@@ -82,12 +84,15 @@ scaled_keras_binary <- scaling(oversampled_keras_binary)
 scaled_keras_multi <- scaling(oversampled_keras_multi)
 scaled_keras_regression <- scaling(oversampled_keras_regression)
 
+scaled_keras_multi[[1]][["train_set"]]
+
 # keras format
 ready_keras_binary <- inputtables_to_keras(scaled_keras_binary)
 ready_keras_multi <- inputtables_to_keras(scaled_keras_multi)
 ready_keras_regression <- inputtables_to_keras(scaled_keras_regression)
-str(ready_keras, max = 2)
-str(ready_keras_regression, max = 2)
+str(ready_keras_binary, max = 2)
+
+ready_keras_multi[[1]][["trainset_labels"]]
 
 ###### for ranger
 
@@ -95,17 +100,18 @@ str(ready_keras_regression, max = 2)
 splitted_input_binary <- split_data(merged_input_binary, c(0.6, 0.8))
 splitted_input_multi <- split_data(merged_input_multi, c(0.6, 0.8))
 splitted_input_regression <- split_data(merged_input_regression, c(0.6, 0.8))
-str(splitted_input, max = 2)
+
 
 # oversampling
 oversampled_input_binary <- oversample(splitted_input_binary, 1, 0.5)
 oversampled_input_multi <- oversample(splitted_input_multi, 1, 0.5)
 oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
 
+####### for ranger
 # set up a parameter data.frame
 parameter_df <- extract_parameters(oversampled_input_multi)
 
-##### when to refactor target variable?
+##### include step here?
 hyper_grid <- expand.grid(
   ML_object = names(oversampled_input_multi),
   Number_of_trees = c(151),
@@ -120,7 +126,83 @@ master_grid$Target <- as.character(master_grid$Target)
 test_grid <- head(master_grid, 1)
 
 # running ranger
+#### check confusion matrix levels multi, adjust flog.info paste message
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
-    ranger_classification, the_list = oversampled_input, master_grid = master_grid, step = "training")
+    ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid, step = "training")
 # extract list elements within data frame into rows
 results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
+
+####### for keras multi
+# set up a parameter data.frame
+parameter_keras_multi <- extract_parameters(ready_keras_multi)
+
+hyper_keras_multi <- expand.grid(
+  ML_object = names(ready_keras_multi),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 1, 
+  current_k_fold = 1,
+  Early_callback = "accuracy", #prediction: "accuracy", training: "val_loss"
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "softmax", # sigmoid for binary
+  Optimizer_function = "rmsprop",
+  Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
+  Metric = "accuracy",
+  Cycle = 1:3,
+  step = "prediction",
+  Classification = "multiclass",
+  Delay = 2)
+
+master_keras_multi <- merge(parameter_keras_multi, hyper_keras_multi, by = "ML_object")
+# order by current_k_fold 
+master_keras_multi <- master_keras_multi[order(
+  master_keras_multi$ML_object, 
+  master_keras_multi$Cycle, 
+  master_keras_multi$current_k_fold), ]
+
+test_keras_multi_prediction <- head(master_keras_multi, 2)
+
+test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
+  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
+keras_df_multi_prediction <-  as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
+
+####### for keras binary
+# set up a parameter data.frame
+parameter_keras_binary <- extract_parameters(ready_keras_binary)
+
+hyper_keras_binary <- expand.grid(
+  ML_object = names(ready_keras_binary),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 4, 
+  current_k_fold = 1:4,
+  Early_callback = "val_loss", #prediction: "accuracy", training: "val_loss"
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "softmax", # sigmoid for binary
+  Optimizer_function = "rmsprop",
+  Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
+  Metric = "accuracy",
+  Cycle = 1:3,
+  step = "training",
+  Classification = "binary",
+  Delay = 2)
+
+master_keras_binary <- merge(parameter_keras_binary, hyper_keras_binary, by = "ML_object")
+master_keras_binary <- master_keras_binary[order(
+  master_keras_binary$ML_object, 
+  master_keras_binary$Cycle, 
+  master_keras_binary$current_k_fold), ]
+
+test_keras_binary_training <- head(master_keras_binary, 2)
+
+test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
+  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
+keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))

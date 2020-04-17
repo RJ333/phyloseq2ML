@@ -23,6 +23,10 @@ usethis::use_package("purrr")
 usethis::use_package("speedyseq", "Suggests")
 usethis::use_package("futile.logger", "Suggests")
 usethis::use_package("fastDummies", "Suggests")
+usethis::use_package("tidyr", "Suggests")
+# to make use %>%
+usethis::use_pipe()
+
 # this allows to install e.g. from bioconductor
 setRepositories()
 # if it complaines about missing documentation, you may not have run this command
@@ -70,6 +74,10 @@ usethis::use_data(testps,
   ready_keras_binary,
   ready_keras_multi,
   ready_keras_regression,
+  
+  # keras run
+  test_keras_binary_training,
+  test_keras_multi_prediction,
   
   ###### for ranger
   # split merged list into training and test parts

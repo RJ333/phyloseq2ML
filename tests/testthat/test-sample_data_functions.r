@@ -31,7 +31,7 @@ test_that("Check that underscores are converted to dots", {
 
 test_that("Label for first bin is second factor level due to alphabetical sorting", {
   categorized <- phyloseq2ML::categorize_response_variable(ML_mode = "classification", 
-    response_data = response_variables, my_breaks = c(-Inf, 0, Inf),class_labels = c("lower", "higher"))
+    response_data = response_variables, my_breaks = c(-Inf, 0, Inf), class_labels = c("lower", "higher"))
   expect_equal(levels(categorized[["TNT"]])[2], "lower")
 })
 
