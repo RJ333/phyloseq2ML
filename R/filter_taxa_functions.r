@@ -41,17 +41,23 @@ filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
 #'   "Genus" is appended to the name the agglomerated data.frame in the
 #'   results list for later distinction. Check taxa level using 
 #'   `colnames(tax_table(TNT_communities))`
+#' @param taxa_prefix The leading name of your taxa, e.g. `ASV` or `OTU`, 
+#'   must not contain an underscore or white space
 #' @param ... further argument passed on to filter_subsets()
 #'
 #' @return A list of subsetted community tables for each combination of 
 #'   phyloseq_subset, thresholds and tax_levels (+ ASV/OTU)
 #' @export
 create_community_table_subsets <- function(subset_list, thresholds, 
-  tax_levels = NULL, ...) {
+  tax_levels = NULL, taxa_prefix, ...) {
   if (!is.list(subset_list))
     stop("Input needs to be a list")
   if (length(thresholds) < 1)
     stop("No count thresholds provided for subsetting")
+  if (!is.character(taxa_prefix) | !length(taxa_prefix) == 1)
+    stop("Please provide a single character string as name")
+  if(grepl("_", taxa_prefix, fixed = TRUE))
+     stop("taxa_prefix needs to be a string without underscores")
   
   subset_list_filtered <- list()
   filter_counter <- 0
@@ -67,7 +73,7 @@ create_community_table_subsets <- function(subset_list, thresholds,
   }
   if (is.null(tax_levels)) {
     futile.logger::flog.info("No taxonomic levels for agglomeration specified")
-    names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".ASV")
+    names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".", taxa_prefix)
     subset_list_comb <- subset_list_filtered
   } else {
     if(!requireNamespace("speedyseq", quietly = TRUE)) {

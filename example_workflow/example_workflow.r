@@ -13,20 +13,21 @@ testps <- standardize_phyloseq_headers(
 # translate ASVs to genus
 levels_tax_dictionary <- c("Family", "Genus")
 taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
-translate_ID(ID = c("ASV02", "ASV17"), tax_level = c("Genus"), taxa_vector_list)
-
-# define subsetting parameters
-thresholds <- 1500
-selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
+translate_ID(ID = c("ASV02", "ASV17"), tax_level = "Genus", taxa_vector_list)
 
 # phyloseq objects as list
 subset_list <- list(
   ps_V4_surface = testps
 )
 
+# define subsetting parameters
+thresholds <- c(1000, 1500)
+selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
+
 # tax levels parameter is NULL as default
 subset_list_tax <- create_community_table_subsets(
-  subset_list = subset_list, 
+  subset_list = subset_list,
+  taxa_prefix = "ASV",
   thresholds = thresholds,
   tax_levels = selected_taxa_1)
 subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)

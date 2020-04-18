@@ -4,7 +4,13 @@
 \alias{create_community_table_subsets}
 \title{Create subsets of phyloseq objects based on ASV/OTU counts and taxa level.}
 \usage{
-create_community_table_subsets(subset_list, thresholds, tax_levels = NULL, ...)
+create_community_table_subsets(
+  subset_list,
+  thresholds,
+  tax_levels = NULL,
+  taxa_prefix,
+  ...
+)
 }
 \arguments{
 \item{subset_list}{a list of phyloseq objects}
@@ -18,6 +24,9 @@ Here, "To_genus" is the corresponding taxonomic level in tax_table() and
 "Genus" is appended to the name the agglomerated data.frame in the
 results list for later distinction. Check taxa level using 
 `colnames(tax_table(TNT_communities))`}
+
+\item{taxa_prefix}{The leading name of your taxa, e.g. `ASV` or `OTU`, 
+must not contain an underscore or white space}
 
 \item{...}{further argument passed on to filter_subsets()}
 }

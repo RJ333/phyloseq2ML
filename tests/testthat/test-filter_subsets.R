@@ -20,19 +20,30 @@ test_that("Agglomeration fails if tax levels are not among  tax ranks", {
   expect_error(phyloseq2ML::create_community_table_subsets(
   subset_list = list(TNT_communities),  
   thresholds = c(1500, 2000),
+  taxa_prefix = "ASV",
   tax_levels = "Space Force"))
+})
+
+test_that("Agglomeration fails if taxa_prefix contains underscore", {
+  expect_error(phyloseq2ML::create_community_table_subsets(
+  subset_list = list(TNT_communities),  
+  thresholds = c(1500, 2000),
+  taxa_prefix = "ASV_",
+  tax_levels = "To_Genus"))
 })
 
 test_that("The returning object is a list also without tax levels specified", {
   expect_true(is.list(phyloseq2ML::create_community_table_subsets(
-    subset_list = list(TNT_communities),  
+    subset_list = list(TNT_communities),
+    taxa_prefix = "ASV",
     thresholds = c(1500, 2000))))
 })
 
 test_that("create_counttable_subsets fails if count value vector is empty", {
   empty_vector <- c()
   expect_error(phyloseq2ML::create_community_table_subsets(
-    subset_list = list(TNT_communities),  
+    subset_list = list(TNT_communities),
+    taxa_prefix = "ASV",
     thresholds = empty_vector))
 })
 
@@ -40,5 +51,6 @@ test_that("create_counttable_subsets fails if input is not a list", {
   expect_error(phyloseq2ML::create_community_table_subsets(
     subset_list = TNT_communities,  
     thresholds = 500,
+    taxa_prefix = "ASV",
     tax_levels = "Genus"))
 })
