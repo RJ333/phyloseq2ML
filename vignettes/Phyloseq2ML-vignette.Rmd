@@ -7,6 +7,7 @@ vignette: >
   %\VignetteIndexEntry{Phyloseq2ML-vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+number_sections: true
 ---
 
 ```{r, include = FALSE}
@@ -23,24 +24,208 @@ library(phyloseq)
 
 ## Before starting
 
-### Background
-If you are completely new to Machine Learning (ML) or even to R at all, you might want to do some reading first (you probably already have). 
+You can also go directly to [Let's start]
 
-### Suggestions
-There is a package called `speedyseq` available on github, you can install it using:
+### Background
+If you are completely new to Machine Learning (ML) or even to R at all, you might want to do some reading first (you probably already have), such as [10 tips for machine learning with biological data](https://biodatamining.biomedcentral.com/articles/10.1186/s13040-017-0155-3). You should know what supervised machine learning is and at least roughly how Random Forests work. Check out this [youtube channel](https://www.youtube.com/results?search_query=statquest+random+forest) for the best statistics and machine learning videos I've seen (there a lot of bad ones online!). Double Bam!
+
+### Purpose of this package
+
+In short: be able to use or test machine learning (currently Random Forest and Neural Networks) with microbiome data and corresponding environmental data.
+
+How: By providing some functions that make use of phyloseqs standard data format. Phyloseq is the starting point as you can basically get all kinds of data into phyloseq format
+
+Additional: Providing wrappers to actual run ML using this package and get results with metrics. Maybe some more functions to look into the results. This is especially for not-hardcore users, who probably want to specify their own ML approaches. Using this package, the data is ready to go for that.
+
+### What does the package contain
+
+* Phyloseq object modification
+* Data preparation for binary and multi-class classification and regression
+* Generating a list of input data.frames for ML
+* Running the full list and getting results with metrics for Random Forest and Artificial Neural Net
+
+### Why are these methods implemented?
+
+For historical reasons, I used Random Forest and Artificial Neurals Networks in my first research paper based on a lab experiment, we were now curious to see how they perform in a real world setting. As this package mainly is a way of distributing the code that I use for my current work, these are the supported methods at the moment.
+
+### What do you need?
+
+* obviously `phyloseq`, `ranger` and `keras` with `tensorflow` as backend
+* also using `data.table` for the oversampling function
+* logging (printing messages) via `futile.logger`, you can set the information urgency threshold
+* `purrr` and `tidyr` are used for the ML wrapper functions. 
+* `fastDummies` is used to turn factor columns into integer dummy columns (only consisting of 0 and 1)
+* There is a package called `speedyseq` available on github, you can install it using:
 
 ```r
 devtools::install_github("mikemc/speedyseq")
 ```
 It replaces a couple of phyloseq included functions with a faster version. For this package, we are only interested in a faster version of `tax_glom`, but as a phyloseq user, having a quicker `ps_melt` function might be even more interesting.
 
-### Purpose of this package
 
-Having landed rather accidently in the world of ML (and bioinformatics before that), I realized that when you know your stuff, it is hard to get back to the mind of a person who does not know yet. It makes it even harder to get along in a new area of work such as programming-based work if people tell you, how you can easily do stuff (like write your own package). I suppose more people do not have a background in programming at all, just like me. That is a problem, as there is a lot to explore which can make your life actually easier, but you need to invest the learning time and it sounds complicated. On the other hand, you might not be intersted in the computer stuff, you want to have the results to get back to interpretation, the lab or writing a paper. 
+### Future plans
 
-A large amount of time is spent on data formatting and ppreparation for the actual tasks. When I realized that it takes me murch more effort to get the code together for my current project, I thought there should be a way so not everyone has to go through this. Especially, if you just want to have a short glimpse if ML works on your data.
+Maybe include gradient boosting
 
-mor  working on  is the most complex (in relative terms) that I've written or used so far. As there is so much people, who just get thrown into an informatic task ound with
+### Should I use this package?
 
+Yes, obviously ;-) But to be honest, if you know your way around R, you can have a look at packages like `caret`, `parsnip` etc which try to provide an interface to various machine learning methods. 
 
-### Why are these methods implemented?
+This package is rather specific for researchers who are rather new to either R, microbial bioinformatics and/or ML. 
+
+If you want to use the wrappers I'm providing: they do not allow full ML control ovr all parameters, but I explain in the vignette how to make your own with your own settings. There are some more option for `ranger` and of course, there is a huge amount of possibilities for `keras`
+
+## Let's start
+
+First we load the required libraries. I have speedyseq installed, but you can also you phyloseq. I'm also using a logger package named [futile.logger](https://github.com/zatonovo/futile.logger) (flog). It has different notification settings, and you can choose if you only want to see warnings, or already information etc. My package is quite verbose to make you aware of potential problems early on, so you might want to have less output printed.
+
+The example set uses ASVs generated by `dada2`, but if you have OTUs (`mothur`) or genera (`SILVAngs`) or whatever count data, just replace it in your head. This package is not limited to ASVs.
+
+```{r}
+library(speedyseq)  # or library(phyloseq)
+library(phyloseq2ML)
+futile.logger::flog.threshold("INFO")
+```
+We can load the included phyloseq object and have a look at it dimensions
+```{r}
+data(TNT_communities)
+TNT_communities
+```
+As you can see it is a very small data set which would not make any sense for ML, but it should serve for demonstration purposes. The data set is about microbial communities in sediments where ammunition was [sea-dumped after the WWII](https://udemm.geomar.de/), which took place in the Kolberger Heide near Kiel, Germany. 
+
+We will now add unique lineages for each ASV, independent of its taxonomic annotation. This way, we don't lose taxa that are not annotated e.g. at Genus rank. Check the difference here:
+```{r}
+# modify phyloseq object
+TNT_communities2 <- add_unique_lineages(TNT_communities)
+colnames(tax_table(TNT_communities))
+colnames(tax_table(TNT_communities2))
+```
+Depending on your phyloseq object, it could be useful to re-order your lowest rank taxa organisation. In this case, we already have ASVs, but after I subsetted to generate this example data, the numbering is off. If you import data from `dada2` your names might even still be the actual sequences. In this case, you can `use_sequences = TRUE`, so the ASVs get moved to the refseq() slot of the phyloseq object (The example data contained the refseq() data, but it makes the phyloseq object quite large, so I removed them). You can specify the name prefix such as "OTU" or "ASV" and the function adds the appropriate amount of leading 0s to the ongoing number. Your taxa_prefix should not contain `_`.
+```{r}
+taxa_names(TNT_communities)
+testps <- standardize_phyloseq_headers(
+  phyloseq_object = TNT_communities2, taxa_prefix = "ASV", use_sequences = FALSE)
+taxa_names(testps)
+```
+Another useful function is a tax dictionary, which allows you to translate your ASV to the corresponding taxonomic ranks.
+```{r}
+# translate ASVs to genus
+levels_tax_dictionary <- c("Order", "Family", "Genus")
+taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
+translate_ID(ID = c("ASV01", "ASV03", "ASV17"), tax_level = "Genus", taxa_vector_list)
+``` 
+This is weird, we only get two return values for the 3 ASVs. If we look into the function's documentation using 
+```{r}
+?translate_ID 
+``` 
+we can see that the default value for `na.rm = TRUE`, which means that not annotated ranks are removed. Let's see which ASV was not annotated at genus level:
+```{r}
+translate_ID(ID = c("ASV01", "ASV03", "ASV17"), tax_level = "Genus", taxa_vector_list, na.rm = FALSE)
+``` 
+
+The roadmap to prepare phyloseq data for machine lerning
+
+1. define the phyloseq objects, meaning we use phyloseq functions for subsetting by sample_data entries. 
+2. Abundance based adjustments and per taxonomic rank for each list item. 
+3. Finally, we can add data from the sample_data slot to our input.
+4. Then we only need to add variables from our sample_data which should be predicted by ML.
+5. Split data set in training and test sets: Each named list item becomes a list itself which contains two data.frames for training/valiation and for testing.
+
+Let's have a look what our sample_data slot contains:
+```{r}
+names(sample_data(testps))
+``` 
+So there is a lot of additional context data. The example data set was generated by subsetting `Primerset == "V4"` and `Sample_Type == "Surface"`, that is why I would call this phyloseq object "ps_V4_surface". In the end, we will generate a data.frame that contains all the information about what parameters we chose based on the names and then add the corresponding machine learning results to it. This happens automatically if you adhere to this naming pattern: Your initial name for each phyloseq object should have 2 underscores. The first part, here `ps` is not important later (but counted for numbers of underscores) so you can choose it absolutely freely. The second part in my case described the primer set used and the third part (after the 2. underscore) refers to the general subset (I only used surface sediment samples). Let's create another phyloseq object and then put both as named list items in a list. (We will use named [lists](https://r4ds.had.co.nz/vectors.html#lists) a lot, so you should know a little bit about them!)
+
+```{r}
+# only sediment samples from the restricted ammunition dumping site
+second_phyloseq_object <- subset_samples(testps, Area == "Mine_mound")
+subset_list <- list(
+  ps_V4_surface = testps,
+  ps_V4_minemound = second_phyloseq_object
+)
+str(subset_list, max = 2)  # max defines how many list levels we want to print
+``` 
+>A quick note here: If you want to predict several variables based on different conditons, do this in several analyses. So don't mix e.g. [classification and regression tasks](https://machinelearningmastery.com/classification-versus-regression-in-machine-learning/). 
+
+>Also: for classification, we will use a function to categorize continuous values into classes. The limits need to b the same for all response variables. So if you have e.g. variable 1 and variable 2 containing nutrient concentrations and variable 1 should be split at a concentration of 5 into two classes "below_5" and "above_5" whereas variable 2 should be split at 3 into "below_3", "above_3", these should be separated runs of your workflow.
+
+After we have defined the phyloseq objects, we can now manipulate their community tables (the content of the `otu_table()` slots). For once, we can select how abundant ASVs have to be to be kept. At the moments, these are still absolute sequence counts, not relative abundances. The filter function wants to know, how often an ASV has to be how abundant to keep the ASV. As example, a threshold of 100 and num_samples of 2 would mean that each ASV has to have more than 100 counts in at least 2 samples. If this requirement is fulfilled, this ASV is kept in all samples, including those where it is less abundant than 100 counts. This way we can keep the full range of the ASV's abundance in different samples, whch is valuable informaton for ML
+
+>Note: Don't be too careful with the filter threshold: Try many e.g. `c(5, 50, 250, 500, 1000)`, I was surprised how useful higher thresholds turned out to be for my specific data sets. Of course, this depends among other factors on your sequencing depth.
+
+And then we can also cumulate the abundance of ASVs by a higher taxonomic rank. This means for e.g. the genus rank that each ASV of the same genus is summed up and we continue on genus rank taxonomic resolution. Here we can make use of our added "To_Genus" columns in the `tax_table()`, which allows us to keep taxa such as `..._Pseudomonadales_Pseudomonadaceae_NA_ASV0007` and `..._Pseudomonadales_Moraxellaceae_NA_ASV0013` separate, although they are both annotated as `NA` on "Genus". We should specify how the list items' names should be complemented. These names should be the original tax rank names, here "Genus" and "Family". The original level, such as ASV, is already included.
+
+```{r}
+# define subsetting parameters
+selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
+``` 
+```{r}
+
+# tax levels parameter is NULL as default
+subset_list_tax <- create_community_table_subsets(
+  subset_list = subset_list, 
+  thresholds = c(1000, 1500),
+  taxa_prefix = "ASV",
+  num_samples = 1,
+  tax_levels = selected_taxa_1)
+names(subset_list_tax)
+``` 
+
+>Note: First the ASVs are filtered, then the remaining entries are summed on the specified tax ranks.
+
+After the filter and accumulation step we extract the otu_table() slots from the phyloseq objects and turn them into regular data.frames. The counts are converted to relative abundances in percentage.
+```{r}
+subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)
+str(subset_list_df, max = 1)
+head(subset_list_df[[1]], 2)  # have a look at the first list element, make sure to use [[]], not []
+``` 
+
+So, well done, we have a list of community table data.frames. However, you maybe want to use some e.g. environmental variables you measured to support you ML with additional information. As phyloseq organizes this data already for us, we can make use of it and select which sample_data() columns we want to include. You can use `names(sample_data(testps))` again to see what is available and `str(sample_data(testps))` to see whether a column contains numerical or categorical data. 
+
+>Note: This is still the setup for the "independent" or "predictor" variables. The "dependent", "response" or "target" variable will be specified afterwards.
+
+Let's pick two numerical columns, the amount of phosphorus measured after extracting the sediment with 0.5 M HCl and the total organic carbon. There is also the factor column telling us which samples where taken on which cruise. The function automatically merges these columns to each data.frame in our list of community tables.
+```{r}
+desired_sample_data <- c("TOC", "P_percent", "Cruise_ID")
+subset_list_extra <- add_sample_data(phyloseq_object = testps, 
+  community_tables = subset_list_df, sample_data_names = desired_sample_data)
+sapply(subset_list_extra[1:2], names)
+``` 
+
+>Note: A very important issue to consider are underlying patterns in your provided data that you are not aware of. Just assume all samples that contained the explosive TNT where (maybe on accident) sampled in winter time and in summer time you we only collected samples free of TNT. The ML algorithm would just need to figure out if it looks at a summer or winter community (or as a more drastic example, communities from oxic or anoxic sediments) to correctly predict the presence of TNT. There is still TNT in winter times, though, and what the ML used has nothing to do with the influence of TNT on microorganisms. Just remember: ML looks for correlations, there is nothing about causality to be made from ML.
+
+>Providing the Cruise_ID can be another trap, as the ML could learn which cruises correlate with TNT positive samples (or with winter or summer season), which again is not bad for the prediction quality, but it is not related to the sample properties such as geological parameters or microbial composition at all. We will later have a look at variable importance in Random Forest, where we can check which variable was important for a given classification or regression.
+
+> From [Forbes](https://www.forbes.com/sites/kalevleetaru/2019/01/15/a-reminder-that-machine-learning-is-about-correlations-not-causation/): Putting this all together, the ease with which modern machine learning pipelines can transform a pile of data into a predictive model without requiring an understanding of statistics or even programming has been a key driving force in its rapid expansion into industry. At the same time, it has eroded the distinction between correlation and causation as the new generation of data scientists building and deploying these models conflate their predictive prowess with explanatory power.
+
+Now it is getting interesting. Let us choose the variables from the sample_data() slot we want to predict. As mentioned above, only pick those where you want to apply the same prediction conditions. Here we want to perform multiclass classification with two explosives categorized into classes "none", "below_3", "above_3" referring to their concentration in sediment expressed in pmol/g (yes, that is not much!). We use a function to get the columns from the phyloseq object we used in the beginning and then another function to cut the values into intervals. The labels become the factor levels. `-Inf` and `Inf` make sure that we include all values and obviously, you need as many labels as intervals are generated. If you would use `ML_mode = "regression"`, the response variables would not be altered.
+
+```{r}
+# get response variables
+desired_response_vars <- c("TNT", "DANT_2.6")
+response_variables <- extract_response_variable(
+  response_variables = desired_response_vars, phyloseq_object = testps)
+# cut response numeric values into 3 classes
+responses_multi <- categorize_response_variable(
+  ML_mode = "classification", 
+  response_data = response_variables, 
+  my_breaks = c(-Inf, 0, 3, Inf), 
+  class_labels = c("none", "below_3", "above_3"))
+head(responses_multi, 10)
+```
+
+Now we can add these response columns to our predictor tables. As we will only predict one response at a time, each response variable will be merged with each input table.
+```{r}
+merged_input_multi <- merge_input_response(subset_list_extra, responses_multi)
+# number of predictor tables x number of response variables
+length(merged_input_multi) == length(subset_list_extra) * ncol(responses_multi) 
+```
+
+Technically we could start with machine learning already. If you want to, just run
+```{r}
+first_try <- merged_input_multi[[2]]
+ranger_trained <- ranger::ranger(TNT ~ ., data = first_try)
+ranger_trained
+ranger_trained$confusion.matrix
+```
