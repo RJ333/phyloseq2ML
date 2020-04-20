@@ -1,6 +1,6 @@
 Package: phyloseq2ML
 Title: Connects Phyloseq To Ranger And Keras
-Version: 0.4
+Version: 0.5
 Authors@R: 
     person(given = "René",
            family = "Janßen",

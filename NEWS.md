@@ -1,3 +1,11 @@
+Version 0.5
+
+*  Vignette added demonstrating a possible workflow using built-in data set
+*  Naming patterns changed to open up for users
+*  oversample function is now more appropriately called augment function
+*  ranger regression mtry set to 1/3 of available independent variables as default
+*  speedyseq support added for tax_glom
+
 Version 0.4
 
 *  Keras tensorflow classification runs using purrr:pmap including metrics implemented
