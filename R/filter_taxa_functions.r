@@ -11,7 +11,7 @@
 #' @return The subsetted phyloseq object
 #'
 #' @export
-filter_subsets <- function(phyloseq_object, threshold = 0, num_samples = 1) {
+filter_subsets <- function(phyloseq_object, threshold, num_samples = 1) {
   if (threshold <= 0)
     stop("threshold is not larger 0, filter would have no effect, 
       stopped function")
@@ -63,12 +63,12 @@ create_community_table_subsets <- function(subset_list, thresholds,
   filter_counter <- 0
   for (phyloseq_subset in subset_list) {
     filter_counter <- filter_counter + 1 
-    for (current_threshold in thresholds) { 
+    for (threshold in thresholds) { 
       current_name <- paste(names(subset_list)[filter_counter], 
-        current_threshold, "filtered", sep = "_")
-      futile.logger::flog.info("Generating subsets: ", current_name, capture = TRUE)
-      subset_list_filtered[[current_name]] <- filter_subsets(phyloseq_subset, 
-        threshold = current_threshold, ...)
+        threshold, "filtered", sep = "_")
+      message <- paste("Generating subset:", current_name)
+      futile.logger::flog.info(message)
+      subset_list_filtered[[current_name]] <- filter_subsets(phyloseq_subset, threshold, ...)
     }
   }
   if (is.null(tax_levels)) {
@@ -93,7 +93,7 @@ create_community_table_subsets <- function(subset_list, thresholds,
         )}
       ))
     }  
-    names(subset_list_filtered) <- paste0(names(subset_list_filtered), ".ASV")
+    names(subset_list_filtered) <- paste0(names(subset_list_filtered),  ".", taxa_prefix)
     subset_list_comb <- c(subset_list_filtered, subset_list_filtered_tax)
   }
   subset_list_comb

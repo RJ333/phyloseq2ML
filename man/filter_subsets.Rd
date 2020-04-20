@@ -4,7 +4,7 @@
 \alias{filter_subsets}
 \title{Remove ASV/OTU/etc from a phyloseq object based on counts.}
 \usage{
-filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
+filter_subsets(phyloseq_object, threshold, num_samples = 1)
 }
 \arguments{
 \item{phyloseq_object}{the object to be filtered}
