@@ -75,15 +75,15 @@ splitted_keras_regression <- split_data(keras_dummy_regression, c(0.6, 0.8))
 
 keras_dummy_multi[[1]]
 
-# oversampling
-oversampled_keras_binary <- oversample(splitted_keras_binary, 2, 0.5)
-oversampled_keras_multi <- oversample(splitted_keras_multi, 2, 0.5)
-oversampled_keras_regression <- oversample(splitted_keras_regression, 2, 0.5)
+# augmentation
+augmented_keras_binary <- augment(splitted_keras_binary, 2, 0.5)
+augmented_keras_multi <- augment(splitted_keras_multi, 2, 0.5)
+augmented_keras_regression <- augment(splitted_keras_regression, 2, 0.5)
 
 # scaling
-scaled_keras_binary <- scaling(oversampled_keras_binary)
-scaled_keras_multi <- scaling(oversampled_keras_multi)
-scaled_keras_regression <- scaling(oversampled_keras_regression)
+scaled_keras_binary <- scaling(augmented_keras_binary)
+scaled_keras_multi <- scaling(augmented_keras_multi)
+scaled_keras_regression <- scaling(augmented_keras_regression)
 
 scaled_keras_multi[[1]][["train_set"]]
 
@@ -103,17 +103,17 @@ splitted_input_multi <- split_data(merged_input_multi, c(0.6, 0.8))
 splitted_input_regression <- split_data(merged_input_regression, c(0.6, 0.8))
 
 
-# oversampling
-oversampled_input_binary <- oversample(splitted_input_binary, 1, 0.5)
-oversampled_input_multi <- oversample(splitted_input_multi, 1, 0.5)
-oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
+# augmentation
+augmented_input_binary <- augment(splitted_input_binary, 1, 0.5)
+augmented_input_multi <- augment(splitted_input_multi, 1, 0.5)
+augmented_regression <- augment(splitted_input_regression, 1, 0.5)
 
 ####### ranger classification
 # set up a parameter data.frame
-parameter_df <- extract_parameters(oversampled_input_multi)
+parameter_df <- extract_parameters(augmented_input_multi)
 
 hyper_grid <- expand.grid(
-  ML_object = names(oversampled_input_multi),
+  ML_object = names(augmented_input_multi),
   Number_of_trees = c(151),
   Mtry_factor = c(1),
   Importance_mode = c("none"),
@@ -127,14 +127,14 @@ master_grid$Target <- as.character(master_grid$Target)
 test_grid <- head(master_grid, 2)
 
 master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
-    ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid)
+    ranger_classification, the_list = augmented_input_multi, master_grid = master_grid)
 results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
 
 #### ranger regression
-parameter_regress <- extract_parameters(oversampled_regression)
+parameter_regress <- extract_parameters(augmented_regression)
 
 hyper_grid_regress <- expand.grid(
-  ML_object = names(oversampled_regression),
+  ML_object = names(augmented_regression),
   Number_of_trees = c(151),
   Mtry_factor = c(1),
   Importance_mode = c("none"),
@@ -147,11 +147,11 @@ test_grid_regress <- head(master_grid_regress, 1)
 
 # running ranger
 master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
-    ranger_regression, the_list = oversampled_regression, master_grid = master_grid_regress)
+    ranger_regression, the_list = augmented_regression, master_grid = master_grid_regress)
 results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
 
 test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
-    ranger_regression, the_list = oversampled_regression, master_grid = test_grid_regress)
+    ranger_regression, the_list = augmented_regression, master_grid = test_grid_regress)
 results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
 
 
