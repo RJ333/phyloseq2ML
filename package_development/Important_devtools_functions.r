@@ -25,6 +25,7 @@ usethis::use_package("futile.logger", "Suggests")
 usethis::use_package("fastDummies", "Suggests")
 usethis::use_package("tidyr", "Suggests")
 usethis::use_package("speedyseq", "Suggests")
+usethis::use_package("ggplot2", "Suggests")
 # to make use %>%
 usethis::use_pipe()
 
