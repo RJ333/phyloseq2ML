@@ -40,8 +40,8 @@ ranger_regression <- function(master_grid, Target, ML_object, Cycle,
   all_vars <- ncol(the_list[[ML_object]][["train_set"]]) - 1
   # multiply sqrt of variables with Mtry_factor; if greater than available 
   # number of variables, select all variables
-  for_mtry <- ifelse((sqrt(all_vars) * Mtry_factor) < all_vars,
-    sqrt(all_vars) * Mtry_factor, all_vars)
+  for_mtry <- ifelse(((all_vars / 3) * Mtry_factor) < all_vars,
+    (all_vars / 3) * Mtry_factor, all_vars)
   
   RF_train <- ranger::ranger(
     dependent.variable.name = Target,  # needs to character, not factor
