@@ -2,6 +2,7 @@
 #'
 #' This function extracts specific parameters from first level named list items.
 #' The data frame headers and length are set up using `initialize_results()`.
+#' The first 3 values can be used to describe the subset components of a data set.
 #' 
 #' @param input_list the input list with named items on first level
 #'
@@ -22,9 +23,11 @@ extract_parameters <- function(input_list) {
   # split the names at all "_" and select the correct proportion
   # representing the desired parameter
   result_table$ML_object <- names(input_list)
-  result_table$Primerset <- as.factor(sapply(strsplit(
+  result_table$Subset_1 <- as.factor(sapply(strsplit(
+    as.character(names(input_list)), '_'), "[", 1))
+  result_table$Subset_2 <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 2))
-  result_table$Subset <- as.factor(sapply(strsplit(
+  result_table$Subset_3 <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 3))
   result_table$Target <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 6))
@@ -57,7 +60,7 @@ extract_parameters <- function(input_list) {
 
 initialize_results <- function(input_list) {
 
-  df_headers <- c("ML_object", "Primerset", "Subset", "Tax_level", "Threshold", 
+  df_headers <- c("ML_object", "Subset_1", "Subset_2", "Subset_3", "Tax_level", "Threshold", 
     "Target", "Split_ratio", "Noise_copies", "Noise_factor")
   df_result <- stats::setNames(data.frame(matrix(ncol = length(df_headers), 
     nrow = length(input_list))), df_headers)
