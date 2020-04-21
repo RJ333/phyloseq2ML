@@ -8,4 +8,4 @@
 ^example_workflow\.r$
 ^example_workflow$
 ^package_development$
-^build_runner$
+^Dockerfile$
