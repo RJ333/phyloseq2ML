@@ -7,7 +7,7 @@ before_script:
   - conda env create -f conda.yml -p ./vendor/conda/$BASE_ENV
   - source activate $BASE_ENV
   - R --vanilla -e 'keras::install_keras(tensorflow = "default")'
-  - R --vanilla -e 'devtools::install_github("mikemc/speedyseq")'
+  #- R --vanilla -e 'devtools::install_github("mikemc/speedyseq")'
 
 variables:
   BASE_ENV: seq2ml
