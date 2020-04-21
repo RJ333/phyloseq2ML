@@ -7,7 +7,7 @@
 create_community_table_subsets(
   subset_list,
   thresholds,
-  tax_levels = NULL,
+  tax_ranks = NULL,
   taxa_prefix,
   ...
 )
@@ -18,11 +18,11 @@ create_community_table_subsets(
 \item{thresholds}{an integer vector specifying the input
 to `filter_taxa(sum(x > threshold) >= 1)`}
 
-\item{tax_levels}{specifying the tax levels to agglomerate in the form 
+\item{tax_ranks}{specifying the tax ranks to agglomerate in the form 
 of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
 Here, "To_genus" is the corresponding taxonomic level in tax_table() and 
 "Genus" is appended to the name the agglomerated data.frame in the
-results list for later distinction. Check taxa level using 
+results list for later distinction. Check taxa rank using 
 `colnames(tax_table(TNT_communities))`}
 
 \item{taxa_prefix}{The leading name of your taxa, e.g. `ASV` or `OTU`, 
@@ -32,7 +32,7 @@ must not contain an underscore or white space}
 }
 \value{
 A list of subsetted community tables for each combination of 
-  phyloseq_subset, thresholds and tax_levels (+ ASV/OTU)
+  phyloseq_subset, thresholds and tax_ranks (+ ASV/OTU)
 }
 \description{
 This subsetting function allows to create multiple combinations of subsets 
