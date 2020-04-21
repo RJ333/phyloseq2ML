@@ -21,7 +21,7 @@ subset_list <- list(
 )
 
 # define subsetting parameters
-thresholds <- c(0.01, 0.015)
+thresholds <- c(0.01, 2.0)
 selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
 
 # tax levels parameter is NULL as default

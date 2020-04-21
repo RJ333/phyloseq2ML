@@ -16,8 +16,8 @@ create_community_table_subsets(
 \item{subset_list}{a list of phyloseq objects}
 
 \item{thresholds}{an integer vector specifying the input
-to `filter_taxa(sum(x > threshold) >= num_samples)`, needs to contain a
-dot as decimal separator such as 1.0 or 0.3 for later string splits}
+to `filter_taxa(sum(x > threshold) >= num_samples)`, will be formatted with
+with digits after . later string splits}
 
 \item{tax_ranks}{specifying the tax ranks to agglomerate in the form 
 of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
