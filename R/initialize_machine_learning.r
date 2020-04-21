@@ -40,10 +40,10 @@ extract_parameters <- function(input_list) {
   result_table$Threshold <- as.numeric(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 4))
   # here we first split at "." and then at "_" to get the Tax_level
-  tax_level_unclean <- sapply(strsplit(
+  tax_rank_unclean <- sapply(strsplit(
     as.character(names(input_list)), '\\.'), "[", 2)
-  result_table$Tax_level <- as.factor(sapply(strsplit(
-    tax_level_unclean, '_'), "[", 1))
+  result_table$Tax_rank <- as.factor(sapply(strsplit(
+    tax_rank_unclean, '_'), "[", 1))
 
   result_table
 }
@@ -60,7 +60,7 @@ extract_parameters <- function(input_list) {
 
 initialize_results <- function(input_list) {
 
-  df_headers <- c("ML_object", "Subset_1", "Subset_2", "Subset_3", "Tax_level", "Threshold", 
+  df_headers <- c("ML_object", "Subset_1", "Subset_2", "Subset_3", "Tax_rank", "Threshold", 
     "Target", "Split_ratio", "Noise_copies", "Noise_factor")
   df_result <- stats::setNames(data.frame(matrix(ncol = length(df_headers), 
     nrow = length(input_list))), df_headers)
