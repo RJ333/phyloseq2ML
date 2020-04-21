@@ -1,4 +1,4 @@
-name: seq2ml
+name: phyloseq2ml
 channels:
   - conda-forge
   - bioconda
