@@ -24,3 +24,19 @@ The second group of algorithms are Artificial neural networks and in our case, m
 ## Anything else?
 
 you can combine your sample and count table data as input object. Some analysis scripts for microbiome data are included, e.g. variable importance. You can use lists of phyloseq objects to reduce hands on time and some plotting standards are included. You can choose from the various taxonomic levels present in your data which one should be used.
+# How to build the docker image for the CI
+
+
+## Installation
+
+### Set up CI
+
+In order to use the CI, we use a modified docker image that builds on
+`continuumio/miniconda3:latest` and has all dependencies already installed
+defined in the conda environment as well as `keras`, `Tensorflow` and
+`speedyseq`.
+
+```bash
+docker build . -t phyloseq2ml-runner
+```
+
