@@ -13,7 +13,7 @@ testps <- standardize_phyloseq_headers(
 # translate ASVs to genus
 levels_tax_dictionary <- c("Family", "Genus")
 taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
-translate_ID(ID = c("ASV02", "ASV17"), tax_level = "Genus", taxa_vector_list)
+translate_ID(ID = c("ASV02", "ASV17"), tax_rank = "Genus", taxa_vector_list)
 
 # phyloseq objects as list
 subset_list <- list(
@@ -21,16 +21,17 @@ subset_list <- list(
 )
 
 # define subsetting parameters
-thresholds <- c(1000, 1500)
+thresholds <- c(0.01, 0.015)
 selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
 
 # tax levels parameter is NULL as default
+subset_list_rel <- to_relative_abundance(subset_list = subset_list)
 subset_list_tax <- create_community_table_subsets(
-  subset_list = subset_list,
+  subset_list = subset_list_rel,
   taxa_prefix = "ASV",
   thresholds = thresholds,
-  tax_levels = selected_taxa_1)
-subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)
+  tax_ranks = selected_taxa_1)
+subset_list_df <- otu_table_to_df(subset_list = subset_list_tax)
 # add sample data columns to the count table
 #names(sample_data(testps))
 desired_sample_data <- c("TOC", "P_percent")
@@ -187,7 +188,7 @@ master_keras_multi <- master_keras_multi[order(
   master_keras_multi$Cycle, 
   master_keras_multi$current_k_fold), ]
 rownames(master_keras_multi) <- NULL
-test_keras_multi_prediction <- head(master_keras_multi, 4)
+test_keras_multi_prediction <- head(master_keras_multi, 2)
 
 test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
   keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)

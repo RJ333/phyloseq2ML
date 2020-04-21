@@ -17,14 +17,14 @@ test_that("Length of output rows equals input rows times classes", {
 test_that("Breaks for wrong input list", {
   expect_error(test_keras_binary_training$results <- purrr::pmap(
     cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
-    keras_classification, the_list = oversampled_keras_binary, 
+    keras_classification, the_list = augmented_keras_binary, 
     master_grid = test_keras_binary_training))
 })
 
 test_that("Breaks for missing columns in master_grid", {
   expect_error(test_keras_binary_training$results <- purrr::pmap(
     cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
-    keras_classification, the_list = oversampled_keras_binary, 
+    keras_classification, the_list = augmented_keras_binary, 
     master_grid = test_keras_binary_training[, c(1:8)]))
 })
 
@@ -46,7 +46,7 @@ test_that("Length of output rows equals input rows times classes", {
 
 test_that("Number of caes per class corresponds to TP + FN for each case, also
   Number of Samples fits number of predicted cases", {
-  keras_trues <- table(oversampled_keras_multi[[test_keras_multi_prediction$ML_object[1]]][["test_set"]][[as.character(
+  keras_trues <- table(augmented_keras_multi[[test_keras_multi_prediction$ML_object[1]]][["test_set"]][[as.character(
     test_keras_multi_prediction$Target[1])]])
   
   test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 

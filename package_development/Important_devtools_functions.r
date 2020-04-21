@@ -65,10 +65,10 @@ usethis::use_data(testps,
   splitted_keras_multi,
   splitted_keras_regression,
   
-  # oversampling
-  oversampled_keras_binary,
-  oversampled_keras_multi,
-  oversampled_keras_regression,
+  # augmentation
+  augmented_keras_binary,
+  augmented_keras_multi,
+  augmented_keras_regression,
   
   # scaling
   scaled_keras_binary,
@@ -92,10 +92,10 @@ usethis::use_data(testps,
   splitted_input_multi,
   splitted_input_regression,
   
-  # oversampling
-  oversampled_input_binary,
-  oversampled_input_multi,
-  oversampled_regression,
+  # augmentation
+  augmented_input_binary,
+  augmented_input_multi,
+  augmented_regression,
   
   # running ranger
   parameter_df,

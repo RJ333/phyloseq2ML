@@ -1,12 +1,12 @@
 # ranger_regression
 test_that("Length of output equals input", {
   results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), master_grid = test_grid_regress,
-    phyloseq2ML::ranger_regression, the_list = oversampled_regression)
+    phyloseq2ML::ranger_regression, the_list = augmented_regression)
   expect_equal(nrow(results[[1]]), nrow(test_grid_regress))
 })
 
 test_that("Detect no response classes for regression", {
-  classes <- length(levels(oversampled_regression[[1]][["train_set"]][[test_grid_regress$Target]]))
+  classes <- length(levels(augmented_regression[[1]][["train_set"]][[test_grid_regress$Target]]))
   expect_equal(classes, 0)
 })
 
@@ -19,14 +19,14 @@ test_that("Breaks if ML_object names in master_grid do not match list item names
 test_that("Breaks if master_grid$Target is not character", {
   test_grid_regress$Target <- as.factor(test_grid_regress$Target)
   expect_error(purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), master_grid = test_grid_regress,
-    phyloseq2ML::ranger_regression, the_list = oversampled_regression)
+    phyloseq2ML::ranger_regression, the_list = augmented_regression)
   )
 })
 
 test_that("Breaks if master_grid does not contain required columns", {
   expect_error(purrr::pmap(cbind(parameter_df, .row = rownames(parameter_df)), 
     master_grid = parameter_df, phyloseq2ML::ranger_regression, the_list = 
-    oversampled_regression)
+    augmented_regression)
   )
 })
 
@@ -40,7 +40,7 @@ test_that("Breaks if the input list is not correct", {
 test_that("Breaks if the actual response variable is not numeric", {
   expect_error(purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
     master_grid = test_grid_regress, phyloseq2ML::ranger_regression, the_list = 
-    oversampled__input_multi)
+    augmented__input_multi)
   )
 })
 
@@ -56,7 +56,7 @@ test_that("Breaks if no test_set is provided", {
 
 test_that("Breaks if no ranger class object is provided", {
   expect_error(phyloseq2ML::store_regression(trained_rf = "hello",  
-    step = "training", training_data = oversampled_regression[[1]][["train_set"]])
+    step = "training", training_data = augmented_regression[[1]][["train_set"]])
   )
 })
 
