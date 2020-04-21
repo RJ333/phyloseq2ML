@@ -1,7 +1,7 @@
 ^LICENSE\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^conda\.yml$
+^environment\.yml$
 ^vendor$
 ^\.gitlab-ci\.yml$
 ^Important_devtools_functions\.r$
