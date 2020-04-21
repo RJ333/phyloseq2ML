@@ -1,4 +1,4 @@
-name: seq2ml
+name: phyloseq2ml
 channels:
   - conda-forge
   - bioconda
@@ -111,7 +111,6 @@ dependencies:
   - pysocks=1.7.1=py36h9f0ad1d_1
   - python=3.6.10=h8356626_1010_cpython
   - python_abi=3.6=1_cp36m
-  - qpdf=10.0.1=hf30be14_0
   - r-ade4=1.7_15=r36h7fa42b6_1
   - r-ape=5.3=r36h0357c0b_1
   - r-askpass=1.1=r36hcdcec82_1
