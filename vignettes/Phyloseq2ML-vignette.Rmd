@@ -32,11 +32,11 @@ library(phyloseq)
 
 You can also go directly to [Let's start]
 
-## Background
+### Background
 If you are completely new to Machine Learning (ML) or even to R at all, you might want to do some reading first (you probably already have), such as [10 tips for machine learning with biological data](https://biodatamining.biomedcentral.com/articles/10.1186/s13040-017-0155-3). You should know what supervised machine learning is and at least roughly how Random Forests work. Check out this [youtube channel](https://www.youtube.com/results?search_query=statquest+random+forest) for the best statistics and machine learning videos I've seen (there a lot of bad ones online!). Double Bam!
-Neural networks: my keras code is mostly based on this book [Deep Learning with R](https://www.manning.com/books/deep-learning-with-r)
+Neural networks: my keras code is mostly based on this book [Deep Learning with R](https://www.manning.com/books/deep-learning-with-r). But I also included a lot of (very shallow) explanations along the way to give you the key words for easier recherche.
 
-## Purpose of this package
+### Purpose of this package
 
 In short: be able to use or test machine learning (currently Random Forest and Neural Networks) with microbiome data and corresponding environmental data.
 
@@ -44,23 +44,24 @@ How: By providing some functions that make use of phyloseqs standard data format
 
 Additional: Providing wrappers to actual run ML using this package and get results with metrics. Maybe some more functions to look into the results. This is especially for not-hardcore users, who probably want to specify their own ML approaches. Using this package, the data is ready to go for that.
 
-## What does the package contain
+### What does the package contain
 
 * Phyloseq object modification
 * Data preparation for binary and multi-class classification and regression
 * Generating a list of input data.frames for ML
 * Running the full list and getting results with metrics for Random Forest and Artificial Neural Net
 
-## Why are these methods implemented?
+### Why are these methods implemented?
 
 For historical reasons, I used Random Forest and Artificial Neurals Networks in my first research paper based on a lab experiment, we were now curious to see how they perform in a real world setting. As this package mainly is a way of distributing the code that I use for my current work, these are the supported methods at the moment.
 
-## What do you need?
+### What do you need?
 
 * obviously `phyloseq`, `ranger` and `keras` with `tensorflow` as backend
 * also using `data.table` for the oversampling function
 * logging (printing messages) via `futile.logger`, you can set the information urgency threshold
 * `purrr` and `tidyr` are used for the ML wrapper functions. 
+* `ggplot2` for plotting
 * `fastDummies` is used to turn factor columns into integer dummy columns (only consisting of 0 and 1)
 * There is a package called `speedyseq` available on github, you can install it using:
 
@@ -69,20 +70,28 @@ devtools::install_github("mikemc/speedyseq")
 ```
 It replaces a couple of phyloseq included functions with a faster version. For this package, we are only interested in a faster version of `tax_glom`, but as a phyloseq user, having a quicker `ps_melt` function might be even more interesting.
 
+### Future vignette plans
 
-## Future plans
+* Add a data augmentation step and evaluate results using unsupervised Random Forests
+* Use set.seed to run Random Forest and Neural networks with identically splitted input data and directly compare the results
+* Use some phyloseq included data sets for demonstration
+* Show how to modify the `purrr:pmap`-called `ranger_*` and `keras_*` functions to your needs
+* Include variable importance analysis for ranger results
+* Calculate p values for your models
 
-Maybe include gradient boosting
+### Future package plans
 
-## Should I use this package?
+If I find some time I would like to test and include gradient boosting
 
-Yes, obviously ;-) But to be honest, if you know your way around R, you can have a look at packages like `caret`, `parsnip` etc which try to provide an interface to various machine learning methods. 
+### Should I use this package?
 
-This package is rather specific for researchers who are rather new to either R, microbial bioinformatics and/or ML. 
+Yes, obviously ;-) But to be honest, if you know your way around R, you can have a look at packages like `caret`, `parsnip` etc which try to provide a standardized interface to various machine learning and other regression methods. 
 
-If you want to use the wrappers I'm providing: they do not allow full ML control ovr all parameters, but I explain in the vignette how to make your own with your own settings. There are some more option for `ranger` and of course, there is a huge amount of possibilities for `keras`
+This package is rather specific for researchers who are new to R, microbial bioinformatics and/or ML. 
 
-## Let's start
+If you want to use the wrappers I'm providing: they do not allow full ML control ovr all parameters, but you should have a look into the source code to adjust them to your own settings. There are some more option for `ranger` and of course, there is a huge amount of possibilities for `keras`. As mentioned above, I will hopefully include this in the vignette at some point.
+
+# Let's start
 
 First we load the required libraries. I have speedyseq installed, but you can also you phyloseq. I'm also using a logger package named [futile.logger](https://github.com/zatonovo/futile.logger) (flog). It has different notification settings, and you can choose if you only want to see warnings, or already information etc. My package is quite verbose to make you aware of potential problems early on, so you might want to have less output printed.
 
@@ -99,7 +108,7 @@ First we load the required libraries. I have speedyseq installed, but you can al
 The example set uses ASVs generated by `dada2`, but if you have OTUs (`mothur`) or genera (`SILVAngs`) or whatever count data, just replace it in your head. This package is not limited to ASVs.
 
 ```{r}
-library(speedyseq)  # or library(phyloseq)
+library(phyloseq)  # or library(phyloseq)
 library(phyloseq2ML)
 futile.logger::flog.threshold("INFO")
 ```
@@ -407,7 +416,7 @@ train_plot <- ggplot(results_df, aes(x = as.factor(Number_of_trees), y = Balance
     stat_summary(position = position_dodge(width = 0.9), fill = "black", 
       fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
     theme_bw() +
-    facet_wrap(~ Subset_2 + Mtry_factor + Target + Tax_level, nrow = 2)
+    facet_wrap(~ Subset_2 + Mtry_factor + Threshold + Target + Tax_rank, nrow = 2)
 train_plot
 ```
 Aha. So let's pretend we have clearly seen what the best parameters for the test set prediction should be. Remember, this example data set is so reduced, there is not much information left.
@@ -444,7 +453,7 @@ predict_plot <- ggplot(predictions_df, aes(x = as.factor(Number_of_trees), y = B
     stat_summary(position = position_dodge(width = 0.9), fill = "black", 
       fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
     theme_bw() +
-    facet_wrap(~ Subset_2 + Target + Tax_level, nrow = 2)
+    facet_wrap(~ Subset_2 + Threshold + Target + Tax_rank, nrow = 2)
 predict_plot
 ```
 
@@ -510,7 +519,9 @@ What is left to do is already familiar to you: Setting up a data.frame with the 
 
 ### Setting up the parameters data.frame
 
-As you can see below, there are more arguments required. Please refer to `?build_the_model` and `?keras_classification` 
+As you can see below, there are more arguments required. Please refer to `?build_the_model` and `?keras_classification` and the there mentioned links to understand which values are valid and what they mean. In short, we are asking here for a neural network which has two hidden layers of 20 and 8 nodes and the first hidden layer randomly does not use 20 % of its nodes to prevent overfitting. We are going to split our training data into 4 parts, resulting in 4 runs with different train and validation sets. If the callback metric "loss in validation" does not improve for two epochs "Delay" the model is stopped as we assume we reached the best state. The hidden layers are densely connected (each node with each node of the next layer). We are only doing 5 passes of the whole data through the network ("Epochs") to reduce time here. Every 2 samples the weights are updated ("Batch size").
+
+Some values need to be changed if you want to run binary classification or regression (same values for training and prediction here), these are shown in the in line comments:
 
 ```{r}
 parameter_keras_multi <- extract_parameters(ready_keras_multi)
@@ -519,20 +530,76 @@ hyper_keras_multi <- expand.grid(
   ML_object = names(ready_keras_multi),
   Epochs = 5, 
   Batch_size = 2, 
-  k_fold = 1, 
-  current_k_fold = 1,
-  Early_callback = "val_loss", #prediction: "accuracy", training: "val_loss"
+  k_fold = 4, 
+  current_k_fold = 1:4,  # always from 1 to k_fold
+  Early_callback = "val_loss",  # "mae" for regression
   Layer1_units = 20,
   Layer2_units = 8,
   Dropout_layer1 = 0.2,
   Dropout_layer2 = 0.0,
   Dense_activation_function = "relu",
-  Output_activation_function = "softmax", # sigmoid for binary
+  Output_activation_function = "softmax", # "sigmoid" for binary and remove/outcomment line for regression
   Optimizer_function = "rmsprop",
-  Loss_function = "categorical_crossentropy", # binary_crossentropy for binary
-  Metric = "accuracy",
+  Loss_function = "categorical_crossentropy", # "binary_crossentropy" for binary and "mse" for regression 
+  Metric = "accuracy",  # "mae" for regression
   Cycle = 1:3,
   step = "training",
+  Classification = "multiclass",  # this is just for your results data.frame, allows later to subset for multiclass classifications
+  Delay = 2)
+```
+After merging with our parameter_df the ordering might be different to what we would like, so we can fix this using the following piece of code:
+```{r}
+master_keras_multi <- merge(parameter_keras_multi, hyper_keras_multi, by = "ML_object")
+# order by name, cycle and current_k_fold 
+master_keras_multi <- master_keras_multi[order(
+  master_keras_multi$ML_object, 
+  master_keras_multi$Cycle, 
+  master_keras_multi$current_k_fold), ]
+rownames(master_keras_multi) <- NULL
+test_keras_multi_training <- head(master_keras_multi, 2)  # our demo short cut
+```
+If you check the row.names after the order-step, they were changed along with their lines (which makes sense). We refreshed them, otherwise the passing of the row.names to the pmap call is not as informative about the progress: It would tells us that e.g. line 5 is processed, then line 1, then line 13 etc.
+
+At least in my experience neural networks need longer than random forests. And the kind we are using right now is still crazy small to what is going on in deep learning. Additionally, our model does not involve complicated calculation steps as in RNN, LSTM etc. If you plan to go more into the neural network direction you can 1) check if there are [NVIDIA GPUs](https://tensorflow.rstudio.com/installation/gpu/local_gpu/) to make use of available and/or 2) build keras with [tensorflow from source](https://tensorflow.rstudio.com/installation/custom/) on your system, which will make best use of your hardware. 
+
+Still, we are only using a small subset of the data.frame to demonstrate how to run and process the results (spoiler: similar to ranger runs). 
+```{r}
+test_keras_multi_training$results <- purrr::pmap(cbind(test_keras_multi_training, .row = rownames(test_keras_multi_training)), 
+  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_training)
+keras_df_multi_training <-  as.data.frame(tidyr::unnest(test_keras_multi_training, results))
+keras_df_multi_training
+```
+Based on the parameters we used, there is probably not much meaningful output. We can plot it, although many combinations have not been used yet after 2 rows of the data.frame. But the following code should get you started once you have performed larger runs.
+
+```{r fig.height = 6, fig.width = 7}
+ggplot(keras_df_multi_training, aes(x = as.factor(Threshold), y = Balanced_accuracy, colour = Class)) +
+  geom_violin(size = 0.4, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
+  stat_summary(position = position_dodge(width = 0.9), fill = "black", 
+    fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
+  theme_bw() +
+  facet_wrap(~ Subset_2 + Split_ratio + Tax_rank, nrow = 2)
+```
+
+and if you want to predict you can basically use the same code as above, but you need to modify the hyperparameter grid slightly. You can see the differences in the in line comments:
+```{r}
+hyper_keras_multi <- expand.grid(
+  ML_object = names(ready_keras_multi),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 1,  # the k_fold has to be 1, because we don't split our train data in train and validate here 
+  current_k_fold = 1,  # therefore, current_k_fold can only be 1, too
+  Early_callback = "accuracy", # we can't use val_loss, because there are no validation samples to measure it
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "softmax",
+  Optimizer_function = "rmsprop",
+  Loss_function = "categorical_crossentropy",
+  Metric = "accuracy",
+  Cycle = 1:3,
+  step = "prediction",  # this is the relevant switch so the function knows it is about predicting the test set
   Classification = "multiclass",
   Delay = 2)
 ```
