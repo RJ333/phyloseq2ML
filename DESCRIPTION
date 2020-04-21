@@ -30,5 +30,6 @@ Suggests:
     tidyr,
     knitr,
     rmarkdown,
-    speedyseq
+    speedyseq,
+    ggplot2
 VignetteBuilder: knitr
