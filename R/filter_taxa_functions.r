@@ -37,8 +37,8 @@ filter_subsets <- function(phyloseq_object, threshold, num_samples = 1) {
 #'
 #' @param subset_list a list of phyloseq objects
 #' @param thresholds an integer vector specifying the input
-#'   to `filter_taxa(sum(x > threshold) >= num_samples)`, needs to contain a
-#'   dot as decimal separator such as 1.0 or 0.3 for later string splits
+#'   to `filter_taxa(sum(x > threshold) >= num_samples)`, will be formatted with
+#'   with digits after . later string splits
 #' @param tax_ranks specifying the tax ranks to agglomerate in the form 
 #'   of `setNames(c("To_genus", To_family), c("Genus", "Family"))`. 
 #'   Here, "To_genus" is the corresponding taxonomic level in tax_table() and 
@@ -58,8 +58,6 @@ create_community_table_subsets <- function(subset_list, thresholds,
     stop("Input needs to be a list")
   if (length(thresholds) < 1)
     stop("No count thresholds provided for subsetting")
-  if(!all(grepl(".", thresholds, fixed = TRUE)))
-     stop('thresholds need to contain a "." as decimal sep such as 1.0 or 0.3')
   if (!is.character(taxa_prefix) | !length(taxa_prefix) == 1)
     stop("Please provide a single character string as name")
   if(grepl("_", taxa_prefix, fixed = TRUE))
@@ -71,7 +69,7 @@ create_community_table_subsets <- function(subset_list, thresholds,
     filter_counter <- filter_counter + 1 
     for (threshold in thresholds) { 
       current_name <- paste(names(subset_list)[filter_counter], 
-        threshold, "filtered", sep = "_")
+        formatC(threshold, digits = 4, format = "f"), "filtered", sep = "_")
       message <- paste("Generating subset:", current_name)
       futile.logger::flog.info(message)
       subset_list_filtered[[current_name]] <- filter_subsets(phyloseq_subset, threshold, ...)
