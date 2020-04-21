@@ -41,7 +41,7 @@ extract_parameters <- function(input_list) {
     as.character(names(input_list)), '_'), "[", 4))
   # here we first split at "." and then at "_" to get the Tax_level
   tax_rank_unclean <- sapply(strsplit(
-    as.character(names(input_list)), '\\.'), "[", 2)
+    as.character(names(input_list)), '\\.'), "[", 3)
   result_table$Tax_rank <- as.factor(sapply(strsplit(
     tax_rank_unclean, '_'), "[", 1))
 

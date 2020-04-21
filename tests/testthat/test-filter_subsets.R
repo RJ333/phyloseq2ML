@@ -22,12 +22,20 @@ test_that("Filtering fails for threshold of 100", {
   expect_error(phyloseq2ML::filter_subsets(TNT_communities, 100, 1))
 })
 
-test_that("Agglomeration fails if tax levels are not among  tax ranks", {
+test_that("Agglomeration fails if tax levels are not among tax ranks", {
   expect_error(phyloseq2ML::create_community_table_subsets(
   subset_list = list(TNT_communities),  
   thresholds = c(0.1500, 0.2),
   taxa_prefix = "ASV",
   tax_ranks = "Space Force"))
+})
+
+test_that("Agglomeration fails if thresholds do not contain dots", {
+  expect_error(phyloseq2ML::create_community_table_subsets(
+  subset_list = list(TNT_communities),  
+  thresholds = c(0.1500, 2),
+  taxa_prefix = "ASV",
+  tax_ranks = "Genus"))
 })
 
 test_that("Agglomeration fails if taxa_prefix contains underscore", {
