@@ -2,23 +2,23 @@
 % Please edit documentation in R/taxonomy_level_functions.r
 \name{create_taxonomy_lookup}
 \alias{create_taxonomy_lookup}
-\title{Creates a dictionary list to translate taxonomic levels}
+\title{Creates a dictionary list to translate taxonomic ranks}
 \usage{
-create_taxonomy_lookup(phyloseq_object, taxonomic_levels)
+create_taxonomy_lookup(phyloseq_object, taxonomic_ranks)
 }
 \arguments{
 \item{phyloseq_object}{the phyloseq object to extract the taxonomic information from}
 
-\item{taxonomic_levels}{a character vector with taxa levels 
+\item{taxonomic_ranks}{a character vector with taxa ranks 
 e.g. from `colnames(phyloseq::tax_table(phyloseq_object))`}
 }
 \value{
-A list of vectors for each tax level with the corresponding unique 
+A list of vectors for each tax rank with the corresponding unique 
   identifier as row name
 }
 \description{
 This function creates a list containing the entries for a higher taxonomic 
-level in relation to their low level unique identifier (i.e. OTUs or ASVs). 
-The taxonomic levels can be specified and need to be present in `tax_table()`` 
+rank in relation to their low rank unique identifier (i.e. OTUs or ASVs). 
+The taxonomic ranks can be specified and need to be present in `tax_table()`` 
 of the respective phyloseq object
 }
