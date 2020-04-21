@@ -52,7 +52,7 @@ passed through the network?}
 \item{...}{additional features passed by pmap call}
 }
 \value{
-a compiled keras sequential model with two hidden layers#'
+a compiled keras sequential model with two hidden layers
 }
 \description{
 This functions calls keras tensorflow using the parameter values in each row 

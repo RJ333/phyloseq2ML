@@ -23,7 +23,8 @@
 #' @param .row current row of master_grid
 #' @param ... additional features passed by pmap call
 #'
-#' @return a compiled keras sequential model with two hidden layers#'
+#' @return a compiled keras sequential model with two hidden layers
+#' 
 #' @export
 keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold, 
   current_k_fold, Early_callback, Delay, step, the_list, master_grid, .row, ...) {
