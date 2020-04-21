@@ -51,7 +51,8 @@ translate_ID <- function(ID, tax_rank, lookup_table,
   na.rm = TRUE) {
   
   if(!tax_rank %in% names(lookup_table)) {
-    futile.logger::flog.warn("Available names: ", names(lookup_table), capture = TRUE)
+    tax_rank_msg <- paste("Available names: ", names(lookup_table))
+    futile.logger::flog.warn(tax_rank_msg)
     stop("\nThe taxonomic rank ", tax_rank, " is not found in the provided lookup table.")  
   }
   translated <- lookup_table[[tax_rank]][ID]
