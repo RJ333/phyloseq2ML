@@ -1,25 +1,29 @@
 #' Run keras tensorflow regression
 #' 
-#' This functions calls keras tensorflow for regression using the parameter 
-#' values in each row of the provided master_grid, using the data of the list elements.
+#' This functions calls keras tensorflow using the parameter values in each row 
+#' of the provided master_grid, using the data of the list elements. Please have
+#' a look at the keras [fit doc](https://keras.rstudio.com/reference/fit.html)
+#' for explanation on the keras related variables, the arguments are beginning 
+#' with "keras" in the description. Except for `the list`, `master_grid` and `.row`
+#' all arguments need to be column names of `master_grid`
 #' 
-#' @param Target The respective column from the master_grid
-#' @param ML_object The respective column from the master_grid
-#' @param Cycle The respective column from the master_grid
-#' @param Epochs The respective column from the master_grid
-#' @param Batch_size The respective column from the master_grid
-#' @param k_fold The respective column from the master_grid
-#' @param current_k_fold The respective column from the master_grid
-#' @param Early_callback The respective column from the master_grid
-#' @param Delay The respective column from the master_grid
+#' @param Target factor, the response variable
+#' @param ML_object factor or char, the name of the corresponding `the_list` item
+#' @param Cycle integer, the current repetition
+#' @param Epochs keras, integer, how many times should the whole data set be 
+#'   passed through the network?
+#' @param Batch_size keras, integer, how many samples before updating the weights?
+#' @param k_fold integer, the total number of k_folds for cross validation 
+#' @param current_k_fold integer, the current k_fold in range 1 : k_fold 
+#' @param Early_callback keras, string, a callback metric
+#' @param Delay keras, integer, wait for how many epochs before callback happens?
 #' @param step character declaring `training` or `prediction`
 #' @param the_list The input tables list
 #' @param master_grid the data frame containing all parameter combinations
 #' @param .row current row of master_grid
 #' @param ... additional features passed by pmap call
 #'
-#' @return a compiled keras sequential model with two hidden layers
-#'
+#' @return a compiled keras sequential model with two hidden layers#'
 #' @export
 keras_regression <- function(Target, ML_object, Cycle, Epochs, Batch_size, k_fold, 
   current_k_fold, Early_callback, Delay, step, the_list, master_grid, .row, ...) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/keras_classification.R
 \name{keras_classification}
 \alias{keras_classification}
-\title{Run keras tensorflow classification}
+\title{Run keras tensorflow classification.}
 \usage{
 keras_classification(
   Target,
@@ -22,23 +22,24 @@ keras_classification(
 )
 }
 \arguments{
-\item{Target}{The respective column from the master_grid}
+\item{Target}{factor, the response variable}
 
-\item{ML_object}{The respective column from the master_grid}
+\item{ML_object}{factor or char, the name of the corresponding `the_list` item}
 
-\item{Cycle}{The respective column from the master_grid}
+\item{Cycle}{integer, the current repetition}
 
-\item{Epochs}{The respective column from the master_grid}
+\item{Epochs}{keras, integer, how many times should the whole data set be 
+passed through the network?}
 
-\item{Batch_size}{The respective column from the master_grid}
+\item{Batch_size}{keras, integer, how many samples before updating the weights?}
 
-\item{k_fold}{The respective column from the master_grid}
+\item{k_fold}{integer, the total number of k_folds for cross validation}
 
-\item{current_k_fold}{The respective column from the master_grid}
+\item{current_k_fold}{integer, the current k_fold in range 1 : k_fold}
 
-\item{Early_callback}{The respective column from the master_grid}
+\item{Early_callback}{keras, string, a callback metric}
 
-\item{Delay}{The respective column from the master_grid}
+\item{Delay}{keras, integer, wait for how many epochs before callback happens?}
 
 \item{step}{character declaring `training` or `prediction`}
 
@@ -55,5 +56,9 @@ a compiled keras sequential model with two hidden layers
 }
 \description{
 This functions calls keras tensorflow using the parameter values in each row 
-of the provided master_grid, using the data of the list elements.
+of the provided master_grid, using the data of the list elements. Please have
+a look at the keras [fit doc](https://keras.rstudio.com/reference/fit.html)
+for explanation on the keras related variables, the arguments are beginning 
+with "keras" in the description. Except for `the list`, `master_grid` and `.row`
+all arguments need to be column names of `master_grid`
 }
