@@ -31,6 +31,11 @@ usethis::use_pipe()
 
 # setup a vignette for the package
 usethis::use_vignette("Phyloseq2ML-vignette")
+usethis::use_vignette("Prepare_phyloseq_for_Machine_Learning")
+usethis::use_vignette("Ranger_classification")
+usethis::use_vignette("Keras_classification")
+usethis::use_vignette("Ranger_regression")
+usethis::use_vignette("Keras_regression_multiclass")
 
 # this allows to install e.g. from bioconductor
 setRepositories()
