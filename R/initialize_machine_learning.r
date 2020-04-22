@@ -29,6 +29,13 @@ extract_parameters <- function(input_list) {
     as.character(names(input_list)), '_'), "[", 2))
   result_table$Subset_3 <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 3))
+  result_table$Threshold <- as.numeric(sapply(strsplit(
+    as.character(names(input_list)), '_'), "[", 4))
+  # here we first split at "_" and then at "." to get the Tax_rank
+  tax_rank_unclean <- sapply(strsplit(
+    as.character(names(input_list)), '_'), "[", 5)
+  result_table$Tax_rank <- as.factor(sapply(strsplit(
+    as.character(tax_rank_unclean), '\\.'), "[", 2))
   result_table$Target <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 6))
   result_table$Split_ratio <- as.numeric(sapply(strsplit(
@@ -37,13 +44,8 @@ extract_parameters <- function(input_list) {
     as.character(names(input_list)), '_'), "[", 9))
   result_table$Noise_factor <- as.numeric(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 11))
-  result_table$Threshold <- as.numeric(sapply(strsplit(
-    as.character(names(input_list)), '_'), "[", 4))
-  # here we first split at "." and then at "_" to get the Tax_level
-  tax_rank_unclean <- sapply(strsplit(
-    as.character(names(input_list)), '\\.'), "[", 3)
-  result_table$Tax_rank <- as.factor(sapply(strsplit(
-    tax_rank_unclean, '_'), "[", 1))
+
+
 
   result_table
 }

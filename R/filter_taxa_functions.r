@@ -69,7 +69,7 @@ create_community_table_subsets <- function(subset_list, thresholds,
     filter_counter <- filter_counter + 1 
     for (threshold in thresholds) { 
       current_name <- paste(names(subset_list)[filter_counter], 
-        formatC(threshold, digits = 4, format = "f"), "filtered", sep = "_")
+        threshold, "filtered", sep = "_")
       message <- paste("Generating subset:", current_name)
       futile.logger::flog.info(message)
       subset_list_filtered[[current_name]] <- filter_subsets(phyloseq_subset, threshold, ...)
