@@ -143,8 +143,9 @@ str(subset_list, max = 2)  # max defines how many list levels we want to print
 >A quick note here: If you want to predict several variables based on
 different conditons, do this in several analyses. So don't mix e.g.
 [classification and regression tasks](https://machinelearningmastery.com/classification-versus-regression-in-machine-learning/).
+
 >Also: for classification, we will use a function to categorize continuous
-values into classes. The limits need to b the same for all response variables.
+values into classes. The limits need to be the same for all response variables.
 So if you have e.g. variable 1 and variable 2 containing nutrient concentrations
 and variable 1 should be split at a concentration of 5 into two classes
 "below_5" and "above_5" whereas variable 2 should be split at 3 into "below_3",
@@ -156,12 +157,15 @@ After we have defined the phyloseq objects, we can now manipulate their
 community tables (the content of the `otu_table()` slots). For once, we can
 select how abundant ASVs have to be to be kept. The counts are converted to
 relative abundances in percentage. The filter function wants to know, how often
-an ASV has to be how abundant to keep the ASV. As example, a threshold of 0.01
-and num_samples of 2 would mean that each ASV has to have more than 0.01 %
-abundance in at least 2 samples. If this requirement is fulfilled, this ASV is
-kept in all samples, including those where it is less abundant than 100 counts.
-This way we can keep the full range of the ASV's abundance in different samples,
-whch is valuable informaton for ML
+an ASV has to be how abundant to keep the ASV. In code this looks like
+`sum(x > threshold) >= num_samples` with x being the current ASV abundance.
+As example, a threshold of 0.01 and num_samples of 2 would mean that each ASV 
+has to have more than 0.01 % abundance in at least 2 samples. 
+
+If this requirement is fulfilled, this ASV is kept in all samples, including 
+those where it is less abundant than 100 counts. This way we can keep the full 
+range of the ASV's abundance in different samples, which is valuable informaton 
+for ML.
 And then we can also cumulate the abundance of ASVs by a higher taxonomic rank.
 This means for e.g. the genus rank that each ASV of the same genus is summed up
 and we continue on genus rank taxonomic resolution. Here we can make use of our
@@ -266,8 +270,7 @@ pmol/g (yes, that is not much!). We use a function to get the columns from the
 phyloseq object we used in the beginning and then another function to cut the
 values into intervals. The labels become the factor levels. `-Inf` and `Inf`
 make sure that we include all values and obviously, you need as many labels as
-intervals are generated. If you would use `ML_mode = "regression"`, the response
-variables would not be altered.
+intervals are generated.
 
 ```{r}
 # get response variables
