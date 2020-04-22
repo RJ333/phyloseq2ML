@@ -116,12 +116,13 @@ So this is one reason why you should not use the current list for ML.
 The second is important for Random Forest and essential for Neural networks: We
 haven't split our data yet into training and test sets.
 
->Note: Again, there is some terminology confusion possible. I'm using the term
-"validation" for the part of the training data set, which the model is evaluated
-on to see which hyperparameters perform best. The "test" set is the final data
-set which will be predicted using the best model in the train-validate step. You
-can find online information where the meaning of "validation" and "test"" is
-switched!
+>Note: Again, there is some terminology confusion possible. I'm following these 
+[guidelines](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets) 
+where the term "validation" refers to the part of the training data set, which 
+the model is evaluated on to see which hyperparameters perform best. The "test" 
+set is the final data set which will be predicted using the best model in the 
+train-validate step. You can find online information where the meaning of 
+"validation" and "test" is switched!
 
 ### Short background on data set splitting
 
@@ -236,7 +237,7 @@ the name of the list items.
 >Note: Don't get fooled by near perfect training-validatin results. This is
 expected, as you probably have identical (without noise) or almost identical
 sample (with noise) in training and validation. Obviously, the test set is NOT
-allowed to contain augmented samples! The function as is only works on the
+allowed to contain augmented samples! The function as it is only works on the
 training sets.
 
 ```{r results = "hide"}
