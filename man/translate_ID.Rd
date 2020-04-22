@@ -2,7 +2,7 @@
 % Please edit documentation in R/taxonomy_level_functions.r
 \name{translate_ID}
 \alias{translate_ID}
-\title{Translate unique IDs such as ASV/OTUs to specified tax rank}
+\title{Translate unique IDs such as ASV/OTUs to specified tax rank.}
 \usage{
 translate_ID(ID, tax_rank, lookup_table, na.rm = TRUE)
 }

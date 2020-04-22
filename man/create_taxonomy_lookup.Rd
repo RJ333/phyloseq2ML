@@ -2,7 +2,7 @@
 % Please edit documentation in R/taxonomy_level_functions.r
 \name{create_taxonomy_lookup}
 \alias{create_taxonomy_lookup}
-\title{Creates a dictionary list to translate taxonomic ranks}
+\title{Creates a dictionary list to translate taxonomic ranks.}
 \usage{
 create_taxonomy_lookup(phyloseq_object, taxonomic_ranks)
 }
@@ -20,5 +20,5 @@ A list of vectors for each tax rank with the corresponding unique
 This function creates a list containing the entries for a higher taxonomic 
 rank in relation to their low rank unique identifier (i.e. OTUs or ASVs). 
 The taxonomic ranks can be specified and need to be present in `tax_table()`` 
-of the respective phyloseq object
+of the respective phyloseq object.
 }
