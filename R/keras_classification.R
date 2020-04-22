@@ -175,8 +175,10 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
     stop("Length of predictions and data to be predicted differs")
   }
   # provide all classes as factor levels, otherwise confusion matrix breaks if
-  # a class is not predicted at all
+  # a class is not predicted or present at all
   predicted_labels$val_predictions <- factor(predicted_labels$val_predictions, 
+    levels = colnames(training_labels))
+  predicted_labels$factor_targets <- factor(predicted_labels$factor_targets, 
     levels = colnames(training_labels))
   # calculate confusion matrix
   confusion_matrix <- table(
