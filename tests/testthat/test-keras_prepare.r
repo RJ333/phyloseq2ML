@@ -11,6 +11,8 @@ test_that("Response variable stayes as factor after dummification", {
 })
 
 test_that("Returns unmodified table if no factor columns present", {
+  # select numeric columns from the list's first table
+  merged_input_regression[[1]] <- merged_input_regression[[1]][, 1:10]
   dummified <- phyloseq2ML::dummify_input_tables(merged_input_regression)
   expect_equal(dummified[[1]], merged_input_regression[[1]])
 })

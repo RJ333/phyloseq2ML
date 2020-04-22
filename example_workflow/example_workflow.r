@@ -16,25 +16,25 @@ taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
 translate_ID(ID = c("ASV02", "ASV17"), tax_rank = "Genus", taxa_vector_list)
 
 # phyloseq objects as list
+second_phyloseq_object <- subset_samples(testps, Area == "Mine_mound")
 subset_list <- list(
-  ps_V4_surface = testps
+  vignette_V4_surface = testps,
+  vignette_V4_minemound = second_phyloseq_object
 )
 
 # define subsetting parameters
-thresholds <- c(0.01, 2.0)
 selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
-
-# tax levels parameter is NULL as default
-subset_list_rel <- to_relative_abundance(subset_list = subset_list)
+subset_list_rel <- to_relative_abundance(subset_list)
 subset_list_tax <- create_community_table_subsets(
-  subset_list = subset_list_rel,
+  subset_list = subset_list_rel, 
+  thresholds = c(5, 1.5),
   taxa_prefix = "ASV",
-  thresholds = thresholds,
+  num_samples = 1,
   tax_ranks = selected_taxa_1)
 subset_list_df <- otu_table_to_df(subset_list = subset_list_tax)
 # add sample data columns to the count table
 #names(sample_data(testps))
-desired_sample_data <- c("TOC", "P_percent")
+desired_sample_data <- c("TOC", "P_percent", "Cruise_ID", "Run")
 subset_list_extra <- add_sample_data(phyloseq_object = testps, 
   community_tables = subset_list_df, sample_data_names = desired_sample_data)
 # get response variables
@@ -53,7 +53,7 @@ responses_binary <- categorize_response_variable(
   ML_mode = "classification", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, Inf),
-  class_labels = c("below_0", "above_0"))
+  class_labels = c("absent", "present"))
 
 responses_regression <- categorize_response_variable(
   ML_mode = "regression", 
