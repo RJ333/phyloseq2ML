@@ -1,0 +1,73 @@
+---
+title: "Ranger regression"
+author: "René Janßen"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Ranger regression}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Ranger adjustments for regression
+
+If you want to perform regression with ranger, there is not much to change 
+compared to the classification workflow.
+
+## Changes in data preparation 
+
+First of all, your response variable needs to be numeric, obviously. So you 
+don't need to categorize it and you can skip the 
+`categorize_response_variable()` function or use it instead with 
+`ML_method = "regression"`. That's practically it.
+
+## Changes in the analysis
+
+You need to call `ranger_regression` instead of `ranger_classification` in the
+`purrr::pmap` function.
+
+In the actual analysis you should be careful with `Mtry_factor`, the value to 
+multiply with the ranger `mtry` argument of how many variables to sample at each
+split. The default for `mtry` for regression in ranger is 
+`sqrt(all_independent_variables)` (which is the same for classification), but in 
+my implementation and as originally suggested, the default `mtry` value is 
+`all_independent_variables/3` (for regression) which does not leave much room. 
+You can set it to 0.7 or 2, however, it must not be a whole number. I don't have 
+an idea what a reasonable value for your data might be. To use default `mtry` 
+set `Mtry_factor = 1`.
+
+You will receive different output metrics than in classification, of course. All 
+column names in the data frame should be clearly identifiable with metrics such 
+as MSE, RMSE, MAE and R Squared.
+
+>Note: During training, values directly taken from the ranger object might be 
+calculated only based on the out of bag samples (such as R_squared). For more 
+information on this please refer to the ranger manual.
+
+# Ranger adjustments for multi class classification
+
+## Changes in data preparation 
+
+You need to specifiy more than to intervals and corresponding classes in the 
+`categorize_response_variable()` function. You should also have a look how many
+samples per class you have, as this quickly becomes a problem. If you only have
+20 samples left for one class in the prediction step, each sample accounts for 
+5 % accuracy. 
+
+## Changes in the analysis
+
+You need to call `ranger_classification` in the `purrr::pmap` function.
+
+You will get more rows in the results data frame as each class gets own row per
+run.

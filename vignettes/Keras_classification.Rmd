@@ -1,0 +1,280 @@
+---
+title: "Keras classification"
+author: "René Janßen"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Keras_classification}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(phyloseq)
+library(phyloseq2ML)
+```
+# Prepare data for neural network classification with keras
+
+This part of the vignette deals with the run of a keras classification. It makes
+use of the data we've produced in the vignette part about the 
+[general phyloseq preparation](Prepare_phyloseq_for_Machine_Learning.html)
+
+There are three additional steps compared to what we previously did: 
+
+1.  Turn factor columns to dummy columns (one-hot-encoding)
+2.  Scale continuous variables
+3.  Convert the data to keras formatting
+
+I'll explain a little bit about each step when we are there. We start with the
+one-hot-encoding
+
+## Dummify (One-hot-encoding): turn factors into dummy columns
+
+the keras based neural networks only deal with numeric data, not with
+categorical data (they all do, but other frameworks may convert factors for
+you). Here, we have to do it ourselves, but it is not that hard. We will use
+one-hot-encoding [very well explained here](https://towardsdatascience.com/one-hot-encoding-multicollinearity-and-the-dummy-variable-trap-b5840be3c41a)
+which results in dummy variables. In short, dummy variables are a binary
+representation of categorical data. If you had a factor column "Colours" with
+levels "green", "red", "blue", this would result in the three dummy columns
+"Colours_green", "Colours_red", and "Colours_blue". In "Colours_green", there
+would be a 1 for samples, that had the factor level "green", all others are 0.
+The same for the other columns. This brings us to the dummy trap: If you know
+the content of "Colours_green" and "Colours_blue", you implicitly know which
+values were originally "red": all those who are 0 in both mentioned columns. So
+one of the columns is redundant. This can lead to problems, therefore, we remove
+the first of each dummy column set. The function below does that automatically.
+You can read more about dummy columns
+[here](https://en.wikipedia.org/wiki/Dummy_variable_(statistics)) and the dummy
+variable trap
+[here](https://en.wikipedia.org/wiki/Multicollinearity#Remedies_for_multicollinearity).
+
+```{r results = "hide"}
+# dummify input tables for keras ANN
+merged_input_binary <- phyloseq2ML:::merged_input_binary
+keras_dummy_binary <- dummify_input_tables(merged_input_binary)
+```
+
+How does a dummy variable look like? We look at the last columns of list item 1
+```{r}
+df_1 <- keras_dummy_binary[[1]]
+df_1[6, tail(names(df_1))]
+```
+
+## Splitting data into training and test sets
+
+After the dummification we split the data set as we did with the ranger case. We
+will again not make use of the `augment()` function. I will add another vignette
+going more into detail on this function and how to evaluate the outcomes.
+```{r results = "hide"}
+splitted_keras_binary <- split_data(keras_dummy_binary, c(0.601, 0.602))
+# augmentation
+augmented_keras_binary <- augment(splitted_keras_binary, 0, 0.0)
+```
+## Normalization of independent variables
+
+Another requirement to make the neural networks works is some kind of scaling to
+[normalize the input variables](https://en.wikipedia.org/wiki/Feature_scaling).
+You could do that for Random Forest too, but RF looks at one variable at a time
+and chooses split values ad hoc. In neural networks the variables are combined
+and modified by weights. If some input variables are between 1,000,0000 and
+100,000 and others are between -1,5 and -7, the neural network will have issues
+to adjust the weights. There is a lot of information online on this topic. What
+you should know about this scaling function:
+
+1.  for each variable, it subtracts the mean und divides by the standard
+deviation. This way, all variables are centered around 0 and the SD is 1. 2.
+integer columns are ignored 3.  the response variable, if numeric (regression)
+is ignored. We would change what we want to predict, which might cause
+additional problems 4.  The scaling values (the mean and the SD) are calculated
+using only the training data and those are applied to scaling of the test data.
+You can read about this
+[here](https://stats.stackexchange.com/questions/319514/why-feature-scaling-only-to-training-set)
+and
+[here](https://datascience.stackexchange.com/questions/39932/feature-scaling-both-training-and-test-data)
+```{r results = "hide"}
+# scaling
+scaled_keras_binary <- scaling(augmented_keras_binary)
+```
+
+## Convert to keras-like format
+
+We are almost done with the preparation! But keras wants a little bit more
+effort from us to start the ML. If we want to perform classification, we now
+also need to one-hot-encode the response variable, but this time without
+removing the first dummy column. This is taken care of by
+`keras::to_categorical()`. Also, the independent variables are separated from
+the response variable and all numeric data is turned into numeric matrices.
+Let's have a look:
+```{r}
+# keras format
+ready_keras_binary <- inputtables_to_keras(scaled_keras_binary)
+```
+
+# Running keras classification
+
+What is left to do is already familiar to you: Setting up a data frame with the
+parameters and calling the `keras_classification()` function by `purrr::pmap()`.
+The difference is the amount of parameters to choose from. I again want to
+recommend that you read about what you are choosing, because there are plenty
+(and definitely more than with Random Forest) of ways to do something wrong.
+
+>Note: There is regardless of other settings already the possibility to set up
+the architecture of a neural network as you like. I'm working with two hidden
+layers as more have not been proven useful for me and that is what
+`keras_classification()` and `keras_regression()` make use of. However, I will
+add a vignette (or you look into the source code) how to modify this function
+for your own custom-layered neural network.
+
+## Setting up the parameters data frame
+
+As you can see below, there are more arguments required. Please refer to
+`?build_the_model` and `?keras_classification` and the there mentioned links to
+understand which values are valid and what they mean. In short, we are asking
+here for a neural network which has two hidden layers of 20 and 8 nodes and the
+first hidden layer randomly does not use 20 % of its nodes to prevent
+overfitting. We are going to split our training data into 4 parts, resulting in
+4 runs with different train and validation sets. If the callback metric "loss in
+validation" does not improve for two epochs "Delay" the model is stopped as we
+assume we reached the best state. The hidden layers are densely connected (each
+node with each node of the next layer). We are only doing 5 passes of the whole
+data through the network ("Epochs") to reduce time here. Every 2 samples the
+weights are updated ("Batch size").
+
+Some values need to be changed if you want to run binary classification or
+regression (same values for training and prediction here), these are shown in
+the in line comments:
+
+```{r}
+parameter_keras_binary <- extract_parameters(ready_keras_binary)
+head(parameter_keras_binary, 3)
+```
+
+After having extracted all the name pieces, we add the function arguments:
+```{r}
+hyper_keras_binary <- expand.grid(
+  ML_object = names(ready_keras_binary),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 4, 
+  current_k_fold = 1:4,  # always from 1 to k_fold
+  Early_callback = "val_loss",  # "mae" for regression
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "sigmoid", # "sigmoid" for binary and remove/outcomment line for regression
+  Optimizer_function = "rmsprop",
+  Loss_function = "binary_crossentropy", # "binary_crossentropy" for binary and "mse" for regression 
+  Metric = "accuracy",  # "mae" for regression
+  Cycle = 1:3,
+  step = "training",
+  Classification = "binary",  # this is just for your results data frame, allows later to subset for binary classifications
+  Delay = 2)
+```
+After merging with our parameter_df the ordering might be different to what we
+would like, so we can fix this using the following piece of code:
+```{r}
+master_keras_binary <- merge(parameter_keras_binary, hyper_keras_binary, by = "ML_object")
+# order by name, cycle and current_k_fold 
+master_keras_binary <- master_keras_binary[order(
+  master_keras_binary$ML_object, 
+  master_keras_binary$Cycle, 
+  master_keras_binary$current_k_fold), ]
+rownames(master_keras_binary) <- NULL
+test_keras_binary_training <- head(master_keras_binary, 5)  # our demo short cut
+```
+If you check the row names after the order-step, they were changed along with
+their lines (which makes sense). We refreshed them, otherwise the passing of the
+row names to the pmap call is not as informative about the progress: It would
+tells us that e.g. line 5 is processed, then line 1, then line 13 etc.
+
+## Running the keras classification
+
+At least in my experience neural networks need longer than random forests. And
+the kind we are using right now is still crazy small to what is going on in deep
+learning. Additionally, our model does not involve complicated calculation steps
+as in RNN, LSTM etc. If you plan to go more into the neural network direction
+you can 1) check if there are 
+[NVIDIA GPUs](https://tensorflow.rstudio.com/installation/gpu/local_gpu/) 
+to make use of available and/or 2) build keras with 
+[tensorflow from source](https://tensorflow.rstudio.com/installation/custom/) 
+on your system, which will make best use of your hardware.
+Still, we are only using a small subset of the data frame to demonstrate how to
+run and process the results (spoiler: similar to ranger runs).
+```{r}
+test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
+  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
+keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
+``` 
+
+## Plotting the classification results
+
+Based on the parameters we used, there is probably not much meaningful output. 
+We can plot it, although many combinations have not been used yet after a few 
+rows of the data frame. But the following code should get you started once you 
+have performed proper analyses. Some metrics such as Balanced_accuracy 
+summarize the results over all classes, so plotting values per class is a little
+redundant. You can try class-specific metrics as Precision, Recall etc
+
+```{r fig.height = 6, fig.width = 7}
+library(ggplot2)
+ggplot(keras_df_binary_training, aes(x = as.factor(Threshold), y = Balanced_accuracy, colour = Class)) +
+  geom_violin(size = 0.4, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
+  stat_summary(position = position_dodge(width = 0.9), fill = "black", 
+    fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
+  theme_bw() +
+  facet_wrap(~ Subset_2 + Split_ratio + Tax_rank, nrow = 2)
+```
+
+## Adjustments required for prediction
+
+and if you want to predict you can basically use the same code as above, but you
+need to modify the hyperparameter grid slightly. You can see the differences in
+the in line comments:
+```{r}
+hyper_keras_binary <- expand.grid(
+  ML_object = names(ready_keras_binary),
+  Epochs = 5, 
+  Batch_size = 2, 
+  k_fold = 1,  # the k_fold has to be 1, because we don't split our train data in train and validate here 
+  current_k_fold = 1,  # therefore, current_k_fold can only be 1, too
+  Early_callback = "accuracy", # we can't use val_loss, because there are no validation samples to measure it
+  Layer1_units = 20,
+  Layer2_units = 8,
+  Dropout_layer1 = 0.2,
+  Dropout_layer2 = 0.0,
+  Dense_activation_function = "relu",
+  Output_activation_function = "sigmoid",
+  Optimizer_function = "rmsprop",
+  Loss_function = "binary_crossentropy",
+  Metric = "accuracy",
+  Cycle = 1:3,
+  step = "prediction",  # this is the relevant switch so the function knows it is about predicting the test set
+  Classification = "binary",
+  Delay = 2)
+```
+
+# Some remarks
+
+As you could see here, we only looked into a tiny bit of parameter combinations.
+There is a lot to explore, e.g. how many nodes fit your data best (and do not 
+overfit), do you need dropout nodes, the batch sizes etc. This is why I would
+suggest to start with Random Forest. RF also has developed many descendents,
+but the basic Random Forest algorithms might be more intuitive and there are 
+just a few hyperparameters to tune. I would ASSUME (I really don't know) that if
+a Random Forest can make no sense whatsoever of your data set, it is unlikely 
+that a neural network will jump in and rescue your analysis. Still, they run on
+completely different methods, that is what comparing them makes so interesting.

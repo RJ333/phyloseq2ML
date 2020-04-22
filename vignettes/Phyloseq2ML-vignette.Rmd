@@ -1,14 +1,11 @@
 ---
-title: "Phyloseq2ML-vignette"
+title: "Phyloseq2ML vignette"
 author: "René Janßen"
 date: "`r Sys.Date()`"
-output:
-  html_document:
+output: 
+  rmarkdown::html_vignette:
     toc: true
     toc_depth: 3
-    toc_float:
-      collapsed: true
-      smooth_scroll: false
     number_sections: true
 vignette: >
   %\VignetteIndexEntry{Phyloseq2ML-vignette}
@@ -30,576 +27,106 @@ library(phyloseq)
 
 # Before starting
 
-You can also go directly to [Let's start]
+You can also go directly to [Let's start](Prepare_phyloseq_for_Machine_Learning.html)
 
-### Background
-If you are completely new to Machine Learning (ML) or even to R at all, you might want to do some reading first (you probably already have), such as [10 tips for machine learning with biological data](https://biodatamining.biomedcentral.com/articles/10.1186/s13040-017-0155-3). You should know what supervised machine learning is and at least roughly how Random Forests work. Check out this [youtube channel](https://www.youtube.com/results?search_query=statquest+random+forest) for the best statistics and machine learning videos I've seen (there a lot of bad ones online!). Double Bam!
-Neural networks: my keras code is mostly based on this book [Deep Learning with R](https://www.manning.com/books/deep-learning-with-r). But I also included a lot of (very shallow) explanations along the way to give you the key words for easier recherche.
+## Vignette organization
 
-### Purpose of this package
+This vignette part serves as link between the different sections and lays out 
+some prerequisites.
 
-In short: be able to use or test machine learning (currently Random Forest and Neural Networks) with microbiome data and corresponding environmental data.
+First look how to [prepare your data](Prepare_phyloseq_for_Machine_Learning.html)
+coming from a phyloseq object for Machine Learning.
 
-How: By providing some functions that make use of phyloseqs standard data format. Phyloseq is the starting point as you can basically get all kinds of data into phyloseq format
+We then go into the Random Forest specific part of the workflow running a
+[Ranger classification](Ranger_classification.html).
 
-Additional: Providing wrappers to actual run ML using this package and get results with metrics. Maybe some more functions to look into the results. This is especially for not-hardcore users, who probably want to specify their own ML approaches. Using this package, the data is ready to go for that.
+Complementary to that, I will explain how to run a classification with keras
+[here](Keras_classification.html). Please note that re-used functions explained
+in one of the vignettes above will not be explained again in detail.
 
-### What does the package contain
+I furthermore added some code examples on how to run both multiclass 
+classification and regression with [ranger](Ranger_regression.html) and 
+[keras](Keras_regression_multiclass.html). As this only requires minimal 
+adjustments, comments are kept to a minimum.
+
+## Background
+If you are completely new to Machine Learning (ML) or even to R at all, you 
+might want to do some reading first (you probably already have), such as 
+[10 tips for machine learning with biological data](https://biodatamining.biomedcentral.com/articles/10.1186/s13040-017-0155-3). You should know what supervised machine learning is and at least roughly how Random 
+Forests work. Check out this [youtube channel](https://www.youtube.com/results?search_query=statquest+random+forest) 
+for the best statistics and machine learning videos I've seen (there a lot of 
+bad ones online!). Double Bam! 
+
+And for neural networks: my keras code is mostly based on this book 
+[Deep Learning with R](https://www.manning.com/books/deep-learning-with-r). 
+But I also included a lot of (very shallow) explanations along the way to give
+you the key words for easier recherche.
+
+If you know your way around R, you should have a look at packages like `caret`,
+`parsnip` etc which try to provide a standardized interface to various machine 
+learning and other regression methods. 
+
+## Purpose of this package
+
+In short: be able to use or test machine learning (currently Random Forest and 
+Neural Networks) with microbiome data and corresponding environmental data.
+
+How: By providing some functions that make use of phyloseqs standard data 
+format. Phyloseq is the starting point as you can basically get all kinds of 
+data into phyloseq format.
+
+Additional: Providing wrappers to actual run ML using this package and get 
+results with metrics. Maybe some more functions to look into the results. This 
+is especially for not-hardcore users, who probably want to specify their own ML 
+approaches. Using this package, the data is ready to go for that.
+
+## What does the package contain
 
 * Phyloseq object modification
 * Data preparation for binary and multi-class classification and regression
-* Generating a list of input data.frames for ML
-* Running the full list and getting results with metrics for Random Forest and Artificial Neural Net
+* Generating a list of input data frames for ML
+* Running the full list and getting results with metrics for Random Forest and 
+Artificial Neural Networks
 
-### Why are these methods implemented?
+## Why are these specific methods implemented?
 
-For historical reasons, I used Random Forest and Artificial Neurals Networks in my first research paper based on a lab experiment, we were now curious to see how they perform in a real world setting. As this package mainly is a way of distributing the code that I use for my current work, these are the supported methods at the moment.
+For historical reasons. I used Random Forest and Artificial Neurals Networks in 
+my first [research paper](https://www.researchgate.net/publication/336917275_An_artificial_neural_network_and_Random_Forest_identify_glyphosate-_impacted_brackish_communities_based_on_16S_rRNA_amplicon_MiSeq_read_counts) based on a lab experiment. We were now curious to see how the same methods perform in a real world setting. As this 
+package mainly is a way of distributing the code that I use for my current work, 
+these are the supported methods at the moment.
 
-### What do you need?
+## What does this packge require?
 
 * obviously `phyloseq`, `ranger` and `keras` with `tensorflow` as backend
 * also using `data.table` for the oversampling function
-* logging (printing messages) via `futile.logger`, you can set the information urgency threshold
+* logging (printing messages) via `futile.logger`, you can set the information 
+urgency threshold
 * `purrr` and `tidyr` are used for the ML wrapper functions. 
 * `ggplot2` for plotting
-* `fastDummies` is used to turn factor columns into integer dummy columns (only consisting of 0 and 1)
-* There is a package called `speedyseq` available on github, you can install it using:
+* `fastDummies` is used to turn factor columns into integer dummy columns
+* There is a package called `speedyseq` available on github, you can install it 
+using:
 
 ```r
 devtools::install_github("mikemc/speedyseq")
 ```
-It replaces a couple of phyloseq included functions with a faster version. For this package, we are only interested in a faster version of `tax_glom`, but as a phyloseq user, having a quicker `ps_melt` function might be even more interesting.
+It replaces a couple of phyloseq included functions with a faster version. For 
+this package, we are only interested in a faster version of `tax_glom`, but as 
+a phyloseq user, having a quicker `psmelt` function might be even more 
+interesting.
 
-### Future vignette plans
+## Future vignette plans
 
-* Add a data augmentation step and evaluate results using unsupervised Random Forests
-* Use set.seed to run Random Forest and Neural networks with identically splitted input data and directly compare the results
+* Add a data augmentation step and evaluate results using unsupervised Random 
+Forests
+* Use set.seed to run Random Forest and Neural networks with identically 
+splitted input data and directly compare the results
 * Use some phyloseq included data sets for demonstration
-* Show how to modify the `purrr:pmap`-called `ranger_*` and `keras_*` functions to your needs
+* Show how to modify the `purrr:pmap`-called `ranger_*` and `keras_*` functions 
+to your needs
 * Include variable importance analysis for ranger results
 * Calculate p values for your models
 
-### Future package plans
+## Future package plans
 
 If I find some time I would like to test and include gradient boosting
-
-### Should I use this package?
-
-Yes, obviously ;-) But to be honest, if you know your way around R, you can have a look at packages like `caret`, `parsnip` etc which try to provide a standardized interface to various machine learning and other regression methods. 
-
-This package is rather specific for researchers who are new to R, microbial bioinformatics and/or ML. 
-
-If you want to use the wrappers I'm providing: they do not allow full ML control ovr all parameters, but you should have a look into the source code to adjust them to your own settings. There are some more option for `ranger` and of course, there is a huge amount of possibilities for `keras`. As mentioned above, I will hopefully include this in the vignette at some point.
-
-# Let's start
-
-First we load the required libraries. I have speedyseq installed, but you can also you phyloseq. I'm also using a logger package named [futile.logger](https://github.com/zatonovo/futile.logger) (flog). It has different notification settings, and you can choose if you only want to see warnings, or already information etc. My package is quite verbose to make you aware of potential problems early on, so you might want to have less output printed.
-
-## The roadmap to prepare phyloseq data for machine lerning with ranger and keras
-
-1. define the phyloseq objects, meaning we use phyloseq functions for subsetting by sample_data entries. 
-2. Abundance based adjustments and per taxonomic rank for each list item. 
-3. Finally, we can add data from the sample_data slot to our input.
-4. Then we only need to add variables from our sample_data which should be predicted by ML.
-5. Split data set in training and test sets: Each named list item becomes a list itself which contains two data.frames for training/valiation and for testing.
-
-### Modification of the phyloseq object
-
-The example set uses ASVs generated by `dada2`, but if you have OTUs (`mothur`) or genera (`SILVAngs`) or whatever count data, just replace it in your head. This package is not limited to ASVs.
-
-```{r}
-library(phyloseq)  # or library(phyloseq)
-library(phyloseq2ML)
-futile.logger::flog.threshold("INFO")
-```
-We can load the included phyloseq object and have a look at it dimensions
-```{r}
-data(TNT_communities)
-TNT_communities
-```
-As you can see it is a very small data set which would not make any sense for ML, but it should serve for demonstration purposes. The data set is about microbial communities in sediments where ammunition was [sea-dumped after the WWII](https://udemm.geomar.de/), which took place in the Kolberger Heide near Kiel, Germany. 
-
-We will now add unique lineages for each ASV, independent of its taxonomic annotation. This way, we don't lose taxa that are not annotated e.g. at Genus rank. Check the difference here:
-```{r}
-# modify phyloseq object
-TNT_communities2 <- add_unique_lineages(TNT_communities)
-colnames(tax_table(TNT_communities))
-colnames(tax_table(TNT_communities2))
-```
-Depending on your phyloseq object, it could be useful to re-order your lowest rank taxa organisation. In this case, we already have ASVs, but after I subsetted to generate this example data, the numbering is off. If you import data from `dada2` your names might even still be the actual sequences. In this case, you can `use_sequences = TRUE`, so the ASVs get moved to the refseq() slot of the phyloseq object (The example data contained the refseq() data, but it makes the phyloseq object quite large, so I removed them). You can specify the name prefix such as "OTU" or "ASV" and the function adds the appropriate amount of leading 0s to the ongoing number. Your taxa_prefix should not contain `_`.
-```{r}
-taxa_names(TNT_communities)
-testps <- standardize_phyloseq_headers(
-  phyloseq_object = TNT_communities2, taxa_prefix = "ASV", use_sequences = FALSE)
-taxa_names(testps)
-```
-Another useful function is a tax dictionary, which allows you to translate your ASV to the corresponding taxonomic ranks.
-```{r}
-# translate ASVs to genus
-levels_tax_dictionary <- c("Order", "Family", "Genus")
-taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
-translate_ID(ID = c("ASV01", "ASV03", "ASV17"), tax_rank = "Genus", taxa_vector_list)
-``` 
-This is weird, we only get two return values for the 3 ASVs. If we look into the function's documentation using 
-```{r}
-?translate_ID 
-``` 
-we can see that the default value for `na.rm = TRUE`, which means that not annotated ranks are removed. Let's see which ASV was not annotated at genus level:
-```{r}
-translate_ID(ID = c("ASV01", "ASV03", "ASV17"), tax_rank = "Genus", taxa_vector_list, na.rm = FALSE)
-``` 
-
-### Create a list of subsetted phyloseq objects
-
-Let's have a look what our sample_data slot contains:
-```{r}
-head(names(sample_data(testps)), 10)
-``` 
-So there is a lot of additional context data. The example data set was generated by subsetting `Primerset == "V4"` and `Sample_Type == "Surface"`, that is why I would call this phyloseq object "ps_V4_surface". In the end, we will generate a data.frame that contains all the information about what parameters we chose based on the names and then add the corresponding machine learning results to it. This happens automatically if you adhere to this naming pattern: Your initial name for each phyloseq object should have 2 underscores. The first part, will later be listed as `Subset_1`, the second part (after the first "_") as `Subset_2` and obviously there will be a `Subset_3`.  I will use the first part to make clear this is a vignette example, the second describes the primer set used and the third part (after the 2. underscore) refers to the sample origin subset (I only used surface sediment samples). Let's create a second phyloseq object and then put both as named list items in a list. (We will use named [lists](https://r4ds.had.co.nz/vectors.html#lists) a lot, so you should know a little bit about them!)
-
-```{r}
-# only sediment samples from the restricted ammunition dumping site
-second_phyloseq_object <- subset_samples(testps, Area == "Mine_mound")
-subset_list <- list(
-  vignette_V4_surface = testps,
-  vignette_V4_minemound = second_phyloseq_object
-)
-str(subset_list, max = 2)  # max defines how many list levels we want to print
-``` 
->A quick note here: If you want to predict several variables based on different conditons, do this in several analyses. So don't mix e.g. [classification and regression tasks](https://machinelearningmastery.com/classification-versus-regression-in-machine-learning/). 
-
->Also: for classification, we will use a function to categorize continuous values into classes. The limits need to b the same for all response variables. So if you have e.g. variable 1 and variable 2 containing nutrient concentrations and variable 1 should be split at a concentration of 5 into two classes "below_5" and "above_5" whereas variable 2 should be split at 3 into "below_3", "above_3", these should be separated runs of your workflow.
-
-### Filter the phyloseq objects and choose taxonomic rank
-
-After we have defined the phyloseq objects, we can now manipulate their community tables (the content of the `otu_table()` slots). For once, we can select how abundant ASVs have to be to be kept. The counts are converted to relative abundances in percentage. The filter function wants to know, how often an ASV has to be how abundant to keep the ASV. As example, a threshold of 0.01 and num_samples of 2 would mean that each ASV has to have more than 0.01 % abundance in at least 2 samples. If this requirement is fulfilled, this ASV is kept in all samples, including those where it is less abundant than 100 counts. This way we can keep the full range of the ASV's abundance in different samples, whch is valuable informaton for ML
-
-And then we can also cumulate the abundance of ASVs by a higher taxonomic rank. This means for e.g. the genus rank that each ASV of the same genus is summed up and we continue on genus rank taxonomic resolution. Here we can make use of our added "To_Genus" columns in the `tax_table()`, which allows us to keep taxa such as `..._Pseudomonadales_Pseudomonadaceae_NA_ASV0007` and `..._Pseudomonadales_Moraxellaceae_NA_ASV0013` separate, although they are both annotated as `NA` on "Genus". We should specify how the list items' names should be complemented. These names should be the original tax rank names, here "Genus" and "Family". The original level, such as ASV, is already included. 
-
-```{r}
-# define subsetting parameters
-selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
-``` 
-```{r}
-# tax levels parameter is NULL as default
-subset_list_rel <- to_relative_abundance(subset_list)
-subset_list_tax <- create_community_table_subsets(
-  subset_list = subset_list_rel, 
-  thresholds = c(0.1, 0.15),
-  taxa_prefix = "ASV",
-  num_samples = 1,
-  tax_ranks = selected_taxa_1)
-names(subset_list_tax)
-``` 
-
->Note: First the ASVs are filtered, then the remaining entries are summed on the specified tax ranks.
-
-After the filter and accumulation step we extract the otu_table() slots from the phyloseq objects and turn them into regular data.frames. 
-```{r}
-subset_list_df <- otu_table_to_df(subset_list = subset_list_tax)
-str(subset_list_df, max = 1)
-head(subset_list_df[[1]], 2)[1:10]  # have a look at the first list element using [[]], not []
-``` 
-
-### Add sample data columns to our community data
-
-So, well done, we have a list of community table data.frames. However, you maybe want to use some e.g. environmental variables you measured to support you ML with additional information. As phyloseq organizes this data already for us, we can make use of it and select which sample_data() columns we want to include. You can use `names(sample_data(testps))` again to see what is available and `str(sample_data(testps))` to see whether a column contains numerical or categorical data. 
-
->Note: This is still the setup for the "independent" or "predictor" variables. The "dependent", "response" or "target" variable will be specified afterwards.
-
-Let's pick two numerical columns, the amount of phosphorus measured after extracting the sediment with 0.5 M HCl and the total organic carbon. There is also the factor column telling us which samples where taken on which cruise. The function automatically merges these columns to each data.frame in our list of community tables.
-```{r}
-desired_sample_data <- c("TOC", "P_percent", "Cruise_ID")
-subset_list_extra <- add_sample_data(phyloseq_object = testps, 
-  community_tables = subset_list_df, sample_data_names = desired_sample_data)
-sapply(subset_list_extra[1:2], names)
-``` 
-
->Note: A very important issue to consider are underlying patterns in your provided data that you are not aware of. Just assume all samples that contained the explosive TNT where (maybe on accident) sampled in winter time and in summer time you we only collected samples free of TNT. The ML algorithm would just need to figure out if it looks at a summer or winter community (or as a more drastic example, communities from oxic or anoxic sediments) to correctly predict the presence of TNT. There is still TNT in winter times, though, and what the ML used has nothing to do with the influence of TNT on microorganisms. Just remember: ML looks for correlations, there is nothing about causality to be made from ML.
-
->Providing the Cruise_ID can be another trap, as the ML could learn which cruises correlate with TNT positive samples (or with winter or summer season), which again is not bad for the prediction quality, but it is not related to the sample properties such as geological parameters or microbial composition at all. We will later have a look at variable importance in Random Forest, where we can check which variable was important for a given classification or regression.
-
-> From [Forbes](https://www.forbes.com/sites/kalevleetaru/2019/01/15/a-reminder-that-machine-learning-is-about-correlations-not-causation/): "Putting this all together, the ease with which modern machine learning pipelines can transform a pile of data into a predictive model without requiring an understanding of statistics or even programming has been a key driving force in its rapid expansion into industry. At the same time, it has eroded the distinction between correlation and causation as the new generation of data scientists building and deploying these models conflate their predictive prowess with explanatory power."
-
-### Define response variables
-
-Now it is getting interesting. Let us choose the variables from the sample_data() slot we want to predict. As mentioned above, only pick those where you want to apply the same prediction conditions. Here we want to perform multiclass classification with two explosives categorized into classes "none", "below_3", "above_3" referring to their concentration in sediment expressed in pmol/g (yes, that is not much!). We use a function to get the columns from the phyloseq object we used in the beginning and then another function to cut the values into intervals. The labels become the factor levels. `-Inf` and `Inf` make sure that we include all values and obviously, you need as many labels as intervals are generated. If you would use `ML_mode = "regression"`, the response variables would not be altered.
-
-```{r}
-# get response variables
-desired_response_vars <- c("TNT", "DANT_2.6")  # an explosive's mother compound and a degradation product
-response_variables <- extract_response_variable(
-  response_variables = desired_response_vars, phyloseq_object = testps)
-# cut response numeric values into 3 classes
-responses_multi <- categorize_response_variable(
-  ML_mode = "classification", 
-  response_data = response_variables, 
-  my_breaks = c(-Inf, 0, 3, Inf), 
-  class_labels = c("none", "below_3", "above_3"))
-head(responses_multi, 10)
-```
->Note: For binary classification, you only define two classes (yep). For regression, you either skip this step and use the "response_variables" as input to the next function below, or in a fixed workflow script, you choose "regression" as mentioned above. The other functions detect for themselves if classification or regression is the goal, based on the type of response column (factor or numeric). If you want to use the `purrr::pmap` call at the very end of this script, make sure to use `ranger_regression` instead of `ranger_classification` (or `keras_regression`).
-
-### Merge independent and dependent variables
-
-Now we can add these response columns to our predictor tables. As we will only predict one response at a time, each response variable will be merged with each input table.
-```{r}
-merged_input_multi <- merge_input_response(subset_list_extra, responses_multi)
-# number of predictor tables x number of response variables
-length(merged_input_multi) == length(subset_list_extra) * ncol(responses_multi) 
-```
-
-### A short ranger Random Forest test run
-
-Technically we could start with machine learning already. If you want to, just run
-```{r}
-first_try <- merged_input_multi[[2]]  # take one list element, here with TNT as response
-ranger_trained <- ranger::ranger(TNT ~ ., data = first_try)
-ranger_trained
-```
-The `ranger` class object summary prints information on what kind of analysis was performed (Classification), how many trees were grown and how many variables were considered at each split. The accuracy is the fraction of True positives and True negatives divided by the sum of all possible outcomes, which should equal your number of samples: True positives (TP), False Negatives (FN), True Negatives (TN), False positives (FP). 
-
-You can see what this means in the [confusion matrix](https://en.wikipedia.org/wiki/Confusion_matrix)
-```{r}
-ranger_trained$confusion.matrix
-```
->Note: if you see NAs as additional classes in the confusion matrix, you might not have used enough trees so the model was not sure on how to classify
-
->Note: If comparing confusion matrices (e.g. from different sources or packages or self built ones) make sure the "predicted" and the "true" orientation is the same. See the link above and your current output. Your True positives and True negatives are still the same values (the diagonal) but False positive and False negative would be exchanged, which is hard to detect.
-
-### How is classification performance evaluated?
-
-The confusion matrix is the table which I use to generate all further [binary classification metrics](https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). The link is very helpful in explaining what each metric shows. It is important to choose the right one for your question and understand how to interprete it, as laid out [here](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient#Advantages_of_MCC_over_accuracy_and_F1_score)
-
-You may ask of what help binary classification metrics are for our current multi class example. Binary classification is just a special case of multiclass classification. In binary problems you only need to look at one class, as the other is the complement. If we have more classes, we need to look at the results for each class individually. Important to understand is that for each class, the True positive ("positive" refers to the class considered at the moment) is calculated as before along the diagonal of the matrix. But all other outcomes (FP, TN, FN) distributed over the other classes need to be summed. This way, the problem is (for each class) reduced to a 2 x 2 matrix again. Have a look [here](https://stats.stackexchange.com/a/338240) for more information. 
-
-Using the same logic to reduce a multi class problem to a binary problem for each class, we can generate the binary metrics for one class at a time.
-
-### Further preparation of the list for ML
-
-But let's take a step back from deploying machine learning models already. Yes, we can already run a Random Forst (you could not run an keras based - or probably any - neural network yet, though). But there are two issues (at least in my opinion) with this approach, one regarding efficiency and one regarding good practice.
-
-#### Efficiency
-
-The easy one regarding efficiency: we should find a way to run all list items automatically. 
-
-There is no need for copy and paste code here, where we only exchange the number of the list item we want to run. That is a general rule, if you do basically the same thing multiple times using copy and paste (or even worse, by writing the code again) you are doing the job the computer should do. And the computer is better at that. So we should come up with a function for that (later). Additionally, we only modified the input tables inthe beginning. But what about the various Random Forest [hyperparameters](https://en.wikipedia.org/wiki/Hyperparameter_optimization)? You will go crazy if you check manually which settings are the best (or at least decent) for your data. At Random Forest is very kind with regard to that, neural networks offer even more hyperparameters.
-
-So this is one reason why you should not use the current list for ML.
-
-#### Training (and validation) and test splitting
-The second is important for Random Forest and essential for Neural networks: We haven't split our data yet into training and test sets. 
-
->Note: Again, there is some terminology confusion possible. I'm using the term "validation" for the part of the training data set, which the model is evaluated on to see which hyperparameters perform best. The "test" set is the final data set which will be predicted using the best model in the train-validate step. You can find online information where the meaning of "validation" and "test"" is switched! 
-
-#### Short background on data set splitting
-
-We need to clarify two things first: what data sets do we want and what is overfitting? 
-
-First: The data sets are usually training, validation (as part of the training set) and test set. The validation set is to the training set what the combination of training and validation is to the test set. Unclear? ;-) If we want to use models for predictions, they need to find "something" in their training data, which is also there in the to-be-predicted data, otherwise they don't work. So we always need a data set, which was not used for training, to check if the model learning something useful. Therefore, a part of the training data is not used (the validation data set, it is "hold out") and the trained model is evaluated based on how well it predicts the validation data. If we do not have much data, we can use [kfold crossvalidation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation), where we cut our training set in k pieces and each piece serves once as validation data and the rest as training data. We can take the mean of our k predictions and have a better estimation how well our model performed with the current hyperparameters.
-
-If we have selected the best hyperparameter combination, we can use the full training data (training data + validation data) to train the model and finally predict the test set.
-
-The ratios depend on how variable your data is and how many samples you have. I set about 20 to 25 % of the samples aside for the final test data. RF does the training/validation step automatically due to the bagging (about 63% of the training data is used for training, the rest for validation). In neural nets we can decide how we want to split training and validation data either manually or it is determined by k if we go for kfold cv.
-
-#### Short background on overfitting
-
-Second: [Overfitting](https://en.wikipedia.org/wiki/Overfitting) means, that your model does not generalize, but it learns all about your training data. Sounds cool at first, but the data you want to predict will not exactly be like the trainig data. To detect overfitting, we use validation and test sets. Overfitted models perform worse on the to-be-predicted data than on their trained data. Overfitting, though, is not the only reason why a model is worse in predicting new data. There are measures to be taken against overfitting, which are especially important for neural networks.
-
-There is some discussion ongoing if this is required for Random Forest at all, as it supposedly does not overfit due to the use of bootstrap aggregating ([bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating)). There is a lot of discussion if this is true, however, if you either want to compare various methods or want to compare various RF hyperparameters, you have to do it anyway. Random Forest bagging should result in different Out of Bag samples (OOB samples) for each iteration, so it hard to compare the performance on specific data sets using this approach. 
-
->Note: You should never use your test data when you're still trying to figure out, which settings are the best. This way, information about your test data "leaks" into your model design, although in a real-world scenario this data might not even exist yet.
-
-## Machine learning with ranger
-
-### Split data sets for ranger
-
-That was a lot of theory! However, I think it is important (and there are so many sources online where these topics are way better explained) because ML can trick you if you don't understand how it works principally. The intention is that this reading saves you time, not the other way.
-
-Now, our ways diverge: If we want to use Random Forest, we are almost there. For neural networks, we will perform some additional steps to prepare the data. Let's go first to RF way.
-
-This function splits each data.frame in training table (used for training and validation) and a test table. You can try several split values. Hint: To check whether it is important, which samples are used for training and testing, you can choose values like `c(0.60001, 0.60002)` which will return the same split ratios, but another sample distribution to train and test. As this information is stored in the name of the list item, it makes it distinguishable.
-```{r}
-splitted_input_multi <- split_data(merged_input_multi, c(0.601, 0.602))
-str(splitted_input_multi, max = 2)
-```
->Note: If you think about what we just did, you might realize that we will now end up with training samples in the first split which are test samples in the second split. So we are already hurting the idea of not using test samples for training in some form. In this case we want to identify how similar and therefore, representitive our samples are. If they are quite representitive, you should not see much difference between varying train/test distributions. If you have some deviating (outlier) samples in there, this can largely effect your prediction outcome and you should know this. 
-This means first: your validation outcomes are only an orientation, test is the real "test" (really?). Second: if you have a data set which is not very well represented you shouldn't focus too much on hyperparameter tuning, because it likely still won't help classifying the "outlier samples". Instead if you don't have many samples, the presence of some hard to predict samples may be more determining on your ML performance than the difference between ok-ish and near-perfect hyperparameter settings. In that case, you can do even more splits of the same ratio to analyze how much sample selection affects your outcome. Mention this when you describe your work.
-
-### Data augmentation
-
-[Data augmentation](https://machinelearningmastery.com/how-to-configure-image-data-augmentation-when-training-deep-learning-neural-networks/) means adding samples based on alrady existing ones ONLY to your training set. This augments (or augmentates?) the sample size which is supposed to be especially important for neural nets. You can also add some random noise to each numeric value of the replicates (`?augment`) which forces the ML to generalize and could support the prevention of overfitting. So far the theory, right now this feature is not sufficiently tested. I included it in the package as I hope that it is useful for some people. We will not use it yet (you can of course, if you want), but we will run the function with 0 so the information is added to the name of the list items
-
->Note: Don't get fooled by near perfect training-validatin results. This is expected, as you probably have identical (without noise) or almost identical sample (with noise) in training and validation. Obviously, the test set is NOT allowed to contain augmented samples! The function as is only works on the training sets.
-
-```{r}
-augmented_input_multi <- augment(splitted_input_multi, 0, 0.00)
-```
-
-### Train and predict using ranger individually
-
-The list is ready for Random Forest classification using `ranger`!! But how do we make use of the list now? As said before, you can pick an element using
-
-```{r}
-my_trainset <- augmented_input_multi[[1]][["train_set"]]
-my_testset <- augmented_input_multi[[1]][["test_set"]]
-```
-and then train a ranger model:
-```{r}
-ncol(my_trainset) - 1 # how many independent variables are there? 1 is the response var
-trained <- ranger::ranger(DANT.2.6 ~ ., data = my_trainset, num.trees = 1000, mtry = 10)
-trained
-```
-and then predict the test data using the trained model:
-```{r}
-predicted <- predict(trained, data = my_testset)
-predicted
-```
-Important are the predictions. Comparing those to the true values stored in my_testset we can build our confusion matrix.
-```{r}
-predicted$predictions
-confusion_matrix <- table(true = my_testset[["DANT.2.6"]], 
-      predicted = predicted$predictions)
-confusion_matrix
-```
-
-### Grid search training on all list items with ranger and purrr::pmap
-
-But we discussed above that this is not very efficient. Using a (I find) [complicated function](https://statwonk.com/purrr.html) from the `purrr` package called [pmap](https://r4ds.had.co.nz/iteration.html#mapping-over-multiple-arguments), we can set up a data.frame which contains all the relevant parameters and then run ranger for each data.frame row. To prepare such a data.frame, let's first make use of these weird long names our list items have received:
-```{r}
-parameter_df <- extract_parameters(augmented_input_multi)
-head(parameter_df)
-```
-Pretty cool! Now we create another data.frame where we detail the values for hyperparameters and general ranger arguments we want to use. The `expand.grid` function will turn this into data.frame with all possible combinations of these values. We also include the names of our list items, so we can combine it afterwards with our parameter_df. We should not exaggerate the parameters combinations we want to investigate in one run, unless you have the time and your computer/server/cloud can deal with it.
-
-```{r}
-# A small setup to train ranger models
-hyper_grid <- expand.grid(
-  ML_object = names(augmented_input_multi),
-  Number_of_trees = c(10, 501),
-  Mtry_factor = c(1, 2),
-  Importance_mode = "none",
-  Cycle = 1:3,
-  step = "training")
-```
->Note: All arguments are explained in ?ranger_classification (or ?ranger_regression). The Mtry_factor is a number by which to multiplicate the default value of mtry. The default for classification is the squareroot of the number of available independent variables. It is recommended to increase the default for data sets with many uninformative variables (such as community tables, which are described as [sparse](https://en.wikipedia.org/wiki/Sparse_matrix)). For regression it is 1/3 of all independent variables, which is a lot (theoretically, a Mtry_factor of 3 would be the maximum for regression. But taking all variables into account defeats the bagging approach).  
-
-```{r}
-final_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
-nrow(final_grid)
-# for ranger, string arguments needs to be passed as character, not factor level 
-final_grid$Target <- as.character(final_grid$Target)
-```
-```{r}
-test_grid <- head(final_grid, 5)  # depending on your time and compute resources, you can replace all occurrences below of final_grid with test_grid
-```
-
-Now we are ready! The final_grid (or test_grid) is set up and `purrr::pmap` will call the function `ranger_classification` from this package for each row of the master_grid, passing the values stored in the corresponding row on to the function call. It looks partly duplicated, but I've tried other versions and this is the one that works. We also provide the row.names so we can track the progress (the current row). However, this is supressed in this vignette. pmap will create a new column in final_grid called results, and - careful, weird stuff - each ROW of the column "results" will contain a [whole data.frame](https://r4ds.had.co.nz/many-models.html#nested-data)! This is required to return all the values from the model which we need and keep the per-row combination of corresponding settings.
-
-```{r results = "hide"}
-final_grid$results <- purrr::pmap(cbind(final_grid, .row = rownames(final_grid)), 
-    ranger_classification, the_list = augmented_input_multi, master_grid = final_grid)
-head(final_grid, 2)
-```
-This looks complicated and we cannot make any use of this. But this happened with a reason: using another function we can expand the results data.frame into multiple columns, each only one row long. this fits perfectly with our beforehand shape. The only difference in length is based on the number of classes, because each class gets its own row. Let's have a look at this
-
-```{r}
-results_df <-  as.data.frame(tidyr::unnest(final_grid, results))
-head(results_df, 3)
-```
-This is already pretty cool (not the results, but what we can do with it to our own data)! Let's visualize the results to get an idea how many trees performed better and what mtry factor to choose:
-
-```{r fig.height = 6, fig.width = 7}
-library(ggplot2)
-train_plot <- ggplot(results_df, aes(x = as.factor(Number_of_trees), y = Balanced_accuracy, colour = Class)) +
-    geom_violin(size = 0.4, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
-    stat_summary(position = position_dodge(width = 0.9), fill = "black", 
-      fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
-    theme_bw() +
-    facet_wrap(~ Subset_2 + Mtry_factor + Threshold + Target + Tax_rank, nrow = 2)
-train_plot
-```
-Aha. So let's pretend we have clearly seen what the best parameters for the test set prediction should be. Remember, this example data set is so reduced, there is not much information left.
-
-### Grid search prediction
-
-Therefore, we build another data.frame with the selected parameters, add some repetitions and run the prediction
-
-```{r}
-# A small setup to predict ranger models
-hyper_grid_prediction <- expand.grid(
-  ML_object = names(augmented_input_multi),
-  Number_of_trees = c(501),
-  Mtry_factor = c(2),
-  Cycle = 1:10,
-  step = "prediction")
-
-final_grid_prediction <- merge(parameter_df, hyper_grid_prediction, by = "ML_object")
-nrow(final_grid)
-# for ranger, string arguments needs to be passed as character, not factor level 
-final_grid_prediction$Target <- as.character(final_grid_prediction$Target)
-# running ranger
-```
-```{r results = "hide"}
-final_grid_prediction$results <- purrr::pmap(cbind(final_grid_prediction, .row = rownames(final_grid_prediction)), 
-    ranger_classification, the_list = augmented_input_multi, master_grid = final_grid_prediction)
-# unnesting results
-predictions_df <-  as.data.frame(tidyr::unnest(final_grid_prediction, results))
-```
-```{r fig.height = 6, fig.width = 7}
-# plotting the data
-predict_plot <- ggplot(predictions_df, aes(x = as.factor(Number_of_trees), y = Balanced_accuracy, colour = Class)) +
-    geom_violin(size = 0.4, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
-    stat_summary(position = position_dodge(width = 0.9), fill = "black", 
-      fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
-    theme_bw() +
-    facet_wrap(~ Subset_2 + Threshold + Target + Tax_rank, nrow = 2)
-predict_plot
-```
-
-## Prepare data for neural network classification with keras
-
-There are three additional steps compared to what we previously did: 
-
-1.  Turn factor columns to dummy columns
-2.  Scale continuous variables
-3.  Convert the data to keras formatting
-
-I'll explain a little bit about each step when we are there.
-
-### Dummify: turn factors into dummy columns
-
-the keras based neural networks only deal with numeric data, not with categorical data (they all do, but other frameworks may convert factors for you). Here, we have to do it ourselves, but it is not that hard. We will use one-hot-encoding [very well explained here](https://towardsdatascience.com/one-hot-encoding-multicollinearity-and-the-dummy-variable-trap-b5840be3c41a) which results in dummy variables. In short, dummy variables are a binary representation of categorical data. If you had a factor column "Colours" with levels "green", "red", "blue", this would result in the three dummy columns "Colours_green", "Colours_red", and "Colours_blue". In "Colours_green", there would be a 1 for samples, that had the factor level "green", all others are 0. The same for the other columns. This brings us to the dummy trap: If you know the content of "Colours_green" and "Colours_blue", you implicitly know which values were originally "red": all those who are 0 in both mentioned columns. So one of the columns is redundant. This can lead to problems, therefore, we remove the first of each dummy column set. The function below does that automatically.
-
-You can read more about dummy columns [here](https://en.wikipedia.org/wiki/Dummy_variable_(statistics)) and the dummy variable trap [here](https://en.wikipedia.org/wiki/Multicollinearity#Remedies_for_multicollinearity).
-
-```{r}
-# dummify input tables for keras ANN
-keras_dummy_multi <- dummify_input_tables(merged_input_multi)
-head(keras_dummy_multi[[1]])
-```
-
-### Splitting data into training and test sets
-
-After the dummification we split the data set as we did with the ranger case.
-We will again not make use of the augment() function. I will add another vignette going more into detail on this function and how to evaluate the outcomes.
-```{r}
-splitted_keras_multi <- split_data(keras_dummy_multi, c(0.601, 0.602))
-# augmentation
-augmented_keras_multi <- augment(splitted_keras_multi, 0, 0.0)
-```
-### Normalization of independent variables
-
-Another requirement to make the neural networks works is some kind of scaling to [normalize the input variables](https://en.wikipedia.org/wiki/Feature_scaling). You could do that for Random Forest too, but RF looks at one variable at a time and chooses split values ad hoc. In neural networks the variables are combined and modified by weights. If some input variables are between 1,000,0000 and 100,000 and others are between -1,5 and -7, the neural network will have issues to adjust the weights. There is a lot of information online on this topic. What you should know about this scaling function: 
-
-1.  for each variable, it subtracts the mean und divides by the standard deviation. This way, all variables are centered around 0 and the SD is 1.
-2.  integer columns are ignored
-3.  the response variable, if numeric (regression) is ignored. We would change what we want to predict, which might cause additional problems
-4.  The scaling values (the mean and the SD) are calculated using only the training data and those are applied to scaling of the test data. You can read about this [here](https://stats.stackexchange.com/questions/319514/why-feature-scaling-only-to-training-set) and [here](https://datascience.stackexchange.com/questions/39932/feature-scaling-both-training-and-test-data)
-```{r}
-# scaling
-scaled_keras_multi <- scaling(augmented_keras_multi)
-```
-
-### Convert to keras-like format
-
-We are almost done with the preparation! But keras wants a little bit more effort from us to start the ML. If we want to perform classification, we now also need to one-hot-encode the response variable, but this time without removing the first dummy column. This is taken care of by `keras::to_categorical()`. Also, the independent variables are separated from the response variable and all numeric data is turned into numeric matrices. Let's have a look:
-```{r}
-# keras format
-ready_keras_multi <- inputtables_to_keras(scaled_keras_multi)
-str(ready_keras_multi, max = 2)
-```
-
-
-## Running keras classification
-
-What is left to do is already familiar to you: Setting up a data.frame with the parameters and calling the `keras_classification()` function by `purrr::pmap()`. The difference is the amount of parameters to choose from. I again want to recommend that you read about what you are choosing, because there are plenty (and definitely more than with Random Forest) of ways to do something wrong.
-
->Note: There is regardless of other settings already the possibility to set up the architecture of a neural network as you like. I'm working with two hidden layers as more have not been proven useful for me and that is what `keras_classification()` and `keras_regression()` make use of. However, I will add a vignette (or you look into the source code) how to modify this function for your own custom-layered neural network.
-
-### Setting up the parameters data.frame
-
-As you can see below, there are more arguments required. Please refer to `?build_the_model` and `?keras_classification` and the there mentioned links to understand which values are valid and what they mean. In short, we are asking here for a neural network which has two hidden layers of 20 and 8 nodes and the first hidden layer randomly does not use 20 % of its nodes to prevent overfitting. We are going to split our training data into 4 parts, resulting in 4 runs with different train and validation sets. If the callback metric "loss in validation" does not improve for two epochs "Delay" the model is stopped as we assume we reached the best state. The hidden layers are densely connected (each node with each node of the next layer). We are only doing 5 passes of the whole data through the network ("Epochs") to reduce time here. Every 2 samples the weights are updated ("Batch size").
-
-Some values need to be changed if you want to run binary classification or regression (same values for training and prediction here), these are shown in the in line comments:
-
-```{r}
-parameter_keras_multi <- extract_parameters(ready_keras_multi)
-
-hyper_keras_multi <- expand.grid(
-  ML_object = names(ready_keras_multi),
-  Epochs = 5, 
-  Batch_size = 2, 
-  k_fold = 4, 
-  current_k_fold = 1:4,  # always from 1 to k_fold
-  Early_callback = "val_loss",  # "mae" for regression
-  Layer1_units = 20,
-  Layer2_units = 8,
-  Dropout_layer1 = 0.2,
-  Dropout_layer2 = 0.0,
-  Dense_activation_function = "relu",
-  Output_activation_function = "softmax", # "sigmoid" for binary and remove/outcomment line for regression
-  Optimizer_function = "rmsprop",
-  Loss_function = "categorical_crossentropy", # "binary_crossentropy" for binary and "mse" for regression 
-  Metric = "accuracy",  # "mae" for regression
-  Cycle = 1:3,
-  step = "training",
-  Classification = "multiclass",  # this is just for your results data.frame, allows later to subset for multiclass classifications
-  Delay = 2)
-```
-After merging with our parameter_df the ordering might be different to what we would like, so we can fix this using the following piece of code:
-```{r}
-master_keras_multi <- merge(parameter_keras_multi, hyper_keras_multi, by = "ML_object")
-# order by name, cycle and current_k_fold 
-master_keras_multi <- master_keras_multi[order(
-  master_keras_multi$ML_object, 
-  master_keras_multi$Cycle, 
-  master_keras_multi$current_k_fold), ]
-rownames(master_keras_multi) <- NULL
-test_keras_multi_training <- head(master_keras_multi, 2)  # our demo short cut
-```
-If you check the row.names after the order-step, they were changed along with their lines (which makes sense). We refreshed them, otherwise the passing of the row.names to the pmap call is not as informative about the progress: It would tells us that e.g. line 5 is processed, then line 1, then line 13 etc.
-
-At least in my experience neural networks need longer than random forests. And the kind we are using right now is still crazy small to what is going on in deep learning. Additionally, our model does not involve complicated calculation steps as in RNN, LSTM etc. If you plan to go more into the neural network direction you can 1) check if there are [NVIDIA GPUs](https://tensorflow.rstudio.com/installation/gpu/local_gpu/) to make use of available and/or 2) build keras with [tensorflow from source](https://tensorflow.rstudio.com/installation/custom/) on your system, which will make best use of your hardware. 
-
-Still, we are only using a small subset of the data.frame to demonstrate how to run and process the results (spoiler: similar to ranger runs). 
-```{r}
-test_keras_multi_training$results <- purrr::pmap(cbind(test_keras_multi_training, .row = rownames(test_keras_multi_training)), 
-  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_training)
-keras_df_multi_training <-  as.data.frame(tidyr::unnest(test_keras_multi_training, results))
-keras_df_multi_training
-```
-Based on the parameters we used, there is probably not much meaningful output. We can plot it, although many combinations have not been used yet after 2 rows of the data.frame. But the following code should get you started once you have performed larger runs.
-
-```{r fig.height = 6, fig.width = 7}
-ggplot(keras_df_multi_training, aes(x = as.factor(Threshold), y = Balanced_accuracy, colour = Class)) +
-  geom_violin(size = 0.4, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
-  stat_summary(position = position_dodge(width = 0.9), fill = "black", 
-    fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
-  theme_bw() +
-  facet_wrap(~ Subset_2 + Split_ratio + Tax_rank, nrow = 2)
-```
-
-and if you want to predict you can basically use the same code as above, but you need to modify the hyperparameter grid slightly. You can see the differences in the in line comments:
-```{r}
-hyper_keras_multi <- expand.grid(
-  ML_object = names(ready_keras_multi),
-  Epochs = 5, 
-  Batch_size = 2, 
-  k_fold = 1,  # the k_fold has to be 1, because we don't split our train data in train and validate here 
-  current_k_fold = 1,  # therefore, current_k_fold can only be 1, too
-  Early_callback = "accuracy", # we can't use val_loss, because there are no validation samples to measure it
-  Layer1_units = 20,
-  Layer2_units = 8,
-  Dropout_layer1 = 0.2,
-  Dropout_layer2 = 0.0,
-  Dense_activation_function = "relu",
-  Output_activation_function = "softmax",
-  Optimizer_function = "rmsprop",
-  Loss_function = "categorical_crossentropy",
-  Metric = "accuracy",
-  Cycle = 1:3,
-  step = "prediction",  # this is the relevant switch so the function knows it is about predicting the test set
-  Classification = "multiclass",
-  Delay = 2)
-```
