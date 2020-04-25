@@ -127,9 +127,9 @@ master_grid$Target <- as.character(master_grid$Target)
 
 test_grid <- head(master_grid, 2)
 
-master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
-    ranger_classification, the_list = augmented_input_multi, master_grid = master_grid)
-results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
+#master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
+#    ranger_classification, the_list = augmented_input_multi, master_grid = master_grid)
+#results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
 
 #### ranger regression
 parameter_regress <- extract_parameters(augmented_regression)
@@ -147,13 +147,13 @@ master_grid_regress$Target <- as.character(master_grid_regress$Target)
 test_grid_regress <- head(master_grid_regress, 1)
 
 # running ranger
-master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
-    ranger_regression, the_list = augmented_regression, master_grid = master_grid_regress)
-results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
+#master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
+#    ranger_regression, the_list = augmented_regression, master_grid = master_grid_regress)
+#results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
 
-test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
-    ranger_regression, the_list = augmented_regression, master_grid = test_grid_regress)
-results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
+#test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
+#    ranger_regression, the_list = augmented_regression, master_grid = test_grid_regress)
+#results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
 
 
 ####### for keras multi
@@ -190,9 +190,9 @@ master_keras_multi <- master_keras_multi[order(
 rownames(master_keras_multi) <- NULL
 test_keras_multi_prediction <- head(master_keras_multi, 2)
 
-test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
-  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
-keras_df_multi_prediction <-  as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
+#test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
+#  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
+#keras_df_multi_prediction <-  as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
 
 ####### for keras binary
 # set up a parameter data.frame
@@ -227,9 +227,9 @@ master_keras_binary <- master_keras_binary[order(
 rownames(master_keras_binary) <- NULL
 test_keras_binary_training <- head(master_keras_binary, 2)
 
-test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
-  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
-keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
+#test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
+#  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
+#keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
 
 ####### for keras regression
 # set up a parameter data.frame
@@ -262,9 +262,9 @@ master_keras_regression_training <- master_keras_regression_training[order(
 rownames(master_keras_regression_training) <- NULL
 test_keras_regression_training <- head(master_keras_regression_training, 2)
 
-test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
-  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_training)
-keras_df_regression_training <-  as.data.frame(tidyr::unnest(test_keras_regression_training, results))
+#test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
+#  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_training)
+#keras_df_regression_training <-  as.data.frame(tidyr::unnest(test_keras_regression_training, results))
 
 #### regression prediction
 hyper_keras_regression_prediction <- expand.grid(
@@ -294,6 +294,6 @@ master_keras_regression_prediction <- master_keras_regression_prediction[order(
 rownames(master_keras_regression_prediction) <- NULL
 test_keras_regression_prediction <- head(master_keras_regression_prediction, 2)
 
-test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
-  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_prediction)
-keras_df_regression_prediction <-  as.data.frame(tidyr::unnest(test_keras_regression_prediction, results))
+#test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
+#  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_prediction)
+#keras_df_regression_prediction <-  as.data.frame(tidyr::unnest(test_keras_regression_prediction, results))
