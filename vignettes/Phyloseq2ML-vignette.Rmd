@@ -95,7 +95,7 @@ my first [research paper](https://www.researchgate.net/publication/336917275_An_
 package mainly is a way of distributing the code that I use for my current work, 
 these are the supported methods at the moment.
 
-## What does this packge require?
+## What does this package require?
 
 * obviously `phyloseq`, `ranger` and `keras` with `tensorflow` as backend
 * also using `data.table` for the oversampling function
@@ -130,3 +130,123 @@ to your needs
 ## Future package plans
 
 If I find some time I would like to test and include gradient boosting
+
+# The sample data explained
+
+The example phyloseq object used in the vignette contains a large amount of 
+sample data variables. I will explain below what each column means in case you
+want to have a closer look:
+
+## Data describing the sediment sampling:
+* Udemm: A number given to each sediment which was analyzed for UXOs and further 
+parameters. Multiple libraries can refer to the same Udemm number. UDEMM was 
+the name of the [project](https://udemm.geomar.de/).
+* Cruise_ID: On which cruise was the sediment collected?
+* Station_ID: From which station does the sediment come?
+* Sample_Type: Sediments from the surface or from a multicorer? 
+* Experiment: If available, can the sediment be assigned to a certain 
+experiment or sampling campaign purpose?
+* Area: In what informal area was the sediment taken?
+* Collection: In what way was the sample retrieved?
+* Munition_near: Is this sediment known to be “near” ammunition (“near” refers 
+to up to several meters).
+* Biological_replicate: Describes multiple sediments from the same station.
+* Depth_cm: Used for describing the depth of the multicorer core slices.
+* Metagenome: Does metagenomic data exist for this DNA extract?
+* Weight_loss: The difference in g mass before and after sediment freeze drying.
+* Notes: Additional remarks on collected sediments.
+* Date: The date the sediments were collected.
+* Time: The time the sediments were collected.
+* Direction: Cardinal directions, only applies to specific experiments, 
+were sediments were taken in orientation to a mine.
+* Distance_from_mine: The distance in meters between a mine and the sediment. A 
+very high value such as 99999999 stands for “not close to the sediment, but not 
+exactly known”.
+* Distance_rel: If applicable, how much relative distance between two samples, 
+e.g between between the two replicates for each multicorer core or along a 
+transect.
+
+## Sequencing related information:
+* Extraction_ID: A unique identifier for each sequencing library.
+* Library: The name of each library.
+* Primerset: The name of the primer sets used: V4 stands for 
+5' GTGCCAGCMGCCGCGGTAA 3' reverse 5' GGACTACHVGGGTWTCTAAT 3'  and V34 for 
+forward: 5' CCTACGGGNGGCWGCAG 3', reverse: 5' GACTACHVGGGTATCTAATCC 3'.
+* Run: The Miseq sequencing run on which this sample’s data was generated.
+* Library_purpose: Negative/Positive/Blank control or actual sediment sample.
+* Nucleic_acid: 16S rRNA (RNA) or 16S rRNA gene (DNA).
+* Technical_replicate: Describes multiple libraries from the same sediment.
+* Kit: Which kit was used for extraction?
+* Kit_batch: Describes what number kit was used for extraction.
+* Extract_concentration_ng_microL: How much nucleic acid was extracted in ng/µL.
+
+## The measured concentrations of various unexploded ordnance (UXO):
+* TNT: 2,4,6-Trinitrotoluene
+* ADNT_2: 2-Amino-4,6-dinitrotoluene
+* ADNT_4: 4-Amino-2,6-dinitrotoluene
+* DANT_2.4: 2,4-Diamino-6-nitrotoluene
+* DANT_2.6: 2,6-Diamino-4-nitrotoluene
+* DNT_2.4: 2,4-Dinitrotoluene (1-methyl-2,4-dinitro benzene)
+* DNT_2.6: 2,6-Dinitrotoluene (1-methyl-2,6-dinitro benzene)
+* DNB: 1,3-Dinitrobenzene
+* TNB: 1,3,5-Trinitrobenzene
+* HMX: 1,3,5,7-Tetranitro-1,3,5,7-tetrazoctane
+* RDX: 1,3,5-Trinitro-1,3,5-triazinane
+* Tetryl: N-Methyl-N-(2,4,6-trinitrophenyl)nitramide
+* Sum_ng_g: The sum of all UXOs measured in ng/g wet sediment.
+* UXO_sum: The sum of all UXOs measured in pmol/g wet sediment.
+* Main_UXO_sum: The sum of the most frequent occurring UXOs TNT, DANT_2.6, 
+DANT_2.4, ADNT_4, ADNT_2.
+
+## Element concentrations and ratios:
+* Hg_microg_kg : Mercury in µg/kg dried sediment
+* Pb206_207_ratio: The ratio of lead isotopes 206 to 207 as indicator of 
+anthropogenic lead contamination.
+
+The following elements were measured in each sediment. They are named after this 
+scheme: First the periodic table abbreviations are given (and optionally the 
+atomic number), after the underscore the measurement unit.
+
+* P_percent
+* Ca_percent
+* Fe_percent
+* Sc45_ppm
+* V51_ppm
+* Cr52_ppm
+* Mn55_ppm
+* Co59_ppm
+* Ni60_ppm
+* Cu63_ppm
+* Zn66_ppm
+* As75_ppm
+* Sr86_ppm
+* Zr90_ppm
+* Mo95_ppm
+* Ag107_ppm
+* Cd111_ppm
+* Sn118_ppm
+* Sb121_ppm
+* Cs133_ppm
+* Ba137_ppm
+* W186_ppm
+* Tl205_ppm
+* Pb207_ppm
+* Bi209_ppm
+* Th232_ppm
+* U238_ppm
+* Sum_ppm_ICP_MS: The sum of all element concentrations in ppm.
+
+## Sum parameters:
+* TIC: Total inorganic carbon
+* TN: Total nitrogen
+* TC: Total carbon
+* TS: Total sulfur
+* TOC: Total organic carbon, calculated by TC – TIC.
+
+## Grain size distribution:
+* Microm_001_mean: fraction of sediment grain size above a mean of 0.01 µm.
+* Microm_63_mean: fraction of sediment grain size above a mean 63 µm.
+* Microm_125_mean fraction of sediment grain size above a mean 125 µm.
+* Microm_250_mean fraction of sediment grain size above a mean 250 µm.
+* Microm_500_mean fraction of sediment grain size above a mean 500 µm.
+* Microm_1000_mean fraction of sediment grain size above a mean 1000 µm.
