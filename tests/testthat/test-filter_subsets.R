@@ -7,7 +7,7 @@ test_that("OTU table correct for given threshold and number of samples", {
 test_that("Sample data correct for given threshold and number of samples", {
   data("TNT_communities")
   expect_equal(digest::sha1(phyloseq::sample_data(phyloseq2ML::filter_subsets(TNT_communities, 0.1, 2))),
-               "7a6020b9872cc5c10b895dcd6cda058be1ae9f4d")
+               "ed37856a69c8d0ec8655b82d7fb167d234c36088")
 })
 
 test_that("Filtering fails for zero threshold and number of samples", {
