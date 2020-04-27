@@ -102,13 +102,13 @@ split_data <- function(merged_list, split_ratios) {
 #' all 0s or dummy columns (only 0 and 1) and represent factor levels. The 
 #' response variable is also ignored. Copies are named according to this scheme: 
 #' original: "Sample_1", first copy: "Sample_1.1", second copy: "Sample_1.2" etc
-#' The actual work is performed by internal `oversample_and_noise()` function.
+#' The actual work is performed by internal `augment_and_noise()` function.
 #' 
 #' @param splitted_list a list of complimentary training and test data sets named
 #'   "train_set" and "test_set", e.g `mylist[[1]][["train_set"]]` and 
 #'   `mylist[[1]][["test_set"]]` for the first list item
 #' @param copy_number an integer specifying the number of copies, 0 means no 
-#'   oversampling takes place and `noise_factor` is ignored
+#'   augmentation takes place and `noise_factor` is ignored
 #' @param noise_factor a value >= 0 specifing the relative amount of noise randomly 
 #'   added or substracted to/from the original value e.g. 0.05 == +-5 \% noise 
 #' 
@@ -116,37 +116,37 @@ split_data <- function(merged_list, split_ratios) {
 #'   of copies and the noise value
 #'
 #' @export
-oversample <- function(splitted_list, copy_number, noise_factor) {
+augment <- function(splitted_list, copy_number, noise_factor) {
   
   if(!exists("train_set", where = splitted_list[[1]]))
     stop('Error: Provided list does not contain a training set at location 
       "splitted_list[[1]][["train_set"]].')
    
-  oversample_counter <- 0
-  oversampled_list <- list()
+  augment_counter <- 0
+  augmented_list <- list()
 
   # turn training sets to data.tables
   for (i in c(1:length(splitted_list))) { 
     splitted_list[[i]][[1]] <- data.table::as.data.table(
       splitted_list[[i]][[1]], keep.rownames = "Sample")
   }
-  # generate name, then call actual oversampling function for each training table
+  # generate name, then call actual augmentation function for each training table
   for (split_table in splitted_list) {
-    oversample_counter <- oversample_counter + 1
-    current_name <- paste(names(splitted_list)[oversample_counter], 
+    augment_counter <- augment_counter + 1
+    current_name <- paste(names(splitted_list)[augment_counter], 
       "copies", copy_number, "noise", noise_factor, sep = "_")
     
-    oversampled_list[[current_name]] <- oversample_and_noise(
+    augmented_list[[current_name]] <- augment_and_noise(
       split_table, copy_number, noise_factor)
   }
-  oversampled_list
+  augmented_list
 }
 
 #' Replicate observations with added noise.
 #'
-#' This function gets called by `oversample` and creates copies of samples with
+#' This function gets called by `augment` and creates copies of samples with
 #' a specified amount of random noise. For more information see the docstring of
-#' `oversample`. 
+#' `augment`. 
 #' The anonymous data.table function for replication and noise addition acts on
 #' all columns which are numeric, but neither the response variable or 0/1 only
 #' columns, as these are either dummy variables or empty columns. It copies each
@@ -155,7 +155,7 @@ oversample <- function(splitted_list, copy_number, noise_factor) {
 #' 
 #' @param split_table a list consisting of "train_set" and "test_set"
 #' @param copy_number an integer specifying the number of copies, 0 means no 
-#'   oversampling takes place and `noise_factor` is ignored
+#'   augmentation takes place and `noise_factor` is ignored
 #' @param noise_factor a value between 0 and 100 (100 equals 10,000 \% noise) 
 #'   specifing the relative amount of noise randomly added or substracted to/from 
 #'   the original value. e.g. 0.05 == +-5 \% noise
@@ -164,7 +164,7 @@ oversample <- function(splitted_list, copy_number, noise_factor) {
 #' @return A list of lists, the list item name is updated to reflect the number 
 #'   of copies and the noise value
 #'
-oversample_and_noise <- function(split_table, copy_number, noise_factor) {
+augment_and_noise <- function(split_table, copy_number, noise_factor) {
   
   if (!is.numeric(copy_number)) {
     stop("Error: copy_number needs to be numeric")
@@ -181,7 +181,7 @@ oversample_and_noise <- function(split_table, copy_number, noise_factor) {
   }
 
   if (copy_number == 0) {
-    futile.logger::flog.warn("No oversampling demanded, returning unmodified 
+    futile.logger::flog.warn("No augmentation demanded, returning unmodified 
       list with updated names. Noise factor ignored.") 
     noise_factor <- 0
   }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/keras_classification.R
 \name{build_the_model}
 \alias{build_the_model}
-\title{Build and compile keras sequential models with 2 hidden layers for classification}
+\title{Build and compile keras sequential models with 2 hidden layers}
 \usage{
 build_the_model(
   train_data,
@@ -27,21 +27,22 @@ build_the_model(
 \item{Layer2_units}{integer, number of units in the second hidden layer}
 
 \item{classes}{integer, number of classes and therefore number of units in 
-the output layer}
+the output layer, set to 1 for regression}
 
-\item{Dropout_layer1}{the rate of dropout nodes for layer 1}
+\item{Dropout_layer1}{numeric, ratio of dropout nodes for layer 1 between 0 and 1}
 
-\item{Dropout_layer2}{the rate of dropout nodes for layer 2}
+\item{Dropout_layer2}{numeric, ratio of dropout nodes for layer 2 between 0 and 1}
 
-\item{Dense_activation_function}{the activation function for the hidden layers}
+\item{Dense_activation_function}{char, activation function for the hidden layers}
 
-\item{Output_activation_function}{the activation function for the output layer}
+\item{Output_activation_function}{char, activation function for the output layer,
+(default: NULL, used for regression)}
 
-\item{Optimizer_function}{the optimizer function}
+\item{Optimizer_function}{char, the optimizer function}
 
-\item{Loss_function}{the loss function}
+\item{Loss_function}{char, the loss function}
 
-\item{Metric}{which metrics to monitor}
+\item{Metric}{char vector, which metrics to monitor}
 
 \item{...}{further arguments}
 }
@@ -49,5 +50,8 @@ the output layer}
 a compiled keras sequential model with two hidden layers
 }
 \description{
-This function can setup and compile sequential models for classification.
+This function can setup and compile sequential models. Please have a look at
+[keras_model_sequential](https://keras.rstudio.com/reference/keras_model_sequential.html),
+[layer_dense](https://keras.rstudio.com/reference/layer_dense.html) and 
+[compile](https://keras.rstudio.com/reference/compile.html) for further details.
 }

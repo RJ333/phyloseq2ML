@@ -1,19 +1,23 @@
-#' Build and compile keras sequential models with 2 hidden layers for classification
+#' Build and compile keras sequential models with 2 hidden layers
 #' 
-#' This function can setup and compile sequential models for classification.
+#' This function can setup and compile sequential models. Please have a look at
+#' [keras_model_sequential](https://keras.rstudio.com/reference/keras_model_sequential.html),
+#' [layer_dense](https://keras.rstudio.com/reference/layer_dense.html) and 
+#' [compile](https://keras.rstudio.com/reference/compile.html) for further details.
 #' 
 #' @param train_data a table of training data
 #' @param Layer1_units integer, number of units in the first hidden layer
 #' @param Layer2_units integer, number of units in the second hidden layer
 #' @param classes integer, number of classes and therefore number of units in 
-#'   the output layer
-#' @param Dropout_layer1 the rate of dropout nodes for layer 1
-#' @param Dropout_layer2 the rate of dropout nodes for layer 2
-#' @param Dense_activation_function the activation function for the hidden layers
-#' @param Output_activation_function the activation function for the output layer
-#' @param Optimizer_function the optimizer function
-#' @param Loss_function the loss function
-#' @param Metric which metrics to monitor
+#'   the output layer, set to 1 for regression
+#' @param Dropout_layer1 numeric, ratio of dropout nodes for layer 1 between 0 and 1
+#' @param Dropout_layer2 numeric, ratio of dropout nodes for layer 2 between 0 and 1
+#' @param Dense_activation_function char, activation function for the hidden layers
+#' @param Output_activation_function char, activation function for the output layer,
+#'   (default: NULL, used for regression)
+#' @param Optimizer_function char, the optimizer function
+#' @param Loss_function char, the loss function
+#' @param Metric char vector, which metrics to monitor
 #' @param ... further arguments
 #'
 #' @return a compiled keras sequential model with two hidden layers
@@ -45,20 +49,25 @@ build_the_model <- function(train_data, Layer1_units, Layer2_units, classes,
   model
 }
   
-#' Run keras tensorflow classification
+#' Run keras tensorflow classification.
 #' 
 #' This functions calls keras tensorflow using the parameter values in each row 
-#' of the provided master_grid, using the data of the list elements.
+#' of the provided master_grid, using the data of the list elements. Please have
+#' a look at the keras [fit doc](https://keras.rstudio.com/reference/fit.html)
+#' for explanation on the keras related variables, the arguments are beginning 
+#' with "keras" in the description. Except for `the list`, `master_grid` and `.row`
+#' all arguments need to be column names of `master_grid`
 #' 
-#' @param Target The respective column from the master_grid
-#' @param ML_object The respective column from the master_grid
-#' @param Cycle The respective column from the master_grid
-#' @param Epochs The respective column from the master_grid
-#' @param Batch_size The respective column from the master_grid
-#' @param k_fold The respective column from the master_grid
-#' @param current_k_fold The respective column from the master_grid
-#' @param Early_callback The respective column from the master_grid
-#' @param Delay The respective column from the master_grid
+#' @param Target factor, the response variable
+#' @param ML_object factor or char, the name of the corresponding `the_list` item
+#' @param Cycle integer, the current repetition
+#' @param Epochs keras, integer, how many times should the whole data set be 
+#'   passed through the network?
+#' @param Batch_size keras, integer, how many samples before updating the weights?
+#' @param k_fold integer, the total number of k_folds for cross validation 
+#' @param current_k_fold integer, the current k_fold in range 1 : k_fold 
+#' @param Early_callback keras, string, a callback metric
+#' @param Delay keras, integer, wait for how many epochs before callback happens?
 #' @param step character declaring `training` or `prediction`
 #' @param the_list The input tables list
 #' @param master_grid the data frame containing all parameter combinations
@@ -166,8 +175,10 @@ keras_classification <- function(Target, ML_object, Cycle, Epochs, Batch_size, k
     stop("Length of predictions and data to be predicted differs")
   }
   # provide all classes as factor levels, otherwise confusion matrix breaks if
-  # a class is not predicted at all
+  # a class is not predicted or present at all
   predicted_labels$val_predictions <- factor(predicted_labels$val_predictions, 
+    levels = colnames(training_labels))
+  predicted_labels$factor_targets <- factor(predicted_labels$factor_targets, 
     levels = colnames(training_labels))
   # calculate confusion matrix
   confusion_matrix <- table(

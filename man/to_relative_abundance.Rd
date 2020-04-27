@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_taxa_functions.r
 \name{to_relative_abundance}
 \alias{to_relative_abundance}
-\title{Turn subsets of phyloseq objects into relative abundance data.frames.}
+\title{Turn otu_table() of phyloseq objects to relative abundance}
 \usage{
 to_relative_abundance(subset_list)
 }
@@ -10,10 +10,9 @@ to_relative_abundance(subset_list)
 \item{subset_list}{a list of phyloseq objects}
 }
 \value{
-A list of subsetted community tables as data.frames
+A list of phyloseq objects
 }
 \description{
 The provided list of phyloseq objects is turned to relative abundances 
-in percentage. The community tables are converted to data.frames and stored
-in a list. NaNs are turned into 0.
+in percentage.
 }

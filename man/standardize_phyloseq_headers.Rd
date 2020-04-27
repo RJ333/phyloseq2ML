@@ -9,7 +9,8 @@ standardize_phyloseq_headers(phyloseq_object, taxa_prefix, use_sequences)
 \arguments{
 \item{phyloseq_object}{The phyloseq object with the taxa_names() to be modified}
 
-\item{taxa_prefix}{The leading name of your taxa, e.g. `ASV` or `OTU`}
+\item{taxa_prefix}{The leading name of your taxa, e.g. `ASV` or `OTU`, 
+must not contain an underscore or white space}
 
 \item{use_sequences}{Logical indicating whether your current taxa_names()
 are sequences which you want to have moved to the refseq() slot of the 

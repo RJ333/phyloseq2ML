@@ -2,6 +2,7 @@
 #'
 #' This function extracts specific parameters from first level named list items.
 #' The data frame headers and length are set up using `initialize_results()`.
+#' The first 3 values can be used to describe the subset components of a data set.
 #' 
 #' @param input_list the input list with named items on first level
 #'
@@ -22,10 +23,19 @@ extract_parameters <- function(input_list) {
   # split the names at all "_" and select the correct proportion
   # representing the desired parameter
   result_table$ML_object <- names(input_list)
-  result_table$Primerset <- as.factor(sapply(strsplit(
+  result_table$Subset_1 <- as.factor(sapply(strsplit(
+    as.character(names(input_list)), '_'), "[", 1))
+  result_table$Subset_2 <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 2))
-  result_table$Subset <- as.factor(sapply(strsplit(
+  result_table$Subset_3 <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 3))
+  result_table$Threshold <- as.numeric(sapply(strsplit(
+    as.character(names(input_list)), '_'), "[", 4))
+  # here we first split at "_" and then at "." to get the Tax_rank
+  tax_rank_unclean <- sapply(strsplit(
+    as.character(names(input_list)), '_'), "[", 5)
+  result_table$Tax_rank <- as.factor(sapply(strsplit(
+    as.character(tax_rank_unclean), '\\.'), "[", 2))
   result_table$Target <- as.factor(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 6))
   result_table$Split_ratio <- as.numeric(sapply(strsplit(
@@ -34,13 +44,8 @@ extract_parameters <- function(input_list) {
     as.character(names(input_list)), '_'), "[", 9))
   result_table$Noise_factor <- as.numeric(sapply(strsplit(
     as.character(names(input_list)), '_'), "[", 11))
-  result_table$Threshold <- as.numeric(sapply(strsplit(
-    as.character(names(input_list)), '_'), "[", 4))
-  # here we first split at "." and then at "_" to get the Tax_level
-  tax_level_unclean <- sapply(strsplit(
-    as.character(names(input_list)), '\\.'), "[", 2)
-  result_table$Tax_level <- as.factor(sapply(strsplit(
-    tax_level_unclean, '_'), "[", 1))
+
+
 
   result_table
 }
@@ -57,7 +62,7 @@ extract_parameters <- function(input_list) {
 
 initialize_results <- function(input_list) {
 
-  df_headers <- c("ML_object", "Primerset", "Subset", "Tax_level", "Threshold", 
+  df_headers <- c("ML_object", "Subset_1", "Subset_2", "Subset_3", "Tax_rank", "Threshold", 
     "Target", "Split_ratio", "Noise_copies", "Noise_factor")
   df_result <- stats::setNames(data.frame(matrix(ncol = length(df_headers), 
     nrow = length(input_list))), df_headers)

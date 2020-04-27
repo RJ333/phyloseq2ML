@@ -11,27 +11,29 @@ test_that("Response variable stayes as factor after dummification", {
 })
 
 test_that("Returns unmodified table if no factor columns present", {
+  # select numeric columns from the list's first table
+  merged_input_regression[[1]] <- merged_input_regression[[1]][, 1:10]
   dummified <- phyloseq2ML::dummify_input_tables(merged_input_regression)
   expect_equal(dummified[[1]], merged_input_regression[[1]])
 })
 
 # scaling
 test_that("Scaling returns unmodified response dummy col", {
-  scaled_keras <- phyloseq2ML::scaling(oversampled_keras_multi)
+  scaled_keras <- phyloseq2ML::scaling(augmented_keras_multi)
   target_scaled <- scaled_keras[[1]][["train_set"]][,ncol(scaled_keras[[1]][["train_set"]])]
-  target_oversampled <- oversampled_keras_multi[[1]][["train_set"]][,ncol(oversampled_keras_multi[[1]][["train_set"]])]
-  expect_equal(target_scaled, target_oversampled)
+  target_augmented <- augmented_keras_multi[[1]][["train_set"]][,ncol(augmented_keras_multi[[1]][["train_set"]])]
+  expect_equal(target_scaled, target_augmented)
 })
 
 test_that("Scaling returns unmodified response regression col", {
-  scaled_keras_regression <- phyloseq2ML::scaling(oversampled_keras_regression)
+  scaled_keras_regression <- phyloseq2ML::scaling(augmented_keras_regression)
   target_scaled <- scaled_keras_regression[[1]][["train_set"]][,ncol(scaled_keras_regression[[1]][["train_set"]])]
-  target_oversampled <- oversampled_keras_regression[[1]][["train_set"]][,ncol(oversampled_keras_regression[[1]][["train_set"]])]
-  expect_equal(target_scaled, target_oversampled)
+  target_augmented <- augmented_keras_regression[[1]][["train_set"]][,ncol(augmented_keras_regression[[1]][["train_set"]])]
+  expect_equal(target_scaled, target_augmented)
 })
 
 test_that("Scaling took place on non-dummy columns setting mean to 0", {
-  scaled_keras <- phyloseq2ML::scaling(oversampled_keras_binary)
+  scaled_keras <- phyloseq2ML::scaling(augmented_keras_binary)
   train_set <- scaled_keras[[1]][["train_set"]]
   dummy_columns <- names(train_set)[vapply(train_set, is.dummy, logical(1))]
   dummy_columns <- c(dummy_columns, names(train_set)[ncol(train_set)])
@@ -40,7 +42,7 @@ test_that("Scaling took place on non-dummy columns setting mean to 0", {
 })
 
 test_that("Scaling took place on non-dummy columns setting SD to 1", {
-  scaled_keras <- phyloseq2ML::scaling(oversampled_keras_binary)
+  scaled_keras <- phyloseq2ML::scaling(augmented_keras_binary)
   train_set <- scaled_keras[[1]][["train_set"]]
   dummy_columns <- names(train_set)[vapply(train_set, is.dummy, logical(1))]
   dummy_columns <- c(dummy_columns, names(train_set)[ncol(train_set)])
@@ -49,14 +51,14 @@ test_that("Scaling took place on non-dummy columns setting SD to 1", {
 })
 
 test_that("Scaling ignored response var: SD to 1 not true for all columns", {
-  scaled_keras_regression <- phyloseq2ML::scaling(oversampled_keras_regression)
+  scaled_keras_regression <- phyloseq2ML::scaling(augmented_keras_regression)
   train_set <- scaled_keras_regression[[1]][["train_set"]]
   standard_dev_scaled <- mean(apply(train_set, 2, stats::sd))
   expect_false(isTRUE(all.equal(standard_dev_scaled, 1)))
 })
 
 test_that("Scaling ignored response var: mean to 0 not true for all columns", {
-  scaled_keras_regression <- phyloseq2ML::scaling(oversampled_keras_regression)
+  scaled_keras_regression <- phyloseq2ML::scaling(augmented_keras_regression)
   train_set <- scaled_keras_regression[[1]][["train_set"]]
   mean_scaled <- mean(apply(train_set, 2, mean))
   expect_false(isTRUE(all.equal(mean_scaled, 0))) 
@@ -109,6 +111,6 @@ test_that("Test set exists and is not NULL", {
 test_that("Input and output list have same length", {
   final <- phyloseq2ML::inputtables_to_keras(scaled_keras_multi)
   all_length <- unique(length(final), length(scaled_keras_multi), 
-    length(oversampled_keras_multi), length(splitted_keras_multi))
+    length(augmented_keras_multi), length(splitted_keras_multi))
   expect_equal(all_length, length(final))
 })

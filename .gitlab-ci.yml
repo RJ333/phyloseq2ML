@@ -8,6 +8,7 @@ variables:
 stages:
   - build
   - test
+  - documentation
   - coverage
 
 build:
@@ -19,10 +20,22 @@ build:
     - master
 
 document:
-  stage: test
+  stage: documentation
   script:
     - R --vanilla -e 'devtools::build()'
     - R --vanilla -e 'devtools::document()'
+  only:
+    - merge_requests
+    - master
+
+vignettes:
+  stage: documentation
+  script:
+    - R --vanilla -e 'devtools::build_vignettes()'
+  artifacts:
+    paths:
+      - doc/*.html
+    expire_in: 1 day
   only:
     - merge_requests
     - master
@@ -42,4 +55,3 @@ coverage:
   only:
     - merge_requests
     - master
-

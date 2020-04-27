@@ -1,13 +1,17 @@
 #' Run ranger regression with parameters of data.frame rows.
 #'
 #' This functions calls ranger using the parameter values in each row of the 
-#' provided master_grid, using the data of the list elements.
+#' provided master_grid, using the data of the list elements. Please have
+#' a look at the [ranger doc](https://cran.r-project.org/web/packages/ranger/ranger.pdf)
+#' for explanation on the ranger related variables, the arguments are beginning 
+#' with "ranger" in the description. Except for `the list`, `master_grid` and `.row`
+#' all arguments need to be column names of `master_grid`
 #'
-#' @param Target The respective column from the master_grid
-#' @param ML_object The respective column from the master_grid
-#' @param Cycle The respective column from the master_grid
-#' @param Number_of_trees The respective column from the master_grid
-#' @param Mtry_factor The respective column from the master_grid
+#' @param Target character, the response variable
+#' @param ML_object factor or character, the name of the corresponding `the_list` item
+#' @param Cycle integer, the current repetition
+#' @param Number_of_trees ranger, integer, number of trees per forest
+#' @param Mtry_factor ranger, factor to multiply default ranger mtry argument
 #' @param .row current row of master_grid
 #' @param the_list The input tables list
 #' @param master_grid the data frame containing all parameter combinations
@@ -40,8 +44,8 @@ ranger_regression <- function(master_grid, Target, ML_object, Cycle,
   all_vars <- ncol(the_list[[ML_object]][["train_set"]]) - 1
   # multiply sqrt of variables with Mtry_factor; if greater than available 
   # number of variables, select all variables
-  for_mtry <- ifelse((sqrt(all_vars) * Mtry_factor) < all_vars,
-    sqrt(all_vars) * Mtry_factor, all_vars)
+  for_mtry <- ifelse(((all_vars / 3) * Mtry_factor) < all_vars,
+    (all_vars / 3) * Mtry_factor, all_vars)
   
   RF_train <- ranger::ranger(
     dependent.variable.name = Target,  # needs to character, not factor

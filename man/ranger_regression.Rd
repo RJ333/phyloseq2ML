@@ -20,15 +20,15 @@ ranger_regression(
 \arguments{
 \item{master_grid}{the data frame containing all parameter combinations}
 
-\item{Target}{The respective column from the master_grid}
+\item{Target}{character, the response variable}
 
-\item{ML_object}{The respective column from the master_grid}
+\item{ML_object}{factor or character, the name of the corresponding `the_list` item}
 
-\item{Cycle}{The respective column from the master_grid}
+\item{Cycle}{integer, the current repetition}
 
-\item{Number_of_trees}{The respective column from the master_grid}
+\item{Number_of_trees}{ranger, integer, number of trees per forest}
 
-\item{Mtry_factor}{The respective column from the master_grid}
+\item{Mtry_factor}{ranger, factor to multiply default ranger mtry argument}
 
 \item{.row}{current row of master_grid}
 
@@ -43,5 +43,9 @@ a data frame with results and metrics for each row of the master_grid
 }
 \description{
 This functions calls ranger using the parameter values in each row of the 
-provided master_grid, using the data of the list elements.
+provided master_grid, using the data of the list elements. Please have
+a look at the [ranger doc](https://cran.r-project.org/web/packages/ranger/ranger.pdf)
+for explanation on the ranger related variables, the arguments are beginning 
+with "ranger" in the description. Except for `the list`, `master_grid` and `.row`
+all arguments need to be column names of `master_grid`
 }

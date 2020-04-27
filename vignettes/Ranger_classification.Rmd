@@ -1,0 +1,422 @@
+---
+title: "Ranger classification"
+author: "René Janßen"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Ranger_classification}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(phyloseq)
+library(phyloseq2ML)
+```
+# Performing a Random Forest binary classification with ranger
+
+In this part we will learn how to further process the data extracted from a 
+[phyloseq object](Prepare_phyloseq_for_Machine_Learning.html) so it is suitable 
+for a classification task. We will load the object created in the first vignette
+and start with a short demonstration on how to run ranger. Then we go into more
+recommended preparation steps, performing a Random Forest analysis on multiple
+input tables and process and plot the resuls.
+
+## A short ranger Random Forest test run
+
+If we have a look at our current list of tables, we can do some machine learning
+already. If you want to give it a try, just run
+```{r}
+merged_input_binary <- phyloseq2ML:::merged_input_binary
+first_try <- merged_input_binary[[2]]  # take one list element, here with TNT as response
+ranger_trained <- ranger::ranger(TNT ~ ., data = first_try)
+ranger_trained
+```
+The `ranger` class object summary prints information on what kind of analysis
+was performed (Classification), how many trees were grown and how many variables
+were considered at each split. The accuracy is the fraction of True positives
+and True negatives divided by the sum of all possible outcomes, which should be
+equal to your number of samples: True positives (TP), False Negatives (FN), True
+Negatives (TN), False positives (FP).
+You can see what this means in the 
+[confusion matrix](https://en.wikipedia.org/wiki/Confusion_matrix)
+```{r}
+ranger_trained$confusion.matrix
+```
+>Note: if you see NAs as additional classes in the confusion matrix, you might
+not have used enough trees so the model was not sure on how to classify
+
+>Note: If comparing confusion matrices (e.g. from different sources or packages
+or self built ones) make sure the "predicted" and the "true" orientation is the
+same. See the link above and your current output. Your True positives and True
+negatives are still the same values (because they are in the diagonal) 
+regardless of the orientation, but False positive and False negative would be 
+exchanged, which is hard to detect.
+
+## How is classification performance evaluated?
+
+The confusion matrix is the table which I use to generate all further 
+[binary classification metrics](https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers). 
+The link is very helpful in explaining what each metric shows. It's important to
+choose the right one for your question and understand how to interprete it, as
+laid out
+[here](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient#Advantages_of_MCC_over_accuracy_and_F1_score)
+
+You may ask of what help binary classification metrics are if we had a multi
+class example. Binary classification is just a special case of multiclass
+classification. In binary problems you only need to look at one class, as the
+other is the complement. If we have more classes, we need to look at the results
+for each class individually. Important to understand is that for each class, the
+True positive ("positive" refers to the class considered at the moment) is
+calculated as before along the diagonal of the matrix. But all other outcomes
+(FP, TN, FN) distributed over the other classes need to be summed. This way, the
+problem is (for each class) reduced to a 2 x 2 matrix again. Have a look
+[here](https://stats.stackexchange.com/a/338240) for more information.
+
+# What and why further preparation of the list items for ML is required?
+
+But let's take a step back from deploying machine learning models already. Yes,
+we could run Random Forests now (this data would not run on a keras based - or
+probably any - neural network yet, though). But there are two issues (at least
+in my opinion) with this approach, one regarding efficiency and one regarding
+good practice.
+
+## Efficiency
+
+The easy one regarding efficiency: we should find a way to run all list items 
+automatically. 
+
+There is no need for copy and paste code here, where we only exchange the number
+of the list item we want to run. That is a general rule, if you do basically the
+same thing multiple times using copy and paste (or even worse, by writing the
+code again) you are doing the job the computer should do. And the computer is
+better at that. So we should come up with a function for that (later).
+Additionally, we only modified the input tables inthe beginning. But what about
+the various Random Forest
+[hyperparameters](https://en.wikipedia.org/wiki/Hyperparameter_optimization)?
+You will go crazy if you check manually which settings are the best (or at least
+decent) for your data. At Random Forest is very kind with regard to that, neural
+networks offer even more hyperparameters.
+
+So this is one reason why you should not use the current list for ML.
+
+## Training (and validation) and test splitting
+
+The second is important for Random Forest and essential for Neural networks: We
+haven't split our data yet into training and test sets.
+
+>Note: Again, there is some terminology confusion possible. I'm following these 
+[guidelines](https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets) 
+where the term "validation" refers to the part of the training data set, which 
+the model is evaluated on to see which hyperparameters perform best. The "test" 
+set is the final data set which will be predicted using the best model in the 
+train-validate step. You can find online information where the meaning of 
+"validation" and "test" is switched!
+
+### Short background on data set splitting
+
+We need to clarify two things first: what data sets do we want and what is 
+overfitting? 
+
+First: The data sets are usually training, validation (as part of the training
+set) and test set. The validation set is to the training set what the
+combination of training and validation is to the test set. Unclear? ;-) If we
+want to use models for predictions, they need to find "something" in their
+training data, which is also there in the to-be-predicted data, otherwise they
+don't work. So we always need a data set, which was not used for training, to
+check if the model learning something useful. Therefore, a part of the training
+data is not used (the validation data set, it is "hold out") and the trained
+model is evaluated based on how well it predicts the validation data. If we do
+not have much data, we can use 
+[kfold crossvalidation](https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation),
+where we cut our training set in k pieces and each piece serves once as
+validation data and the rest as training data. We can take the mean of our k
+predictions and have a better estimation how well our model performed with the
+current hyperparameters.
+
+If we have selected the best hyperparameter combination, we can use the full
+training data (training data + validation data) to train the model and finally
+predict the test set.
+
+The ratios depend on how variable your data is and how many samples you have. I
+set about 20 to 25 % of the samples aside for the final test data. RF does the
+training/validation step automatically due to the bagging (about 63% of the
+training data is used for training, the rest for validation). In neural nets we
+can decide how we want to split training and validation data either manually or
+it is determined by k if we go for kfold cv.
+
+### Short background on overfitting
+
+Second: [Overfitting](https://en.wikipedia.org/wiki/Overfitting) means, that
+your model does not generalize, but it learns all about your training data.
+Sounds cool at first, but the data you want to predict will not exactly be like
+the trainig data. To detect overfitting, we use validation and test sets.
+Overfitted models perform worse on the to-be-predicted data than on their
+trained data. Overfitting, though, is not the only reason why a model is worse
+in predicting new data. There are measures to be taken against overfitting,
+which are especially important for neural networks.
+
+There is some discussion ongoing if this is required for Random Forest at all,
+as it supposedly does not overfit due to the use of bootstrap aggregating
+([bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating)). There is a lot
+of discussion if this is true, however, if you either want to compare various
+methods or want to compare various RF hyperparameters, you have to do it anyway.
+Random Forest bagging should result in different Out of Bag samples (OOB
+samples) for each iteration, so it hard to compare the performance on specific
+data sets using this approach.
+
+>Note: You should never use your test data when you're still trying to figure
+out, which settings are the best. This way, information about your test data
+"leaks" into your model design, although in a real-world scenario this data
+might not even exist yet.
+
+# Machine learning with ranger
+
+## Split data sets for ranger
+
+That was a lot of theory! However, I think it is important (and there are so
+many sources online where these topics are way better explained) because ML can
+trick you if you don't understand how it works principally. The intention is
+that this reading saves you time, not the other way.
+
+Now, our ways diverge: If we want to use Random Forest, we are almost there. For
+neural networks, we will perform some additional steps to prepare the data.
+Let's go first to RF way.
+
+This function splits each data frame in training table (used for training and
+validation) and a test table. You can try several split values. Hint: To check
+whether it is important, which samples are used for training and testing, you
+can choose values like `c(0.60001, 0.60002)` which will return the same split
+ratios, but another sample distribution to train and test. As this information
+is stored in the name of the list item, it makes it distinguishable.
+```{r results = "hide"}
+splitted_input_binary <- split_data(merged_input_binary, c(0.601, 0.602))
+str(splitted_input_binary, max = 2)
+```
+>Note: If you think about what we just did, you might realize that we will now
+end up with training samples in the first split which are test samples in the
+second split. So we are already hurting the idea of not using test samples for
+training in some form. In this case we want to identify how similar and
+therefore, representitive our samples are. If they are quite representitive, you
+should not see much difference between varying train/test distributions. If you
+have some deviating (outlier) samples in there, this can largely effect your
+prediction outcome and you should know this. This means first: your validation
+outcomes are only an orientation, test is the real "test" (really?). Second: if
+you have a data set which is not very well represented you shouldn't focus too
+much on hyperparameter tuning, because it likely still won't help classifying
+the "outlier samples". Instead if you don't have many samples, the presence of
+some hard to predict samples may be more determining on your ML performance than
+the difference between ok-ish and near-perfect hyperparameter settings. In that
+case, you can do even more splits of the same ratio to analyze how much sample
+selection affects your outcome. Mention this when you describe your work.
+
+## Data augmentation
+
+[Data augmentation](https://machinelearningmastery.com/how-to-configure-image-data-augmentation-when-training-deep-learning-neural-networks/)
+means adding samples based on alrady existing ones ONLY to your training set.
+This augments (or augmentates?) the sample size which is supposed to be
+especially important for neural nets. You can also add some random noise to each
+numeric value of the replicates (`?augment`) which forces the ML to generalize
+and could support the prevention of overfitting. So far the theory, right now
+this feature is not sufficiently tested. I included it in the package as I hope
+that it is useful for some people. We will not use it yet (you can of course, if
+you want), but we will run the function with 0 so the information is added to
+the name of the list items.
+
+>Note: Don't get fooled by near perfect training-validatin results. This is
+expected, as you probably have identical (without noise) or almost identical
+sample (with noise) in training and validation. Obviously, the test set is NOT
+allowed to contain augmented samples! The function as it is only works on the
+training sets.
+
+```{r results = "hide"}
+augmented_input_binary <- augment(splitted_input_binary, 0, 0.00)
+```
+
+## Train and predict using ranger individually
+
+The list is ready for Random Forest classification using `ranger`!! But how do
+we make use of the list now? As said before, you can pick an element using
+
+```{r}
+my_trainset <- augmented_input_binary[[1]][["train_set"]]
+my_testset <- augmented_input_binary[[1]][["test_set"]]
+```
+check the amount of variables if you want to set your own mtry value 
+(ranger picks the squareroot of all variables by default)
+```{r}
+ncol(my_trainset) - 1 # how many independent variables are there? 1 is the response var
+```
+and then train a ranger model:
+```{r}
+trained <- ranger::ranger(DANT.2.6 ~ ., data = my_trainset, num.trees = 1000, mtry = 10)
+trained
+```
+and finally predict the test data using the trained model:
+```{r}
+predicted <- predict(trained, data = my_testset)
+predicted
+```
+Important are the predictions in `predicted$predictions`. Comparing those to the 
+true values stored in `my_testset` we can build our confusion matrix.
+```{r}
+confusion_matrix <- table(true = my_testset[["DANT.2.6"]], 
+      predicted = predicted$predictions)
+confusion_matrix
+```
+
+## Grid search training on all list items with ranger and purrr::pmap
+
+But we discussed above that this is not very efficient. Using a (I find)
+[complicated function](https://statwonk.com/purrr.html) from the `purrr` package
+called
+[pmap](https://r4ds.had.co.nz/iteration.html#mapping-over-multiple-arguments),
+we can set up a data frame which contains all the relevant parameters and then
+run ranger for each data frame row. To prepare such a data frame, let's first
+make use of these weird long names our list items have received:
+```{r}
+parameter_df <- extract_parameters(augmented_input_binary)
+head(parameter_df)
+```
+Pretty cool! Now we create another data frame where we detail the values for
+hyperparameters and general ranger arguments we want to use. The `expand.grid`
+function will turn this into data frame with all possible combinations of these
+values. We also include the names of our list items, so we can combine it
+afterwards with our parameter_df. We should not exaggerate the parameters
+combinations we want to investigate in one run, unless you have the time and
+your computer/server/cloud can deal with it.
+
+```{r}
+# A small setup to train ranger models
+hyper_grid <- expand.grid(
+  ML_object = names(augmented_input_binary),
+  Number_of_trees = c(10, 501),
+  Mtry_factor = c(1, 2),
+  Importance_mode = "none",
+  Cycle = 1:3,
+  step = "training")
+```
+>Note: All arguments are explained in ?ranger_classification (or
+?ranger_regression). The Mtry_factor is a number by which to multiplicate the
+default value of mtry. The default for classification is the squareroot of the
+number of available independent variables. It is recommended to increase the
+default for data sets with many uninformative variables (such as community
+tables, which are described as
+[sparse](https://en.wikipedia.org/wiki/Sparse_matrix)). For regression it is 1/3
+of all independent variables, which is a lot (theoretically, a Mtry_factor of 3
+would be the maximum for regression. But taking all variables into account
+defeats the bagging approach).
+
+```{r}
+final_grid <- merge(parameter_df, hyper_grid, by = "ML_object")
+nrow(final_grid)
+# for ranger, string arguments needs to be passed as character, not factor level 
+final_grid$Target <- as.character(final_grid$Target)
+```
+```{r}
+test_grid <- head(final_grid, 5)  # depending on your time and compute resources, you can replace all occurrences below of final_grid with test_grid
+```
+
+Now we are ready! The final_grid (or test_grid) is set up and `purrr::pmap` will
+call the function `ranger_classification` from this package for each row of the
+master_grid, passing the values stored in the corresponding row on to the
+function call. It looks partly duplicated, but I've tried other versions and
+this is the one that works. We also provide the row names so we can track the
+progress (the current row). However, this is supressed in this vignette. pmap
+will create a new column in final_grid called results, and - careful, weird
+stuff - each ROW of the column "results" will contain a 
+[whole data frame](https://r4ds.had.co.nz/many-models.html#nested-data)! This is
+required to return all the values from the model which we need and keep the
+per-row combination of corresponding settings.
+
+```{r results = "hide"}
+final_grid$results <- purrr::pmap(cbind(final_grid, .row = rownames(final_grid)), 
+    ranger_classification, the_list = augmented_input_binary, master_grid = final_grid)
+head(final_grid, 2)
+```
+This looks complicated and we cannot make any use of this. But this happened
+with a reason: using another function we can expand the results data frame into
+multiple columns, each only one row long. this fits perfectly with our
+beforehand shape. The only difference in length is based on the number of
+classes, because each class gets its own row. Let's have a look at this
+
+```{r}
+results_df <-  as.data.frame(tidyr::unnest(final_grid, results))
+head(results_df, 3)
+```
+This is already pretty cool (not the results, but what we can do with it to our
+own data)! Let's visualize the results to get an idea how many trees performed
+better and what mtry factor to choose. To make the plot small enough, I will
+only look into the TNT classification
+
+>Note: I'm often using Balanced accuracy as metric for data sets which are a 
+little imbalanced. You can use any metric provided in the results data frame or
+even calculate further metrics.
+
+```{r fig.height = 12, fig.width = 7}
+TNT_results <- subset(results_df, Target == "TNT" & Class == "present")
+library(ggplot2)
+train_plot <- ggplot(TNT_results, aes(x = as.factor(Number_of_trees), y = Balanced_accuracy, colour = Class)) +
+    geom_violin(size = 0.3, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
+    stat_summary(position = position_dodge(width = 0.9), fill = "black", 
+      fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
+    theme_bw() +
+    facet_wrap(~ Split_ratio + Mtry_factor + Threshold + Tax_rank, nrow = 4)
+train_plot
+```
+Aha. So this gives us some impressions: First: the two splits behave quite
+different. Second: with more trees we get more stable results. The tax ranks
+deliver a rather unclear picture and an Mtry_factor of 2 looks a little better 
+than 1. This is actually quite impressive, as this example data set is so 
+reduced, there is not much information left. However, without prediction these 
+results haven't been fully assessed.
+
+## Grid search prediction
+
+Therefore, we build another data frame with the selected parameters, add some
+repetitions and run the prediction:
+
+```{r results = "hide"}
+# A small setup to predict ranger models
+hyper_grid_prediction <- expand.grid(
+  ML_object = names(augmented_input_binary),
+  Number_of_trees = c(501),
+  Mtry_factor = c(2),
+  Cycle = 1:10,
+  step = "prediction")
+final_grid_prediction <- merge(parameter_df, hyper_grid_prediction, by = "ML_object")
+# for ranger, string arguments needs to be passed as character, not factor level 
+final_grid_prediction$Target <- as.character(final_grid_prediction$Target)
+# running ranger
+final_grid_prediction$results <- purrr::pmap(cbind(final_grid_prediction, .row = rownames(final_grid_prediction)), 
+    ranger_classification, the_list = augmented_input_binary, master_grid = final_grid_prediction)
+# unnesting results
+predictions_df <-  as.data.frame(tidyr::unnest(final_grid_prediction, results))
+```
+
+And let's plot the prediction results
+```{r fig.height = 6, fig.width = 7}
+# plotting the data
+predict_plot <- ggplot(predictions_df, aes(x = as.factor(Number_of_trees), y = Balanced_accuracy, colour = Class)) +
+    geom_violin(size = 0.4, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
+    stat_summary(position = position_dodge(width = 0.9), fill = "black", 
+      fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +
+    theme_bw() +
+    facet_wrap(~ Split_ratio + Threshold + Target + Tax_rank, nrow = 2)
+predict_plot
+```
+
+This was it about performing a ranger classification. The last part of the 
+general introduction explains what additional steps are required to achieve a 
+keras-ready data set and how to [run the classification there](Keras_classification.html).

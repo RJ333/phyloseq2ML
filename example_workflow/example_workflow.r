@@ -1,4 +1,4 @@
-library(phyloseq)
+library(speedyseq)
 library(phyloseq2ML)
 library(futile.logger)
 flog.threshold(TRACE)
@@ -13,26 +13,28 @@ testps <- standardize_phyloseq_headers(
 # translate ASVs to genus
 levels_tax_dictionary <- c("Family", "Genus")
 taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
-translate_ID(ID = c("ASV02", "ASV17"), tax_level = c("Genus"), taxa_vector_list)
-
-# define subsetting parameters
-thresholds <- 1500
-selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
+translate_ID(ID = c("ASV02", "ASV17"), tax_rank = "Genus", taxa_vector_list)
 
 # phyloseq objects as list
+second_phyloseq_object <- subset_samples(testps, Area == "Mine_mound")
 subset_list <- list(
-  ps_V4_surface = testps
+  vignette_V4_surface = testps,
+  vignette_V4_minemound = second_phyloseq_object
 )
 
-# tax levels parameter is NULL as default
+# define subsetting parameters
+selected_taxa_1 <- setNames(c("To_Genus", "To_Family"), c("Genus", "Family"))
+subset_list_rel <- to_relative_abundance(subset_list)
 subset_list_tax <- create_community_table_subsets(
-  subset_list = subset_list, 
-  thresholds = thresholds,
-  tax_levels = selected_taxa_1)
-subset_list_df <- to_relative_abundance(subset_list = subset_list_tax)
+  subset_list = subset_list_rel, 
+  thresholds = c(5, 1.5),
+  taxa_prefix = "ASV",
+  num_samples = 1,
+  tax_ranks = selected_taxa_1)
+subset_list_df <- otu_table_to_df(subset_list = subset_list_tax)
 # add sample data columns to the count table
 #names(sample_data(testps))
-desired_sample_data <- c("TOC", "P_percent")
+desired_sample_data <- c("TOC", "P_percent", "Cruise_ID", "Run")
 subset_list_extra <- add_sample_data(phyloseq_object = testps, 
   community_tables = subset_list_df, sample_data_names = desired_sample_data)
 # get response variables
@@ -51,7 +53,7 @@ responses_binary <- categorize_response_variable(
   ML_mode = "classification", 
   response_data = response_variables, 
   my_breaks = c(-Inf, 0, Inf),
-  class_labels = c("below_0", "above_0"))
+  class_labels = c("absent", "present"))
 
 responses_regression <- categorize_response_variable(
   ML_mode = "regression", 
@@ -74,15 +76,15 @@ splitted_keras_regression <- split_data(keras_dummy_regression, c(0.6, 0.8))
 
 keras_dummy_multi[[1]]
 
-# oversampling
-oversampled_keras_binary <- oversample(splitted_keras_binary, 2, 0.5)
-oversampled_keras_multi <- oversample(splitted_keras_multi, 2, 0.5)
-oversampled_keras_regression <- oversample(splitted_keras_regression, 2, 0.5)
+# augmentation
+augmented_keras_binary <- augment(splitted_keras_binary, 2, 0.5)
+augmented_keras_multi <- augment(splitted_keras_multi, 2, 0.5)
+augmented_keras_regression <- augment(splitted_keras_regression, 2, 0.5)
 
 # scaling
-scaled_keras_binary <- scaling(oversampled_keras_binary)
-scaled_keras_multi <- scaling(oversampled_keras_multi)
-scaled_keras_regression <- scaling(oversampled_keras_regression)
+scaled_keras_binary <- scaling(augmented_keras_binary)
+scaled_keras_multi <- scaling(augmented_keras_multi)
+scaled_keras_regression <- scaling(augmented_keras_regression)
 
 scaled_keras_multi[[1]][["train_set"]]
 
@@ -102,17 +104,17 @@ splitted_input_multi <- split_data(merged_input_multi, c(0.6, 0.8))
 splitted_input_regression <- split_data(merged_input_regression, c(0.6, 0.8))
 
 
-# oversampling
-oversampled_input_binary <- oversample(splitted_input_binary, 1, 0.5)
-oversampled_input_multi <- oversample(splitted_input_multi, 1, 0.5)
-oversampled_regression <- oversample(splitted_input_regression, 1, 0.5)
+# augmentation
+augmented_input_binary <- augment(splitted_input_binary, 1, 0.5)
+augmented_input_multi <- augment(splitted_input_multi, 1, 0.5)
+augmented_regression <- augment(splitted_input_regression, 1, 0.5)
 
 ####### ranger classification
 # set up a parameter data.frame
-parameter_df <- extract_parameters(oversampled_input_multi)
+parameter_df <- extract_parameters(augmented_input_multi)
 
 hyper_grid <- expand.grid(
-  ML_object = names(oversampled_input_multi),
+  ML_object = names(augmented_input_multi),
   Number_of_trees = c(151),
   Mtry_factor = c(1),
   Importance_mode = c("none"),
@@ -125,15 +127,15 @@ master_grid$Target <- as.character(master_grid$Target)
 
 test_grid <- head(master_grid, 2)
 
-master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
-    ranger_classification, the_list = oversampled_input_multi, master_grid = master_grid)
-results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
+#master_grid$results <- purrr::pmap(cbind(master_grid, .row = rownames(master_grid)), 
+#    ranger_classification, the_list = augmented_input_multi, master_grid = master_grid)
+#results_df <-  as.data.frame(tidyr::unnest(master_grid, results))
 
 #### ranger regression
-parameter_regress <- extract_parameters(oversampled_regression)
+parameter_regress <- extract_parameters(augmented_regression)
 
 hyper_grid_regress <- expand.grid(
-  ML_object = names(oversampled_regression),
+  ML_object = names(augmented_regression),
   Number_of_trees = c(151),
   Mtry_factor = c(1),
   Importance_mode = c("none"),
@@ -145,13 +147,13 @@ master_grid_regress$Target <- as.character(master_grid_regress$Target)
 test_grid_regress <- head(master_grid_regress, 1)
 
 # running ranger
-master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
-    ranger_regression, the_list = oversampled_regression, master_grid = master_grid_regress)
-results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
+#master_grid_regress$results <- purrr::pmap(cbind(master_grid_regress, .row = rownames(master_grid_regress)), 
+#    ranger_regression, the_list = augmented_regression, master_grid = master_grid_regress)
+#results_regress <-  as.data.frame(tidyr::unnest(master_grid_regress, results))
 
-test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
-    ranger_regression, the_list = oversampled_regression, master_grid = test_grid_regress)
-results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
+#test_grid_regress$results <- purrr::pmap(cbind(test_grid_regress, .row = rownames(test_grid_regress)), 
+#    ranger_regression, the_list = augmented_regression, master_grid = test_grid_regress)
+#results_regress_test <-  as.data.frame(tidyr::unnest(test_grid_regress, results))
 
 
 ####### for keras multi
@@ -188,9 +190,9 @@ master_keras_multi <- master_keras_multi[order(
 rownames(master_keras_multi) <- NULL
 test_keras_multi_prediction <- head(master_keras_multi, 2)
 
-test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
-  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
-keras_df_multi_prediction <-  as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
+#test_keras_multi_prediction$results <- purrr::pmap(cbind(test_keras_multi_prediction, .row = rownames(test_keras_multi_prediction)), 
+#  keras_classification, the_list = ready_keras_multi, master_grid = test_keras_multi_prediction)
+#keras_df_multi_prediction <-  as.data.frame(tidyr::unnest(test_keras_multi_prediction, results))
 
 ####### for keras binary
 # set up a parameter data.frame
@@ -225,9 +227,9 @@ master_keras_binary <- master_keras_binary[order(
 rownames(master_keras_binary) <- NULL
 test_keras_binary_training <- head(master_keras_binary, 2)
 
-test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
-  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
-keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
+#test_keras_binary_training$results <- purrr::pmap(cbind(test_keras_binary_training, .row = rownames(test_keras_binary_training)), 
+#  keras_classification, the_list = ready_keras_binary, master_grid = test_keras_binary_training)
+#keras_df_binary_training <-  as.data.frame(tidyr::unnest(test_keras_binary_training, results))
 
 ####### for keras regression
 # set up a parameter data.frame
@@ -260,9 +262,9 @@ master_keras_regression_training <- master_keras_regression_training[order(
 rownames(master_keras_regression_training) <- NULL
 test_keras_regression_training <- head(master_keras_regression_training, 2)
 
-test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
-  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_training)
-keras_df_regression_training <-  as.data.frame(tidyr::unnest(test_keras_regression_training, results))
+#test_keras_regression_training$results <- purrr::pmap(cbind(test_keras_regression_training, .row = rownames(test_keras_regression_training)), 
+#  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_training)
+#keras_df_regression_training <-  as.data.frame(tidyr::unnest(test_keras_regression_training, results))
 
 #### regression prediction
 hyper_keras_regression_prediction <- expand.grid(
@@ -292,6 +294,6 @@ master_keras_regression_prediction <- master_keras_regression_prediction[order(
 rownames(master_keras_regression_prediction) <- NULL
 test_keras_regression_prediction <- head(master_keras_regression_prediction, 2)
 
-test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
-  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_prediction)
-keras_df_regression_prediction <-  as.data.frame(tidyr::unnest(test_keras_regression_prediction, results))
+#test_keras_regression_prediction$results <- purrr::pmap(cbind(test_keras_regression_prediction, .row = rownames(test_keras_regression_prediction)), 
+#  keras_regression, the_list = ready_keras_regression, master_grid = test_keras_regression_prediction)
+#keras_df_regression_prediction <-  as.data.frame(tidyr::unnest(test_keras_regression_prediction, results))

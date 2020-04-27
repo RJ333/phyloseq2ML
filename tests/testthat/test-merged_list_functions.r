@@ -38,46 +38,46 @@ test_that("Train and test set were created", {
 })
 
 
-test_that("Breaks if train set does not exist for oversampling", {
-  expect_error(phyloseq2ML::oversample(merged_input_multi, 1, 0.5))
+test_that("Breaks if train set does not exist for augmentation", {
+  expect_error(phyloseq2ML::augment(merged_input_multi, 1, 0.5))
 })
 
 test_that("Regression response is excluded from noise addition so each 
   response value appears at least as often as 1 + copy_number", {
   copies <- 3
-  oversampled_regression <- oversample(splitted_input_regression, copies, 0.5)
+  augmented_regression <- augment(splitted_input_regression, copies, 0.5)
   # count the minimal number of occurrences of DANT.2.6 concentrations
-  min_occurrences <- min(table(oversampled_regression[[1]][["train_set"]][["DANT.2.6"]]))
+  min_occurrences <- min(table(augmented_regression[[1]][["train_set"]][["DANT.2.6"]]))
   expect_equal(min_occurrences, copies + 1)
 })
 
-test_that("Oversampling is ignored for copy_number 0", {
-  oversampled <- phyloseq2ML::oversample(splitted_input_binary, 0, 0.5)
-  expect_equal(nrow(oversampled[[1]][["train_set"]]), nrow(splitted_input_binary[[1]][["train_set"]]))
+test_that("augmentation is ignored for copy_number 0", {
+  augmented <- phyloseq2ML::augment(splitted_input_binary, 0, 0.5)
+  expect_equal(nrow(augmented[[1]][["train_set"]]), nrow(splitted_input_binary[[1]][["train_set"]]))
 })
 
-test_that("Oversampling multiplies length of train set", {
+test_that("augmentation multiplies length of train set", {
   copies <- 3
-  oversampled <- phyloseq2ML::oversample(splitted_input_binary, copies, 0.5)
-  expect_equal(nrow(oversampled[[1]][["train_set"]]), (copies + 1) * nrow(splitted_input_binary[[1]][["train_set"]]))
+  augmented <- phyloseq2ML::augment(splitted_input_binary, copies, 0.5)
+  expect_equal(nrow(augmented[[1]][["train_set"]]), (copies + 1) * nrow(splitted_input_binary[[1]][["train_set"]]))
 })
 
-test_that("Oversampling breaks for negative copy number", {
-  expect_error(phyloseq2ML::oversample(splitted_input_multi, -1, 0.5))
+test_that("augmentation breaks for negative copy number", {
+  expect_error(phyloseq2ML::augment(splitted_input_multi, -1, 0.5))
 })
 
-test_that("Oversampling breaks for non numeric copy number", {
-  expect_error(phyloseq2ML::oversample(splitted_input_multi, "hello", 0.03))
+test_that("augmentation breaks for non numeric copy number", {
+  expect_error(phyloseq2ML::augment(splitted_input_multi, "hello", 0.03))
 })
 
-test_that("Oversampling breaks for negative noise factor", {
-  expect_error(phyloseq2ML::oversample(splitted_input_regression, 1, -0.5))
+test_that("augmentation breaks for negative noise factor", {
+  expect_error(phyloseq2ML::augment(splitted_input_regression, 1, -0.5))
 })
 
-test_that("Oversampling breaks for non numeric noise_factor", {
-  expect_error(phyloseq2ML::oversample(splitted_input_regression, 1, "hello"))
+test_that("augmentation breaks for non numeric noise_factor", {
+  expect_error(phyloseq2ML::augment(splitted_input_regression, 1, "hello"))
 })
 
-test_that("Oversampling breaks for too high noise_factor", {
-  expect_error(phyloseq2ML::oversample(splitted_input_multi, 1, 101))
+test_that("augmentation breaks for too high noise_factor", {
+  expect_error(phyloseq2ML::augment(splitted_input_multi, 1, 101))
 })

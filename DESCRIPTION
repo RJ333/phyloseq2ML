@@ -27,4 +27,9 @@ Suggests:
     testthat (>= 2.1.0),
     digest,
     fastDummies,
-    tidyr
+    tidyr,
+    knitr,
+    rmarkdown,
+    speedyseq,
+    ggplot2
+VignetteBuilder: knitr
