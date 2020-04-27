@@ -2,14 +2,14 @@
 % Please edit documentation in R/filter_taxa_functions.r
 \name{filter_subsets}
 \alias{filter_subsets}
-\title{Remove ASV/OTU/etc from a phyloseq object based on counts.}
+\title{Remove ASV/OTU/etc from a phyloseq object based on relative abundance.}
 \usage{
-filter_subsets(phyloseq_object, threshold = 0, num_samples = 1)
+filter_subsets(phyloseq_object, threshold, num_samples = 1)
 }
 \arguments{
 \item{phyloseq_object}{the object to be filtered}
 
-\item{threshold}{this amount of reads have to appear for an ASV, 
+\item{threshold}{this relative abundance in percentage have to appear for an ASV, 
 than all ASV reads are kept}
 
 \item{num_samples}{the number of times (samples) the threshold has to be met}

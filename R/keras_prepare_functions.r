@@ -42,9 +42,8 @@ dummify_input_tables <- function(input_tables) {
       tmp2 <- cbind(tmp, response_col)
       names(tmp2)[ncol(tmp2)] <- response_id
       dummy_data_list[[table_index]] <- tmp2
-      
-      futile.logger::flog.info("names of columns changed to dummy columns:", 
-        factor_column_ids, capture = TRUE)
+      dummy_msg <- paste("Names of columns changed to dummy columns:", factor_column_ids)
+      futile.logger::flog.info(dummy_msg)
     } else {
       dummy_data_list[[table_index]] <- current_table
       futile.logger::flog.info("No categorical columns detected, returning unmodified input table")

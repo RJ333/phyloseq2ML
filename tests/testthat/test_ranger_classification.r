@@ -11,18 +11,18 @@ test_that("Included and own confusion matrix give identical results", {
 
 test_that("Length of output equals input times classes", {
   test_grid$Target <- as.character(test_grid$Target)
-  classes <- length(levels(oversampled_input_multi[[1]][["train_set"]][[test_grid$Target]]))
+  classes <- length(levels(augmented_input_multi[[1]][["train_set"]][[unique(test_grid$Target)]]))
   results <- purrr::pmap(cbind(test_grid, .row = rownames(test_grid)), master_grid = test_grid,
-    phyloseq2ML::ranger_classification, the_list = oversampled_input_multi)
-  expect_equal(nrow(results[[1]]), classes * nrow(test_grid))
+    phyloseq2ML::ranger_classification, the_list = augmented_input_multi)
+  expect_equal(nrow(results[[1]]), classes / length(test_grid$Target)* nrow(test_grid))
 })
 
 test_that("Number of cases per class corresponds to TP + FN for each class, also
   Number of Samples fits number of predicted cases", {
- trues <- table(oversampled_input_multi[[test_grid$ML_object[1]]][["train_set"]][[test_grid$Target[1]]])
+ trues <- table(augmented_input_multi[[test_grid$ML_object[1]]][["train_set"]][[test_grid$Target[1]]])
  
  test_grid$results <- purrr::pmap(cbind(test_grid, .row = rownames(test_grid)), 
-     ranger_classification, the_list = oversampled_input_multi, master_grid = test_grid)
+     ranger_classification, the_list = augmented_input_multi, master_grid = test_grid)
  results_df <-  as.data.frame(tidyr::unnest(test_grid, results))
  result_sub <- subset(results_df, ML_object == test_grid$ML_object[1])
  predicteds <- result_sub[["True_positive"]] + result_sub[["False_negative"]]
@@ -33,17 +33,17 @@ test_that("Number of cases per class corresponds to TP + FN for each class, also
 
 test_that("Detect 2 classes for binary_classification", {
   test_grid$Target <- as.character(test_grid$Target)
-  classes <- length(levels(oversampled_input_binary[[1]][["train_set"]][[test_grid$Target]]))
+  classes <- length(levels(augmented_input_binary[[1]][["train_set"]][[unique(test_grid$Target)]]))
   results <- purrr::pmap(cbind(test_grid, .row = rownames(test_grid)), master_grid = test_grid,
-    phyloseq2ML::ranger_classification, the_list = oversampled_input_binary)
+    phyloseq2ML::ranger_classification, the_list = augmented_input_binary)
   expect_equal(length(unique(results[[1]]$Class)), classes, 2)
 })
 
 test_that("Detect correct number of classes for multi_classification", {
   test_grid$Target <- as.character(test_grid$Target)
-  classes <- length(levels(oversampled_input_multi[[1]][["train_set"]][[test_grid$Target]]))
+  classes <- length(levels(augmented_input_multi[[1]][["train_set"]][[unique(test_grid$Target)]]))
   results <- purrr::pmap(cbind(test_grid, .row = rownames(test_grid)), master_grid = test_grid,
-    phyloseq2ML::ranger_classification, the_list = oversampled_input_multi)
+    phyloseq2ML::ranger_classification, the_list = augmented_input_multi)
   expect_equal(length(unique(results[[1]]$Class)), classes)
 })
 
@@ -56,14 +56,14 @@ test_that("Breaks if ML_object names in master_grid do not match list item names
 test_that("Breaks if master_grid$Target is not character", {
   test_grid$Target <- as.factor(test_grid$Target)
   expect_error(purrr::pmap(cbind(test_grid, .row = rownames(test_grid)), master_grid = test_grid,
-    phyloseq2ML::ranger_classification, the_list = oversampled_input_multi)
+    phyloseq2ML::ranger_classification, the_list = augmented_input_multi)
   )
 })
 
 test_that("Breaks if master_grid does not contain required columns", {
   expect_error(purrr::pmap(cbind(parameter_df, .row = rownames(parameter_df)), 
     master_grid = parameter_df, phyloseq2ML::ranger_classification, the_list = 
-    oversampled_input_multi)
+    augmented_input_multi)
   )
 })
 
@@ -77,7 +77,7 @@ test_that("Breaks if the input list is not correct", {
 test_that("Breaks if the actual response variable is not a factor is not correct", {
   expect_error(purrr::pmap(cbind(test_grid, .row = rownames(test_grid)), 
     master_grid = test_grid, phyloseq2ML::ranger_classification, the_list = 
-    oversampled_regression)
+    augmented_regression)
   )
 })
 

@@ -1,6 +1,6 @@
 Package: phyloseq2ML
 Title: Connects Phyloseq To Ranger And Keras
-Version: 0.4
+Version: 0.5
 Authors@R: 
     person(given = "René",
            family = "Janßen",
@@ -27,4 +27,9 @@ Suggests:
     testthat (>= 2.1.0),
     digest,
     fastDummies,
-    tidyr
+    tidyr,
+    knitr,
+    rmarkdown,
+    speedyseq,
+    ggplot2
+VignetteBuilder: knitr

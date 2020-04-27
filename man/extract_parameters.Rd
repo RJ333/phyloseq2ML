@@ -15,4 +15,5 @@ a data frame with one row per list item and a column for each parameter
 \description{
 This function extracts specific parameters from first level named list items.
 The data frame headers and length are set up using `initialize_results()`.
+The first 3 values can be used to describe the subset components of a data set.
 }

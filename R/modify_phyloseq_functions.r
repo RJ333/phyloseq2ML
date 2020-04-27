@@ -9,7 +9,8 @@
 #' slot will then be overwritten!
 #'
 #' @param phyloseq_object The phyloseq object with the taxa_names() to be modified
-#' @param taxa_prefix The leading name of your taxa, e.g. `ASV` or `OTU`
+#' @param taxa_prefix The leading name of your taxa, e.g. `ASV` or `OTU`, 
+#'   must not contain an underscore or white space
 #' @param use_sequences Logical indicating whether your current taxa_names()
 #'   are sequences which you want to have moved to the refseq() slot of the 
 #'   returning phyloseq object
@@ -20,6 +21,8 @@
 standardize_phyloseq_headers <- function(phyloseq_object, taxa_prefix, use_sequences) {
   if (!is.character(taxa_prefix) | !length(taxa_prefix) == 1)
     stop("Please provide a single character string as name")
+  if(grepl("_", taxa_prefix, fixed = TRUE))
+     stop("taxa_prefix needs to be a string without underscores")
   if (!is.logical(use_sequences))
     stop("Please enter TRUE or FALSE depending on whether your current
          taxa_prefixs are sequences (ASVs from dada2 import)")
