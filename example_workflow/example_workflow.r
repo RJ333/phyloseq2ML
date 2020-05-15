@@ -16,10 +16,10 @@ taxa_vector_list <- create_taxonomy_lookup(testps, levels_tax_dictionary)
 translate_ID(ID = c("ASV02", "ASV17"), tax_rank = "Genus", taxa_vector_list)
 
 # phyloseq objects as list
-second_phyloseq_object <- subset_samples(testps, Area == "Mine_mound")
+second_phyloseq_object <- subset_samples(testps, Technical_replicate == 1)
 subset_list <- list(
   vignette_V4_surface = testps,
-  vignette_V4_minemound = second_phyloseq_object
+  vignette_V4_replicate2 = second_phyloseq_object
 )
 
 # define subsetting parameters
@@ -34,26 +34,26 @@ subset_list_tax <- create_community_table_subsets(
 subset_list_df <- otu_table_to_df(subset_list = subset_list_tax)
 # add sample data columns to the count table
 #names(sample_data(testps))
-desired_sample_data <- c("TOC", "P_percent", "Cruise_ID", "Run")
+desired_sample_data <- c("TOC", "P_percent", "Munition_near", "Run")
 subset_list_extra <- add_sample_data(phyloseq_object = testps, 
   community_tables = subset_list_df, sample_data_names = desired_sample_data)
 # get response variables
-desired_response_vars <- c("TNT", "DANT_2.6")
+desired_response_vars <- c("UXO_sum")
 response_variables <- extract_response_variable(
   response_variables = desired_response_vars, phyloseq_object = testps)
 # cut response numeric values into 3 classes
 responses_multi <- categorize_response_variable(
   ML_mode = "classification", 
   response_data = response_variables, 
-  my_breaks = c(-Inf, 0, 3, Inf), 
-  class_labels = c("none", "below_3", "above_3"))
+  my_breaks = c(-Inf, 10, 20, Inf), 
+  class_labels = c("below_10", "below_20", "above_20"))
 
 # or for two classes
 responses_binary <- categorize_response_variable(
   ML_mode = "classification", 
   response_data = response_variables, 
-  my_breaks = c(-Inf, 0, Inf),
-  class_labels = c("absent", "present"))
+  my_breaks = c(-Inf, 20, Inf),
+  class_labels = c("below_20", "above_20"))
 
 responses_regression <- categorize_response_variable(
   ML_mode = "regression", 
