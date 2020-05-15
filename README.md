@@ -5,7 +5,7 @@
 
 ## Main idea and content
 
-To facilitate and promote the use of machine learning (ML) in biological research I want to provide functionality to prepare count data for ML. The packages for microbiome and machine learning analyses do already exist, I just want to connect them.`phyloseq2ML` provides functions to extract data from a `phyloseq` object and use this as input for machine learning analysis. It also provides wrappers to run Machine Learning and create a set of performance metrics.
+To facilitate and promote the use of machine learning (ML) in biological research I want to provide functionality to prepare count data for ML. The packages for microbiome and machine learning analyses do already exist, I just want to connect them. `phyloseq2ML` provides functions to extract data from a `phyloseq` object and use this as input for machine learning analysis. It also provides wrappers to run Machine Learning and create a set of performance metrics.
 
 
 ## Who could benefit from using this package?
@@ -37,9 +37,7 @@ install.packages("remotes")
 remotes::install_github("RJ333/phyloseq2ML")
 ```
 
-# How to build the docker image for the CI
-
-## Installation
+## How to build the docker image for the CI
 
 ### Set up CI
 
