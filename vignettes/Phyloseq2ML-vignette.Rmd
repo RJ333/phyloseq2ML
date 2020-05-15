@@ -133,20 +133,17 @@ If I find some time I would like to test and include gradient boosting
 
 # The sample data explained
 
-The example phyloseq object used in the vignette contains a large amount of 
-sample data variables. I will explain below what each column means in case you
-want to have a closer look:
+The example phyloseq object is based upon a real data set, which is not 
+published yet. As this package deals with the FORMAT rather then CONTENT I
+massively reduced and randomized the values here presented. This way, we have
+an interesting use case to be demonstrated in the vignette. Sample and microbial 
+data was partly generated in the UDEMM 
+[project](https://udemm.geomar.de/). I will explain below what the sample data 
+involves:
 
 ## Data describing the sediment sampling:
-* Udemm: A number given to each sediment which was analyzed for UXOs and further 
-parameters. Multiple libraries can refer to the same Udemm number. UDEMM was 
-the name of the [project](https://udemm.geomar.de/).
-* Cruise_ID: On which cruise was the sediment collected?
-* Station_ID: From which station does the sediment come?
+
 * Sample_Type: Sediments from the surface or from a multicorer? 
-* Experiment: If available, can the sediment be assigned to a certain 
-experiment or sampling campaign purpose?
-* Area: In what informal area was the sediment taken?
 * Collection: In what way was the sample retrieved?
 * Munition_near: Is this sediment known to be “near” ammunition (“near” refers 
 to up to several meters).
@@ -155,8 +152,6 @@ to up to several meters).
 * Metagenome: Does metagenomic data exist for this DNA extract?
 * Weight_loss: The difference in g mass before and after sediment freeze drying.
 * Notes: Additional remarks on collected sediments.
-* Date: The date the sediments were collected.
-* Time: The time the sediments were collected.
 * Direction: Cardinal directions, only applies to specific experiments, 
 were sediments were taken in orientation to a mine.
 * Distance_from_mine: The distance in meters between a mine and the sediment. A 
@@ -180,23 +175,8 @@ forward: 5' CCTACGGGNGGCWGCAG 3', reverse: 5' GACTACHVGGGTATCTAATCC 3'.
 * Kit_batch: Describes what number kit was used for extraction.
 * Extract_concentration_ng_microL: How much nucleic acid was extracted in ng/µL.
 
-## The measured concentrations of various unexploded ordnance (UXO):
-* TNT: 2,4,6-Trinitrotoluene
-* ADNT_2: 2-Amino-4,6-dinitrotoluene
-* ADNT_4: 4-Amino-2,6-dinitrotoluene
-* DANT_2.4: 2,4-Diamino-6-nitrotoluene
-* DANT_2.6: 2,6-Diamino-4-nitrotoluene
-* DNT_2.4: 2,4-Dinitrotoluene (1-methyl-2,4-dinitro benzene)
-* DNT_2.6: 2,6-Dinitrotoluene (1-methyl-2,6-dinitro benzene)
-* DNB: 1,3-Dinitrobenzene
-* TNB: 1,3,5-Trinitrobenzene
-* HMX: 1,3,5,7-Tetranitro-1,3,5,7-tetrazoctane
-* RDX: 1,3,5-Trinitro-1,3,5-triazinane
-* Tetryl: N-Methyl-N-(2,4,6-trinitrophenyl)nitramide
-* Sum_ng_g: The sum of all UXOs measured in ng/g wet sediment.
+## The measured concentrations o unexploded ordnance (UXO):
 * UXO_sum: The sum of all UXOs measured in pmol/g wet sediment.
-* Main_UXO_sum: The sum of the most frequent occurring UXOs TNT, DANT_2.6, 
-DANT_2.4, ADNT_4, ADNT_2.
 
 ## Element concentrations and ratios:
 * Hg_microg_kg : Mercury in µg/kg dried sediment
