@@ -235,11 +235,11 @@ sapply(subset_list_extra[1:2], names)
 
 >Note: A very important issue to consider are underlying patterns in your
 provided data that you are not aware of. Just assume all samples that contained
-the explosive explosiveswhere (maybe on accident) sampled in winter time and in summer
+the explosive where (maybe on accident) sampled in winter time and in summer
 time you we only collected samples free of explosives. The ML algorithm would just need
 to figure out if it looks at a summer or winter community (or as a more drastic
 example, communities from oxic or anoxic sediments) to correctly predict the
-presence of explosives. There is still explosives in winter times, though, and what the ML
+presence of explosives. There are still explosives in winter times, though, and what the ML
 used has nothing to do with the influence of explosives on microorganisms. Just
 remember: ML looks for correlations, there is nothing about causality to be made
 from ML.
