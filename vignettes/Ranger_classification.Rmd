@@ -39,8 +39,8 @@ If we have a look at our current list of tables, we can do some machine learning
 already. If you want to give it a try, just run
 ```{r}
 merged_input_binary <- phyloseq2ML:::merged_input_binary
-first_try <- merged_input_binary[[2]]  # take one list element, here with TNT as response
-ranger_trained <- ranger::ranger(TNT ~ ., data = first_try)
+first_try <- merged_input_binary[[2]]  # take one list element, here with UXO_sum as response
+ranger_trained <- ranger::ranger(UXO.sum ~ ., data = first_try)
 ranger_trained
 ```
 The `ranger` class object summary prints information on what kind of analysis
@@ -260,7 +260,7 @@ ncol(my_trainset) - 1 # how many independent variables are there? 1 is the respo
 ```
 and then train a ranger model:
 ```{r}
-trained <- ranger::ranger(DANT.2.6 ~ ., data = my_trainset, num.trees = 1000, mtry = 10)
+trained <- ranger::ranger(UXO.sum ~ ., data = my_trainset, num.trees = 1000, mtry = 10)
 trained
 ```
 and finally predict the test data using the trained model:
@@ -271,7 +271,7 @@ predicted
 Important are the predictions in `predicted$predictions`. Comparing those to the 
 true values stored in `my_testset` we can build our confusion matrix.
 ```{r}
-confusion_matrix <- table(true = my_testset[["DANT.2.6"]], 
+confusion_matrix <- table(true = my_testset[["UXO.sum"]], 
       predicted = predicted$predictions)
 confusion_matrix
 ```
@@ -358,16 +358,16 @@ head(results_df, 3)
 This is already pretty cool (not the results, but what we can do with it to our
 own data)! Let's visualize the results to get an idea how many trees performed
 better and what mtry factor to choose. To make the plot small enough, I will
-only look into the TNT classification
+only look into the  classification
 
 >Note: I'm often using Balanced accuracy as metric for data sets which are a 
 little imbalanced. You can use any metric provided in the results data frame or
 even calculate further metrics.
 
 ```{r fig.height = 12, fig.width = 7}
-TNT_results <- subset(results_df, Target == "TNT" & Class == "present")
+UXO_sum_results <- subset(results_df, Target == "UXO.sum" & Class == "above_20")
 library(ggplot2)
-train_plot <- ggplot(TNT_results, aes(x = as.factor(Number_of_trees), y = Balanced_accuracy, colour = Class)) +
+train_plot <- ggplot(UXO_sum_results, aes(x = as.factor(Number_of_trees), y = Balanced_accuracy, colour = Class)) +
     geom_violin(size = 0.3, draw_quantiles = c(0.25, 0.5, 0.75), alpha = 0.7) +
     stat_summary(position = position_dodge(width = 0.9), fill = "black", 
       fun.y = mean, geom = "point", shape = 21, size = 1, alpha = 0.8) +

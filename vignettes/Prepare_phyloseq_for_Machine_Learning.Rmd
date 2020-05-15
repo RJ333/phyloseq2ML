@@ -135,11 +135,11 @@ list. (We will use named [lists](https://r4ds.had.co.nz/vectors.html#lists) a
 lot, so you should know a little bit about them!)
 
 ```{r}
-# only sediment samples from the restricted ammunition dumping site
-second_phyloseq_object <- subset_samples(testps, Area == "Mine_mound")
+# only replicate #2 of sediment samples
+second_phyloseq_object <- subset_samples(testps, Technical_replicate == 2)
 subset_list <- list(
-  vignette_V4_surface = testps,
-  vignette_V4_minemound = second_phyloseq_object
+  vignette_V4_all = testps,
+  vignette_V4_replicate2 = second_phyloseq_object
 )
 str(subset_list, max = 2)  # max defines how many list levels we want to print
 ``` 
@@ -227,7 +227,7 @@ another specifying in which sequencing run it was sequenced. The function
 automatically merges these columns to each data frame in our list of community 
 tables. We can check this using `sapply`
 ```{r}
-desired_sample_data <- c("TOC", "P_percent", "Cruise_ID", "Run")
+desired_sample_data <- c("TOC", "P_percent", "Munition_near", "Run")
 subset_list_extra <- add_sample_data(phyloseq_object = testps, 
   community_tables = subset_list_df, sample_data_names = desired_sample_data)
 sapply(subset_list_extra[1:2], names)
@@ -235,17 +235,17 @@ sapply(subset_list_extra[1:2], names)
 
 >Note: A very important issue to consider are underlying patterns in your
 provided data that you are not aware of. Just assume all samples that contained
-the explosive TNT where (maybe on accident) sampled in winter time and in summer
-time you we only collected samples free of TNT. The ML algorithm would just need
+the explosive explosiveswhere (maybe on accident) sampled in winter time and in summer
+time you we only collected samples free of explosives. The ML algorithm would just need
 to figure out if it looks at a summer or winter community (or as a more drastic
 example, communities from oxic or anoxic sediments) to correctly predict the
-presence of TNT. There is still TNT in winter times, though, and what the ML
-used has nothing to do with the influence of TNT on microorganisms. Just
+presence of explosives. There is still explosives in winter times, though, and what the ML
+used has nothing to do with the influence of explosives on microorganisms. Just
 remember: ML looks for correlations, there is nothing about causality to be made
 from ML.
 
->Providing the Cruise_ID can be another trap, as the ML could learn which
-cruises correlate with TNT positive samples (or with winter or summer season),
+>If you e.g. add from which campaign a sample stems the ML could learn which
+cruises correlate with explosives positive samples (or with winter or summer season),
 which again is not bad for the prediction quality, but it is not related to the
 sample properties such as geological parameters or microbial composition at all.
 THe same is true for the sequencing run information. Variable importance in 
@@ -267,9 +267,9 @@ with explanatory power."
 Now it is getting interesting. Let us choose the variables from the
 `sample_data()` slot we want to predict. As mentioned above, only pick those 
 where you want to apply the same prediction conditions. Here we want to start
-with binary classification with two explosives categorized into classes "absent",
+with binary classification with the explosives sum categorized into classes "absent",
 and "present" referring to their concentration in sediment expressed in
-pmol/g (yes, that is not much!). We use a function to get the columns from the
+pmol/g (yes, that is not much!). We use a function to get the column from the
 phyloseq object we used in the beginning and then another function to cut the
 values into intervals. The labels become the factor levels. `-Inf` and `Inf`
 make sure that we include all values and obviously, you need as many labels as
@@ -277,15 +277,15 @@ intervals are generated.
 
 ```{r}
 # get response variables
-desired_response_vars <- c("TNT", "DANT_2.6")  # an explosive's mother compound and a degradation product
+desired_response_vars <- c("UXO_sum")  # sum of explosives measured
 response_variables <- extract_response_variable(
   response_variables = desired_response_vars, phyloseq_object = testps)
-# cut response numeric values into 3 classes
+# cut response numeric values into 2 classes
 responses_binary <- categorize_response_variable(
   ML_mode = "classification", 
   response_data = response_variables, 
-  my_breaks = c(-Inf, 0, Inf), 
-  class_labels = c("absent", "present"))
+  my_breaks = c(-Inf, 20, Inf), 
+  class_labels = c("below_20", "above_20"))
 head(responses_binary, 10)
 ```
 >Note: For regression, you either skip this step and use the 
