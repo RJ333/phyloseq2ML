@@ -1,3 +1,7 @@
+Version 0.5.1
+
+*  Fixed vignette code and modified the README.md 
+
 Version 0.5
 
 *  Vignette added demonstrating a possible workflow using built-in data set
